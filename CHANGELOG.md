@@ -2,6 +2,56 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-06 - P8 Workflow Automation And Power Automate Option
+
+### P8-T01 - Build local workflow simulator service
+
+- What: added a standalone local workflow simulator with a Power Automate-style payment reminder endpoint, deterministic workflow IDs, duplicate idempotency handling, health/readiness routes, and protected admin metrics/export over simulator audit events.
+- Where: `cmd/workflow-sim/main.go`, `internal/workflow/sim_handler.go`, `internal/workflow/sim_handler_test.go`.
+- When: 2026-05-06.
+- Why: make the workflow automation demo runnable offline while preserving the same request/response shape a Power Automate HTTP trigger would use.
+- How: wrote failing simulator handler tests first for accepted payloads, missing idempotency keys, duplicate keys, invalid JSON, and hashed audit metadata, then implemented the handler and standalone command using the existing in-memory workflow client and audit store.
+
+### P8-T02 - Implement workflow idempotency and retry policy
+
+- What: added redaction-safe idempotency-key hashing, exposed workflow attempt counts, and added transient webhook retry behavior with cancellation handling.
+- Where: `internal/workflow/idempotency.go`, `internal/workflow/idempotency_test.go`, `internal/workflow/client.go`, `internal/workflow/powerautomate.go`, `internal/workflow/powerautomate_test.go`.
+- When: 2026-05-06.
+- Why: prevent duplicate learner reminders and make retry behavior visible without storing raw idempotency keys in audit data.
+- How: started from failing workflow tests for deterministic hashes, transient `5xx` retry, permanent `400` no-retry, and context cancellation, then implemented the smallest client changes to satisfy those cases.
+
+### P8-T03 - Add optional Power Automate webhook client
+
+- What: added a `PaymentReminderSender`-compatible HTTP webhook client that posts the tested JSON schema, forwards trace and idempotency headers, optionally sends a configured signature header, redacts secrets from errors/config output, and is selected by `cmd/api` when `ASKOC_WORKFLOW_URL` is set.
+- Where: `internal/workflow/powerautomate.go`, `internal/workflow/powerautomate_test.go`, `internal/config/config.go`, `internal/config/config_test.go`, `cmd/api/main.go`, `cmd/api/main_test.go`.
+- When: 2026-05-06.
+- Why: show how the Go orchestration boundary can connect to Power Automate or the local simulator without making external webhooks mandatory for the demo.
+- How: wrote failing `httptest.Server`, config, and API wiring tests first, then implemented webhook client config, optional signature headers, retry limits, and default in-process fallback wiring.
+
+### P8-T04 - Audit workflow outcomes and errors
+
+- What: updated workflow audit records to include trace ID, action, status, hashed idempotency metadata, safe failure messages, workflow references, and retry attempt counts when available; simulator audit records no longer store raw idempotency keys.
+- Where: `internal/orchestrator/transcript.go`, `internal/orchestrator/orchestrator.go`, `internal/orchestrator/orchestrator_test.go`, `internal/workflow/sim_handler.go`, `internal/workflow/sim_handler_test.go`.
+- When: 2026-05-06.
+- Why: make workflow automation measurable and debuggable in the admin dashboard/export path without leaking learner identifiers, webhook secrets, or raw idempotency keys.
+- How: added failing orchestrator and simulator audit tests first, confirmed missing hash metadata, then reused `workflow.IdempotencyKeyHash` across orchestrator action audits and simulator events.
+
+### P8-T05 - Document Power Automate flow schema and setup
+
+- What: updated the workflow schema, setup notes, endpoint contract, runtime env vars, simulator behavior, security guidance, and P8 status across project docs.
+- Where: `docs/power-automate-flow.md`, `docs/api-spec.md`, `README.md`, `docs/architecture.md`, `docs/golang-implementation.md`, `docs/test-plan.md`, `docs/demo-script.md`, `docs/implementation-roadmap.md`, `docs/phases-and-tasks.md`, `CHANGELOG.md`.
+- When: 2026-05-06.
+- Why: keep the project documentation aligned with the implemented local simulator, webhook client, retry policy, and audit behavior instead of describing those paths as future work.
+- How: reviewed the P8 task prompts and stale P7/P8 claims, then synchronized request/response examples, secure webhook storage guidance, command lists, environment variables, and task checkboxes.
+
+### P8 review evidence
+
+- What: completed P8 status and documentation sync.
+- Where: `docs/phases-and-tasks.md`, `docs/implementation-roadmap.md`, `README.md`, `docs/power-automate-flow.md`, `docs/api-spec.md`, `docs/architecture.md`, `docs/golang-implementation.md`, `docs/test-plan.md`, `docs/demo-script.md`, `CHANGELOG.md`.
+- When: 2026-05-06.
+- Why: provide PR-ready evidence that workflow automation, optional webhook behavior, and docs moved together.
+- How: verified focused workflow/orchestrator/config/API tests during implementation, then ran `go test ./...`, `make test`, `go vet ./...`, `make test-race`, `go test ./... -coverprofile=/tmp/askoc-p8-coverage.out`, `go tool cover -func=/tmp/askoc-p8-coverage.out`, and `git diff --check`.
+
 ## 2026-05-06 - P7 Privacy, Audit, And Dashboard
 
 ### P7-T01 - Implement PII redaction

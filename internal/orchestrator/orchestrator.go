@@ -240,6 +240,11 @@ func (o *Orchestrator) recordResponseAudit(ctx context.Context, req domain.ChatR
 		if action.Type == "source_confirmation_required" {
 			metadata["stale_source"] = "true"
 		}
+		if strings.TrimSpace(action.IdempotencyKey) != "" {
+			for key, value := range workflowAuditMetadata(action.IdempotencyKey, 0) {
+				metadata[key] = value
+			}
+		}
 		if resp.Escalation != nil {
 			metadata["queue"] = resp.Escalation.Queue
 			metadata["priority"] = resp.Escalation.Priority

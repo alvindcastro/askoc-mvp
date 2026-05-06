@@ -25,7 +25,7 @@ cmd/mock-banner
 cmd/mock-payment
 cmd/mock-crm
 cmd/mock-lms
-cmd/workflow-sim   # later P8
+cmd/workflow-sim   # P8 local workflow simulator
 cmd/ingest         # P5 local RAG ingestion
 cmd/eval           # later P9
 ```
@@ -41,14 +41,14 @@ Each command should have a small `main.go` that loads configuration, creates dep
 | `internal/handlers` | HTTP handlers and JSON encoding/decoding |
 | `internal/session` | In-memory demo conversation sessions with TTL and redaction before persistence |
 | `internal/validation` | Chat request validation and safe validation error codes |
-| `internal/orchestrator` | P6 guarded chat decision workflow, prompt templates, source packaging, and dependency ports |
-| `internal/rag` | P5 allowlist parsing, ingestion, chunking, local retrieval, and source freshness metadata |
-| `internal/llm` | P6 provider-neutral request/response types and Azure/OpenAI-compatible REST client |
-| `internal/classifier` | P6 deterministic fallback, strict JSON parser, and fixture-backed intent/sentiment tests |
+| `internal/orchestrator` | Guarded chat decision workflow, prompt templates, source packaging, workflow audit metadata, and dependency ports |
+| `internal/rag` | Allowlist parsing, ingestion, chunking, local retrieval, and source freshness metadata |
+| `internal/llm` | Provider-neutral request/response types and Azure/OpenAI-compatible REST client |
+| `internal/classifier` | Deterministic fallback, strict JSON parser, and fixture-backed intent/sentiment tests |
 | `internal/tools` | Banner, payment, CRM, LMS, notification clients |
-| `internal/workflow` | P4 in-process idempotent workflow port; later P8 webhook/simulator clients |
-| `internal/privacy` | Later P7 PII redaction, prompt-injection checks, safe summaries |
-| `internal/audit` | P4 audit event port types; later P7 event store and dashboard summaries |
+| `internal/workflow` | In-process idempotent workflow client, local simulator handler, idempotency hashing, and optional Power Automate-compatible webhook client |
+| `internal/privacy` | PII redaction, prompt-injection checks, safe summaries |
+| `internal/audit` | Audit event store, dashboard summaries, export, reset, purge, and workflow metrics |
 | `internal/middleware` | Trace IDs, recovery, logging, auth, rate limits |
 
 ## Dependency rule
@@ -377,9 +377,10 @@ go run ./cmd/mock-banner
 go run ./cmd/mock-payment
 go run ./cmd/mock-crm
 go run ./cmd/mock-lms
+go run ./cmd/workflow-sim
 ```
 
-`cmd/workflow-sim` and `cmd/eval` are later-phase commands.
+`cmd/workflow-sim` is the P8 local workflow target. `cmd/eval` remains a later-phase command.
 
 ## Makefile targets
 
@@ -418,7 +419,7 @@ For the fastest credible build:
 3. Store RAG chunks in local JSON first.
 4. Add PostgreSQL later if time allows.
 5. Use LLM structured output for intent/sentiment.
-6. Add Power Automate webhook only after local workflow simulator works.
+6. Use the local workflow simulator by default for demos, and configure the Power Automate-compatible webhook path only when a safe test trigger URL is available.
 
 
 ## Strict TDD workflow

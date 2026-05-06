@@ -8,7 +8,7 @@ All Go code tasks are governed by [TDD Policy](tdd-policy.md). For each code tas
 
 ## Purpose
 
-This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, and protect privacy in a Go-based demo environment. P7 currently covers deterministic fallback classification, optional OpenAI-compatible LLM gateway behavior behind strict JSON parsing, local approved-source RAG retrieval, transcript/payment orchestration, in-process workflow idempotency, mock CRM handoff, source fallback, source-only LLM answer guardrails, safe action traces, shared redaction, redacted audit storage, protected admin metrics, dashboard rendering, and audit retention/export/reset controls. The standalone workflow simulator and evaluation runner remain later-phase coverage.
+This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, and protect privacy in a Go-based demo environment. P8 currently covers deterministic fallback classification, optional OpenAI-compatible LLM gateway behavior behind strict JSON parsing, local approved-source RAG retrieval, transcript/payment orchestration, in-process workflow idempotency, the standalone workflow simulator, optional Power Automate-compatible webhook retries/signature headers, mock CRM handoff, source fallback, source-only LLM answer guardrails, safe action traces, shared redaction, redacted audit storage, protected admin metrics, dashboard rendering, and audit retention/export/reset controls. The evaluation runner remains later-phase coverage.
 
 ## Test objectives
 
@@ -31,8 +31,8 @@ This test plan verifies that AskOC AI Concierge can answer learner-service quest
 | Mock Banner API | Go service with synthetic student records |
 | Mock Payment API | Go service with synthetic payment records |
 | Mock CRM API | Go service with synthetic case creation |
-| Automation workflow | P4 in-process idempotent workflow port; P8 adds Go workflow simulator or Power Automate demo flow |
-| Dashboard | P7 Go admin dashboard at `/admin` reading the in-memory audit event store through protected admin APIs |
+| Automation workflow | P8 in-process idempotent workflow client by default; `cmd/workflow-sim` or Power Automate-compatible webhook client when `ASKOC_WORKFLOW_URL` is configured |
+| Dashboard | Go admin dashboard at `/admin` reading the in-memory audit event store through protected admin APIs |
 
 ## Go test commands
 
@@ -41,13 +41,15 @@ go test ./...
 go test ./internal/privacy ./internal/audit ./internal/handlers
 go test ./internal/llm ./internal/classifier ./internal/orchestrator
 go test ./internal/classifier ./internal/workflow ./internal/orchestrator
+go test ./internal/workflow -run 'TestSimulator|TestPowerAutomate|TestIdempotency'
+go test ./cmd/workflow-sim ./cmd/api ./internal/config ./internal/orchestrator
 go test ./internal/rag ./internal/orchestrator
 go test ./internal/domain ./internal/validation ./internal/handlers ./internal/session
 go test -race ./internal/session
 go test ./internal/orchestrator -run 'TestTranscriptStatus|TestUrgent|TestLowConfidence'
 ```
 
-P7 verification uses package-specific privacy, audit, handler, LLM, classifier, RAG, workflow, and orchestrator tests plus `go test ./...`. The evaluation runner and broad race coverage remain later-phase checks unless those packages exist.
+P8 verification uses package-specific privacy, audit, handler, LLM, classifier, RAG, workflow, config, API, simulator, and orchestrator tests plus `go test ./...`. The evaluation runner and broad race coverage remain later-phase checks unless those packages exist.
 
 ## Test data
 
@@ -108,7 +110,7 @@ I ordered my transcript but it has not been processed. My student ID is S100002.
 - mock Payment API is called,
 - payment status is `unpaid`,
 - payment reminder workflow action is triggered with workflow ID and idempotency key,
-- audit port records workflow attempted/completed events,
+- audit port records workflow attempted/completed events with a hashed idempotency key and retry attempt count when applicable,
 - no CRM case is created unless learner is frustrated or workflow fails.
 
 ### Test 3: Financial hold escalation

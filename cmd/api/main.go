@@ -42,13 +42,18 @@ func main() {
 	}
 	auditStore := audit.NewMemoryStore()
 	retriever := buildRetriever(context.Background(), cfg.RAG.ChunksPath, logger)
+	workflowPort, err := buildWorkflow(cfg, toolHTTPClient)
+	if err != nil {
+		logger.Error("create workflow client", "error", err)
+		os.Exit(1)
+	}
 	chatService, err := orchestrator.New(orchestrator.Dependencies{
 		Classifier: buildClassifier(cfg, llmPort, auditStore),
 		Retriever:  retriever,
 		LLM:        llmPort,
 		Banner:     tools.NewBannerClient(cfg.Integrations.BannerURL, toolHTTPClient),
 		Payment:    tools.NewPaymentClient(cfg.Integrations.PaymentURL, toolHTTPClient),
-		Workflow:   workflow.NewInMemoryClient(),
+		Workflow:   workflowPort,
 		CRM:        tools.NewCRMClient(cfg.Integrations.CRMURL, toolHTTPClient),
 		Audit:      auditStore,
 	})
@@ -133,6 +138,19 @@ func buildClassifier(cfg config.Config, llmPort orchestrator.LLM, recorder audit
 		Parse:    classifier.ParseLLMClassificationOutput,
 		Audit:    recorder,
 	}
+}
+
+func buildWorkflow(cfg config.Config, httpClient *http.Client) (orchestrator.WorkflowTool, error) {
+	if cfg.Workflow.URL == "" {
+		return workflow.NewInMemoryClient(), nil
+	}
+	return workflow.NewPowerAutomateClient(workflow.PowerAutomateClientConfig{
+		WebhookURL:      cfg.Workflow.URL,
+		HTTPClient:      httpClient,
+		Signature:       cfg.Workflow.Signature,
+		SignatureHeader: cfg.Workflow.SignatureHeader,
+		MaxRetries:      cfg.Workflow.MaxRetries,
+	})
 }
 
 func adminAccessToken(cfg config.Config) string {
