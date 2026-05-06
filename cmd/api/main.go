@@ -10,10 +10,14 @@ import (
 	"syscall"
 	"time"
 
+	"askoc-mvp/internal/audit"
+	"askoc-mvp/internal/classifier"
 	"askoc-mvp/internal/config"
 	"askoc-mvp/internal/handlers"
 	"askoc-mvp/internal/middleware"
-	"askoc-mvp/internal/session"
+	"askoc-mvp/internal/orchestrator"
+	"askoc-mvp/internal/tools"
+	"askoc-mvp/internal/workflow"
 )
 
 func main() {
@@ -28,8 +32,21 @@ func main() {
 	}))
 
 	mux := http.NewServeMux()
-	chatStore := session.NewStore(30 * time.Minute)
-	chatService := handlers.NewPlaceholderChatService(chatStore)
+	toolHTTPClient := &http.Client{Timeout: cfg.Workflow.Timeout}
+	chatService, err := orchestrator.New(orchestrator.Dependencies{
+		Classifier: classifier.Fallback{},
+		Retriever:  orchestrator.DisabledRetriever{},
+		LLM:        orchestrator.DisabledLLM{},
+		Banner:     tools.NewBannerClient(cfg.Integrations.BannerURL, toolHTTPClient),
+		Payment:    tools.NewPaymentClient(cfg.Integrations.PaymentURL, toolHTTPClient),
+		Workflow:   workflow.NewInMemoryClient(),
+		CRM:        tools.NewCRMClient(cfg.Integrations.CRMURL, toolHTTPClient),
+		Audit:      audit.NopRecorder{},
+	})
+	if err != nil {
+		logger.Error("create orchestrator", "error", err)
+		os.Exit(1)
+	}
 	mux.Handle("/", handlers.ChatPageHandler("web/templates/chat.html"))
 	mux.Handle("/chat", handlers.ChatPageHandler("web/templates/chat.html"))
 	mux.Handle("/static/", http.StripPrefix("/static/", handlers.StaticFileHandler("web/static")))

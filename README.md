@@ -116,7 +116,7 @@ A task is not done until the relevant package test and `go test ./...` pass. AI,
 3. Assistant summarizes the case.
 4. Mock CRM case is created with transcript context, payment status, conversation summary, and priority flag.
 
-## Current P3 repository structure
+## Current P4 repository structure
 
 ```text
 askoc-ai-concierge/
@@ -150,9 +150,9 @@ askoc-ai-concierge/
     ...
 ```
 
-The current chat API still uses deterministic placeholder behavior only. P3 adds reusable synthetic fixtures, mock Banner/payment/CRM/LMS HTTP services, and typed enterprise clients; later phases wire them into orchestration, workflow simulation, ingestion, evaluation, dashboard, and Docker.
+The current chat API uses deterministic P4 orchestration: fallback intent/sentiment classification, typed mock Banner/payment/CRM clients, an in-process idempotent payment-reminder workflow port, a safe action trace, and CRM handoff routing for holds, urgent sentiment, low confidence, or explicit human handoff. Later phases add RAG ingestion, live LLM gateway behavior, the durable audit store/dashboard, the standalone workflow simulator, evaluation, and Docker.
 
-## Current P3 commands
+## Current P4 commands
 
 ```bash
 make dev
@@ -166,7 +166,7 @@ go run ./cmd/mock-crm
 go run ./cmd/mock-lms
 ```
 
-`make dev` runs the Go API and serves the chat UI. Auth is disabled by default for local demo use. Set `ASKOC_AUTH_ENABLED=true` and `ASKOC_AUTH_TOKEN=<demo-token>` to require a mock bearer token.
+For the full P4 transcript-status demo, start the mock Banner, payment, and CRM services in separate terminals before `make dev`. The API talks to those typed mock services through configurable local URLs. Auth is disabled by default for local demo use. Set `ASKOC_AUTH_ENABLED=true` and `ASKOC_AUTH_TOKEN=<demo-token>` to require a mock bearer token.
 
 Current environment settings:
 
@@ -177,7 +177,10 @@ Current environment settings:
 | `ASKOC_AUTH_TOKEN` | empty | Demo bearer token when auth is enabled |
 | `ASKOC_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, or `error` |
 | `ASKOC_WORKFLOW_URL` | empty | Future workflow webhook URL |
-| `ASKOC_WORKFLOW_TIMEOUT_SECONDS` | `5` | Future workflow timeout |
+| `ASKOC_WORKFLOW_TIMEOUT_SECONDS` | `5` | Tool client timeout; P8 reuses this for external workflow calls |
+| `ASKOC_BANNER_URL` | `http://localhost:8081` | Mock Banner base URL used by P4 orchestration |
+| `ASKOC_PAYMENT_URL` | `http://localhost:8082` | Mock payment base URL used by P4 orchestration |
+| `ASKOC_CRM_URL` | `http://localhost:8083` | Mock CRM base URL used by P4 orchestration |
 | `ASKOC_PROVIDER` | `stub` | Future AI provider mode |
 | `ASKOC_PROVIDER_MODEL` | `demo-placeholder` | Future provider model name |
 | `ASKOC_PROVIDER_API_KEY` | empty | Future provider API key, never printed by config |
@@ -196,8 +199,8 @@ Mock CRM:     http://localhost:8083/api/v1/crm/cases
 Mock LMS:     http://localhost:8085/api/v1/students/S100001/lms-access?course_id=DEMO-LMS-101
 ```
 
-The P2 chat API validates JSON requests, rejects empty or oversized messages, accepts synthetic student IDs in the `S` plus six digits format, includes trace IDs in responses, and stores only redacted demo conversation messages in an in-memory TTL session store.
-P3 tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors for later orchestration.
+The chat API validates JSON requests, rejects empty or oversized messages, accepts synthetic student IDs in the `S` plus six digits format, includes trace IDs in responses and action results, and routes transcript/payment decisions through the P4 orchestrator.
+P3 tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors. P4 adds deterministic classifier/orchestrator tests and an in-process workflow port that returns idempotent synthetic workflow IDs until the P8 simulator exists.
 
 ## Demo data policy
 

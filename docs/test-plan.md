@@ -8,7 +8,7 @@ All Go code tasks are governed by [TDD Policy](tdd-policy.md). For each code tas
 
 ## Purpose
 
-This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, and protect privacy in a Go-based demo environment.
+This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, and protect privacy in a Go-based demo environment. P4 currently covers deterministic classifier, transcript/payment orchestration, in-process workflow idempotency, mock CRM handoff, and safe action traces; RAG, durable audit/dashboard, and the standalone workflow simulator remain later-phase coverage.
 
 ## Test objectives
 
@@ -26,35 +26,33 @@ This test plan verifies that AskOC AI Concierge can answer learner-service quest
 |---|---|
 | Frontend | Go server-rendered web chat or optional React UI |
 | Backend | Go `cmd/api` local container |
-| Knowledge base | Approved public pages indexed into local JSON, PostgreSQL/pgvector, or Azure AI Search |
+| Knowledge base | P4 transcript source placeholder; P5 adds approved public-page indexing |
 | Mock Banner API | Go service with synthetic student records |
 | Mock Payment API | Go service with synthetic payment records |
 | Mock CRM API | Go service with synthetic case creation |
-| Automation workflow | Go workflow simulator or Power Automate demo flow |
-| Dashboard | Go dashboard endpoints reading audit/event store |
+| Automation workflow | P4 in-process idempotent workflow port; P8 adds Go workflow simulator or Power Automate demo flow |
+| Dashboard | Deferred to P7 Go dashboard endpoints reading audit/event store |
 
 ## Go test commands
 
 ```bash
 go test ./...
-go test -race ./...
+go test ./internal/classifier ./internal/workflow ./internal/orchestrator
 go test ./internal/domain ./internal/validation ./internal/handlers ./internal/session
 go test -race ./internal/session
-go test ./internal/orchestrator -run TestTranscriptStatusWorkflow
-go test ./internal/privacy -run TestRedact
-go run ./cmd/eval -input data/eval-questions.jsonl
+go test ./internal/orchestrator -run 'TestTranscriptStatus|TestUrgent|TestLowConfidence'
 ```
 
-P2 verification currently uses the package-specific domain, validation, handler, and session tests plus the session race test. Later phases will broaden `go test -race ./...` when more packages exist.
+P4 verification uses the package-specific classifier, workflow, and orchestrator tests plus `go test ./...`. Privacy, evaluation, dashboard, and broad race coverage remain later-phase checks unless those packages exist.
 
 ## Test data
 
 | Student ID | Transcript status | Payment status | Holds | Expected result |
 |---|---|---|---|---|
-| `S100001` | requested | paid | none | Assistant says request is ready/in progress |
-| `S100002` | requested | unpaid | none | Payment reminder workflow triggered |
-| `S100003` | requested | paid | financial hold | CRM case created |
-| `S100004` | unknown | unknown | none | Low-confidence escalation |
+| `S100001` | ready_for_processing | paid | none | Assistant says request is ready; no reminder |
+| `S100002` | blocked_by_unpaid_fee | unpaid | mock_payment_hold | Payment reminder workflow triggered |
+| `S100003` | needs_staff_review | review_required | mock_financial_hold | Registrar/Student Accounts CRM case created |
+| `S100004` | not_found | not_applicable | none | Normal handoff for unresolved synthetic status |
 | `S999999` | not found | n/a | n/a | Safe not-found response; no data leak |
 
 ## Intent test set
@@ -105,8 +103,8 @@ I ordered my transcript but it has not been processed. My student ID is S100002.
 - mock Banner API is called,
 - mock Payment API is called,
 - payment status is `unpaid`,
-- payment reminder workflow is triggered,
-- audit log records workflow action,
+- payment reminder workflow action is triggered with workflow ID and idempotency key,
+- audit port records workflow attempted/completed events,
 - no CRM case is created unless learner is frustrated or workflow fails.
 
 ### Test 3: Financial hold escalation
@@ -120,7 +118,7 @@ Can you check my transcript? My student ID is S100003.
 **Expected:**
 
 - transcript status is checked,
-- payment status is paid,
+- payment status is review-required in the synthetic fixture,
 - financial hold is detected,
 - assistant avoids giving detailed financial judgment,
 - CRM case is created for Registrar/Finance follow-up,

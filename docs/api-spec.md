@@ -10,7 +10,7 @@ This document defines a simple REST API surface for the AskOC AI Concierge MVP. 
 http://localhost:8080/api/v1
 ```
 
-The implemented P2 chat route is `POST http://localhost:8080/api/v1/chat`. The web chat UI is served at `GET http://localhost:8080/chat`.
+The implemented P4 chat route is `POST http://localhost:8080/api/v1/chat`. The web chat UI is served at `GET http://localhost:8080/chat`.
 
 ## Authentication
 
@@ -80,37 +80,62 @@ Sends a learner message to the Go AI orchestrator.
 {
   "conversation_id": "conv_01JABC123",
   "trace_id": "trace_01JABC456",
-  "answer": "This P2 demo placeholder received your transcript status question. Synthetic Banner and payment checks will be added in later phases.",
+  "answer": "Your synthetic transcript request SYNTH-TRN-100002 is blocked by an unpaid demo balance of 15.00 CAD. I triggered a synthetic payment reminder workflow.",
   "intent": {
     "name": "transcript_status",
-    "confidence": 0.6
+    "confidence": 0.86
   },
   "sentiment": "neutral",
   "sources": [
     {
       "title": "Transcript Request - 2005 Onwards",
       "url": "https://www.okanagancollege.ca/ask-oc/transcript-request-2005-onwards",
-      "chunk_id": "placeholder-transcript-source"
+      "chunk_id": "p4-deterministic-transcript-source"
     }
   ],
   "actions": [
     {
-      "type": "placeholder_response",
+      "type": "intent_classified",
       "status": "completed",
-      "message": "No live AI, retrieval, or enterprise system was called in this P2 placeholder."
+      "message": "Message classified by deterministic fallback logic.",
+      "trace_id": "trace_01JABC456"
+    },
+    {
+      "type": "banner_status_checked",
+      "status": "completed",
+      "message": "Synthetic transcript status checked.",
+      "reference_id": "SYNTH-TRN-100002",
+      "trace_id": "trace_01JABC456"
+    },
+    {
+      "type": "payment_status_checked",
+      "status": "completed",
+      "message": "Synthetic transcript payment status checked.",
+      "reference_id": "SYNTH-PAY-100002",
+      "trace_id": "trace_01JABC456"
+    },
+    {
+      "type": "payment_reminder_triggered",
+      "status": "completed",
+      "message": "Synthetic payment reminder workflow accepted.",
+      "reference_id": "LOCAL-WF-CD66B7682DD8",
+      "trace_id": "trace_01JABC456",
+      "idempotency_key": "payment-reminder:trace_01JABC456:S100002:official_transcript"
     }
   ],
   "escalation": null
 }
 ```
 
-P2 validation rules:
+P4 validation and orchestration rules:
 
 - `message` is required after trimming whitespace.
 - `message` must be 2000 characters or fewer.
 - `student_id` is optional, but when present it must use the synthetic demo shape `S` plus six digits, such as `S100002`.
+- transcript-status messages can also include a synthetic ID in the message body, such as `My student ID is S100002`.
 - invalid JSON, validation failures, and service failures return the common safe error shape and never echo raw request bodies.
-- P2 does not call live AI, retrieval, Banner, payment, CRM, LMS, or workflow services.
+- P4 does not call live AI or retrieval. It uses deterministic classifier logic, typed mock Banner/payment/CRM clients, and an in-process idempotent workflow port.
+- paid records skip workflow reminders, unpaid records trigger one reminder attempt, financial holds create mock Registrar/Student Accounts cases, unresolved synthetic records create normal handoff cases, and urgent/negative messages create priority staff handoffs.
 
 ### Go request model
 
@@ -137,6 +162,8 @@ type ChatResponse struct {
     Escalation     *Escalation   `json:"escalation,omitempty"`
 }
 ```
+
+`Action` records may include `trace_id`, `reference_id`, and `idempotency_key` so the learner-facing response can show a safe decision trace without opening logs.
 
 ---
 
@@ -341,8 +368,10 @@ This endpoint can be implemented by:
   "conversation_id": "conv_01JABC123",
   "trace_id": "trace_01JABC456",
   "item": "official_transcript",
+  "amount_due": 15.00,
+  "currency": "CAD",
   "reason": "Transcript request cannot be processed until payment is complete.",
-  "idempotency_key": "payment-reminder:S100002:official-transcript:2026-05-06"
+  "idempotency_key": "payment-reminder:trace_01JABC456:S100002:official_transcript"
 }
 ```
 

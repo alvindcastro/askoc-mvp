@@ -19,7 +19,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 | [x] | P1 — Go project foundation | Go project compiles, serves health endpoints, and has API hygiene. | [Task list](phases-and-tasks.md#p1-go-project-foundation) |
 | [x] | P2 — Chat API and UI skeleton | Chat API and minimal UI exist with deterministic placeholder behavior. | [Task list](phases-and-tasks.md#p2-chat-api-and-ui-skeleton) |
 | [x] | P3 — Synthetic enterprise APIs and clients | Synthetic Banner/payment/CRM/LMS APIs and typed clients are working. | [Task list](phases-and-tasks.md#p3-synthetic-enterprise-apis-and-clients) |
-| [ ] | P4 — Deterministic orchestration before AI | Transcript/payment orchestration works without relying on live AI. | [Task list](phases-and-tasks.md#p4-deterministic-orchestration-before-ai) |
+| [x] | P4 — Deterministic orchestration before AI | Transcript/payment orchestration works without relying on live AI. | [Task list](phases-and-tasks.md#p4-deterministic-orchestration-before-ai) |
 | [ ] | P5 — RAG ingestion and source-grounded answers | Approved-source ingestion and retrieval produce grounded responses. | [Task list](phases-and-tasks.md#p5-rag-ingestion-and-source-grounded-answers) |
 | [ ] | P6 — LLM gateway and structured classification | LLM gateway, strict JSON classification, prompts, and guardrails are testable. | [Task list](phases-and-tasks.md#p6-llm-gateway-and-structured-classification) |
 | [ ] | P7 — Privacy, audit, and dashboard | Privacy redaction, audit events, and dashboard metrics are in place. | [Task list](phases-and-tasks.md#p7-privacy-audit-and-dashboard) |
@@ -66,11 +66,11 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 ### P4 — Deterministic orchestration before AI
 
-- [ ] Orchestrator depends on interfaces and is tested with fakes.
-- [ ] Transcript-status flow handles S100001-S100004 correctly.
-- [ ] Payment reminder workflow fires only for unpaid transcript cases.
-- [ ] CRM escalation occurs for holds, urgent sentiment, low confidence, or human handoff.
-- [ ] Chat response includes safe action trace.
+- [x] Orchestrator depends on interfaces and is tested with fakes.
+- [x] Transcript-status flow handles S100001-S100004 correctly.
+- [x] Payment reminder workflow fires only for unpaid transcript cases.
+- [x] CRM escalation occurs for holds, urgent sentiment, low confidence, or human handoff.
+- [x] Chat response includes safe action trace.
 
 ### P5 — RAG ingestion and source-grounded answers
 
@@ -136,12 +136,12 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 - [x] P1 API foundation.
 - [x] P2 chat endpoint with deterministic response.
 - [x] P3 synthetic student/payment/LMS fixture and mock enterprise APIs.
-- [ ] P4 deterministic transcript flow for S100001-S100003.
+- [x] P4 deterministic transcript flow for S100001-S100004.
 - [x] Basic README and demo script.
 
 ### 1-week version
 
-- [ ] P1-P4 complete.
+- [x] P1-P4 complete.
 - [ ] P5 local RAG over curated source snippets.
 - [ ] P6 fallback classifier plus optional LLM client.
 - [ ] P7 redaction, audit store, and dashboard endpoint.

@@ -7,14 +7,17 @@ const (
 	IntentTranscriptStatus  Intent = "transcript_status"
 	IntentFeePayment        Intent = "fee_payment"
 	IntentHumanHandoff      Intent = "human_handoff"
+	IntentEscalationRequest Intent = "escalation_request"
 	IntentUnknown           Intent = "unknown"
 )
 
 type Sentiment string
 
 const (
-	SentimentNeutral Sentiment = "neutral"
-	SentimentUrgent  Sentiment = "urgent"
+	SentimentNeutral        Sentiment = "neutral"
+	SentimentNegative       Sentiment = "negative"
+	SentimentUrgent         Sentiment = "urgent"
+	SentimentUrgentNegative Sentiment = "urgent_negative"
 )
 
 type ActionStatus string
@@ -62,10 +65,12 @@ type Source struct {
 }
 
 type Action struct {
-	Type        string       `json:"type"`
-	Status      ActionStatus `json:"status"`
-	Message     string       `json:"message,omitempty"`
-	ReferenceID string       `json:"reference_id,omitempty"`
+	Type           string       `json:"type"`
+	Status         ActionStatus `json:"status"`
+	Message        string       `json:"message,omitempty"`
+	ReferenceID    string       `json:"reference_id,omitempty"`
+	TraceID        string       `json:"trace_id,omitempty"`
+	IdempotencyKey string       `json:"idempotency_key,omitempty"`
 }
 
 type Escalation struct {
