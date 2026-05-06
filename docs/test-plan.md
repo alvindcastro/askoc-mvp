@@ -8,7 +8,7 @@ All Go code tasks are governed by [TDD Policy](tdd-policy.md). For each code tas
 
 ## Purpose
 
-This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, protect privacy, and run repeatably in a Go-based demo environment. P10 covers deterministic fallback classification, optional OpenAI-compatible LLM gateway behavior behind strict JSON parsing, local approved-source RAG retrieval, transcript/payment orchestration, in-process workflow idempotency, the standalone workflow simulator, optional Power Automate-compatible webhook retries/signature headers, mock CRM handoff, source fallback, source-only LLM answer guardrails, safe action traces, shared redaction, redacted audit storage, protected admin metrics, dashboard rendering, audit retention/export/reset controls, a JSONL evaluation runner, JSON/Markdown quality reports, critical safety gates, unresolved eval review items, Docker Compose packaging, CI, env safety, and smoke verification.
+This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, protect privacy, and run repeatably in a Go-based demo environment. The P11 release surface covers deterministic fallback classification, optional OpenAI-compatible LLM gateway behavior behind strict JSON parsing, local approved-source RAG retrieval, transcript/payment orchestration, in-process workflow idempotency, the standalone workflow simulator, optional Power Automate-compatible webhook retries/signature headers, mock CRM handoff, source fallback, source-only LLM answer guardrails, safe action traces, shared redaction, redacted audit storage, protected admin metrics, dashboard rendering, audit retention/export/reset controls, a JSONL evaluation runner, JSON/Markdown reports, critical safety gates, unresolved eval review items, Docker Compose packaging, CI, env safety, smoke verification, portfolio diagrams, a timed demo script, and synthetic-only screenshot placeholders.
 
 ## Test objectives
 
@@ -35,8 +35,8 @@ This test plan verifies that AskOC AI Concierge can answer learner-service quest
 | Automation workflow | P8 in-process idempotent workflow client by default; `cmd/workflow-sim` or Power Automate-compatible webhook client when `ASKOC_WORKFLOW_URL` is configured |
 | Dashboard | Go admin dashboard at `/admin` reading the in-memory audit event store through protected admin APIs |
 | Evaluation | P9 `cmd/eval` uses deterministic in-process fakes by default or a live local `/api/v1/chat` endpoint with `-base-url` |
-| Local stack | P10 Docker Compose runs API, mock Banner, mock payment, mock CRM, mock LMS, and workflow simulator containers |
-| CI | P10 GitHub Actions runs offline `go test ./...`, `go vet ./...`, and `make eval` with `ASKOC_PROVIDER=stub` |
+| Local stack | Docker Compose runs API, mock Banner, mock payment, mock CRM, mock LMS, and workflow simulator containers |
+| CI | GitHub Actions runs offline `go test ./...`, `go vet ./...`, and `make eval` with `ASKOC_PROVIDER=stub` |
 
 ## Go test commands
 
@@ -61,9 +61,9 @@ make smoke
 ASKOC_API_PORT=18080 make smoke
 ```
 
-P10 verification uses package-specific privacy, audit, handler, LLM, classifier, RAG, workflow, config, API, simulator, orchestrator, eval, and build-artifact tests plus `go test ./...`. The deterministic evaluation gate is `make eval`; it must report zero critical failures before demo release. The local repeatability gate is `make smoke`; it builds and starts the Compose stack, checks `/healthz`, and verifies transcript workflow plus CRM action traces using synthetic IDs.
+P11 release verification uses package-specific privacy, audit, handler, LLM, classifier, RAG, workflow, config, API, simulator, orchestrator, eval, and build-artifact tests plus `go test ./...`. The deterministic evaluation gate is `make eval`; it must report zero critical failures before demo release. The local repeatability gate is `make smoke`; it builds and starts the Compose stack, checks `/healthz`, and verifies transcript workflow plus CRM action traces using synthetic IDs.
 
-## P10 smoke checks
+## Smoke checks
 
 `scripts/smoke.sh` can either start Docker Compose itself or test an already running local stack. Compose host ports default to `8080`-`8085`; set `ASKOC_API_PORT`, `ASKOC_BANNER_PORT`, `ASKOC_PAYMENT_PORT`, `ASKOC_CRM_PORT`, `ASKOC_WORKFLOW_PORT`, or `ASKOC_LMS_PORT` when a default port is already in use.
 
@@ -311,12 +311,43 @@ After running test conversations, verify that the dashboard at `/admin` shows:
 
 The MVP is demo-ready when:
 
-- at least 20 curated questions pass,
+- at least 30 curated synthetic evaluation questions pass,
 - all four synthetic student scenarios work,
 - no answer is generated without source support for policy/procedure questions,
 - low-confidence fallback works,
 - escalation works,
 - audit logs are redacted,
 - dashboard metrics update after interactions,
-- `go test ./...` passes,
-- README and demo script are complete.
+- README, architecture diagrams, demo script, privacy notes, test plan, and evaluation report are consistent,
+- known limitations are honest,
+- `make test` passes,
+- `make eval` passes with zero critical policy errors,
+- `make smoke` passes against the local stack.
+
+## P11 release checklist
+
+| Check | Evidence |
+|---|---|
+| README explains the project in under two minutes | README has a two-minute reviewer path, quickstart, architecture pointer, success metrics, TDD quality statement, and screenshot placeholders. |
+| Architecture and sequence diagrams are present | `docs/architecture.md` includes Mermaid high-level and interview sequence diagrams covering chat UI, Go API, orchestrator, RAG, mock Banner/payment/CRM/LMS, workflow, audit, and dashboard. |
+| Demo script fits 5-7 minutes | `docs/demo-script.md` has a minute-by-minute run sheet and keeps full test commands as prep/release evidence rather than live narration. |
+| Screenshot/GIF placeholders are privacy-reviewed | README and demo script list placeholders with captions; `docs/privacy-impact-lite.md` defines the capture review checks. |
+| Release commands pass | `make test`, `make eval`, `make smoke`, and `make secret-check` are the final local evidence set. |
+| Synthetic-only boundary holds | `data/synthetic-students.json`, redaction tests, privacy notes, and screenshot review rules prohibit real learner data, real payment data, private URLs, and secrets. |
+| Limitations are honest | README and privacy notes keep real authentication, real Banner/payment/CRM/LMS integrations, private portal scraping, and production deployment out of scope. |
+
+## P11 local release evidence
+
+Latest local verification on 2026-05-06:
+
+| Command or review | Result |
+|---|---|
+| README top-to-bottom review | Pass: problem, solution, stack, quickstart, privacy, success metrics, architecture pointer, screenshot placeholders, and TDD quality statement are present. |
+| Diagram golden-path trace | Pass: chat UI, Go API, orchestrator, RAG, mock Banner/payment/CRM/LMS, workflow, audit, dashboard, and eval/report components are represented. |
+| Demo-script dry run | Pass: the run sheet fits the 5-7 minute interview window when full test commands are treated as prep/release evidence rather than live narration. |
+| Screenshot/GIF privacy review | Pass: placeholders only; future captures must follow the privacy checklist before binary assets are added. |
+| `make test` | Pass: `go test ./...` completed successfully. |
+| `make eval` | Pass: 34/34 cases passed with zero critical failures and refreshed `reports/eval-summary.md`. |
+| `make secret-check` | Pass: no known live-token patterns detected. |
+| `git diff --check` | Pass: no whitespace errors. |
+| `make smoke` | Default port `8080` was occupied locally after images built; rerun with the documented `ASKOC_API_PORT=18080 make smoke` override passed health, transcript workflow, and CRM smoke checks. |

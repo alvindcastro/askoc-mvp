@@ -140,6 +140,29 @@ If a future demo needs a new scenario, add a new clearly fake record rather than
 
 The P7 dashboard is aggregate-first. It shows total conversations, containment, escalations, workflows, top intents, low-confidence review items, stale-source warning counts, and redacted review text. It does not show raw learner messages. Admin metrics, audit export, audit purge, and audit reset require a bearer token; the local demo default is `demo-admin-token`.
 
+## Portfolio screenshot and GIF review
+
+P11 portfolio captures must be reviewed before they are added to the repository or shared in an interview deck. The review is required even when captures come from the local stack, because browser chrome, terminal history, or dashboard rows can accidentally expose private URLs, real names, or tokens.
+
+Required checks:
+
+- Capture only local demo URLs such as `localhost:8080` or clearly fake placeholders.
+- Show only synthetic learner IDs in the `S10000X` pattern.
+- Show only `SYNTH-`, `MOCK-`, or local demo workflow/case identifiers.
+- Do not show `.env`, shell history, real webhook URLs, provider endpoints, API keys, or browser profile details.
+- Do not show raw learner free text if it contains email addresses, phone numbers, passwords, passcodes, tokens, government-style IDs, or real names.
+- Prefer dashboard aggregate views, redacted review items, and synthetic action traces over raw logs.
+
+Approved P11 placeholder set:
+
+| Capture | Privacy proof required |
+|---|---|
+| Chat grounded answer | Source citation and answer text contain no account-specific learner data. |
+| Transcript workflow | `S100002`, synthetic payment state, and mock workflow ID only. |
+| CRM escalation | Mock case ID, queue, priority, and minimal redacted summary only. |
+| Admin dashboard | Aggregate counts and redacted review rows only. |
+| Eval report | Synthetic prompts and quality metrics only. |
+
 ## Prompt and retrieval safety
 
 Policy/procedure answers must be source-grounded.

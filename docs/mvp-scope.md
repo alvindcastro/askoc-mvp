@@ -31,7 +31,7 @@ Transcript support is strong for an MVP because it combines:
 - a transaction status check,
 - a payment requirement,
 - a natural escalation path,
-- a realistic integration pattern with Registrar, Finance, CRM, and notification systems.
+- a realistic integration pattern with Registrar, Finance, CRM, and workflow reminder channels.
 
 ## MVP personas
 
@@ -52,7 +52,7 @@ Transcript support is strong for an MVP because it combines:
 | RAG | Go ingestion command, chunk metadata, retrieval, source-grounded responses |
 | Intent detection | Transcript/payment workflow, escalation, and safe fallback for other learner-service questions |
 | Sentiment detection | Negative/urgent signal for priority escalation |
-| Mock integrations | Banner-style student API, payment API, CRM API, LMS API, notification API |
+| Mock integrations | Banner-style student API, payment API, CRM API, LMS API, and workflow simulator |
 | Workflow automation | Power Automate webhook client and local Go workflow simulator |
 | Audit | Redacted action logs, tool-call logs, trace IDs |
 | Dashboard | Operational metrics and review queue |
@@ -105,7 +105,7 @@ Transcript support is strong for an MVP because it combines:
 
 | Criterion | Target |
 |---|---:|
-| Curated Tier 0 questions answered correctly | 20+ |
+| Curated synthetic evaluation questions passing | 30+ |
 | Synthetic transcript scenarios working | 4/4 |
 | Source-grounded policy answers | 100% |
 | Critical unsupported claims | 0 |

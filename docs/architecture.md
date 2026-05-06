@@ -18,34 +18,40 @@ This document describes the proposed Go-based architecture for the AskOC AI Conc
 
 ```mermaid
 flowchart TD
-    U[Learner] --> UI[Go Web Chat / Optional React UI]
-    UI --> API[Go API Gateway]
-    API --> ORCH[Go AI Orchestrator]
+    Learner[Learner] --> ChatUI[Go Chat UI]
+    Staff[Reviewer / Interviewer] --> Dashboard[Go Admin Dashboard]
 
-    ORCH --> INTENT[Intent Classification]
-    ORCH --> SENT[Sentiment Analysis]
-    ORCH --> RAG[RAG Retrieval]
-    ORCH --> TOOLS[Typed Tool Calling Layer]
+    ChatUI --> API[Go API Gateway]
+    Dashboard --> AdminAPI[Protected Admin API]
+    API --> Orchestrator[Go AI Orchestrator]
 
-    RAG --> INDEX[Knowledge Index]
-    INDEX --> CONTENT[Approved Public Content]
+    Orchestrator --> Classifier[Deterministic or Guarded LLM Classification]
+    Orchestrator --> RAG[Local RAG Retriever]
+    Orchestrator --> Tools[Typed Tool Layer]
+    Orchestrator --> Audit[Redacted Audit Store]
 
-    TOOLS --> BANNER[Go Mock Banner Student API]
-    TOOLS --> PAY[Go Mock Payment API]
-    TOOLS --> CRM[Go Mock CRM API]
-    TOOLS --> LMS[Go Mock LMS API]
-    TOOLS --> NOTIFY[Go Notification Service]
+    RAG --> Chunks[Approved Public Source Chunks]
+    Classifier --> LLM[Optional OpenAI-Compatible Gateway]
 
-    CRM --> AUTO[Power Automate or Go Workflow Simulator]
-    PAY --> AUTO
-    AUTO --> AUDIT[Audit Log]
-    ORCH --> AUDIT
+    Tools --> Banner[Go Mock Banner API]
+    Tools --> Payment[Go Mock Payment API]
+    Tools --> CRM[Go Mock CRM API]
+    Tools --> LMS[Go Mock LMS API]
+    Tools --> Workflow[In-Process Workflow Client or Go Workflow Simulator]
+    Workflow -. optional .-> PowerAutomate[Power Automate-Compatible Webhook]
 
-    AUDIT --> DASH[Admin Dashboard]
-    ORCH --> EVAL[Go Evaluation Runner]
-    EVAL --> REPORTS[JSON / Markdown Reports]
-    ORCH --> DASH
+    Banner --> Audit
+    Payment --> Audit
+    CRM --> Audit
+    Workflow --> Audit
+    AdminAPI --> Audit
+    Audit --> Dashboard
+
+    Eval[Go Evaluation Runner] --> API
+    Eval --> Reports[JSON / Markdown Reports]
 ```
+
+P11 diagram review: the portfolio diagram explicitly includes the chat UI, Go API, orchestrator, RAG, mock Banner/payment/CRM/LMS services, workflow boundary, audit store, dashboard, optional LLM gateway, and evaluation reports. Every component exists as a Go command, Go package, local fixture, Markdown contract, or generated report in the repository.
 
 ## Core services
 
@@ -56,7 +62,7 @@ flowchart TD
 | RAG ingestor | `cmd/ingest` + `internal/rag` | Fetches approved public pages, cleans HTML, chunks content, and writes local JSON chunks |
 | LLM gateway | `internal/llm` | P6 provider-neutral types and tested Azure OpenAI/OpenAI-compatible REST calls |
 | Classifier | `internal/classifier` | P6 deterministic fallback, strict JSON parser, and fixture-backed intent/sentiment checks |
-| Tool clients | `internal/tools` | Typed clients for Banner, payment, CRM, LMS, notification |
+| Tool clients | `internal/tools` | Typed clients for Banner, payment, CRM, and LMS |
 | Privacy | `internal/privacy` | Shared redaction for logs, sessions, audit payloads, and CRM summaries |
 | Audit | `internal/audit` | Redacted in-memory event store, dashboard summaries, export, reset, purge, and workflow metrics |
 | Workflow | `internal/workflow` | In-process idempotent client, local simulator handler, idempotency hashing, and optional Power Automate-compatible webhook client |
@@ -224,7 +230,6 @@ The MVP uses Go services to simulate enterprise integrations.
 | Mock Payment API | Transcript fee payment status and confirmation |
 | Mock CRM API | Case creation, queue routing, case status |
 | Mock LMS API | LMS account or course-access status |
-| Notification API | Email/SMS-style confirmation messages |
 
 ### 6. Automation workflow
 
@@ -318,6 +323,55 @@ sequenceDiagram
     Orchestrator-->>API: case created with summary
 ```
 
+## P11 interview sequence
+
+```mermaid
+sequenceDiagram
+    participant Learner
+    participant UI as Go Chat UI
+    participant API as Go API
+    participant Orch as Go Orchestrator
+    participant RAG as Local RAG
+    participant Banner as Mock Banner
+    participant Payment as Mock Payment
+    participant Workflow as Workflow Simulator
+    participant CRM as Mock CRM
+    participant Audit as Redacted Audit
+    participant Dashboard as Admin Dashboard
+
+    Learner->>UI: How do I order my official transcript?
+    UI->>API: POST /api/v1/chat
+    API->>Orch: trace ID + normalized message
+    Orch->>RAG: retrieve approved transcript chunks
+    RAG-->>Orch: source IDs, confidence, risk, freshness
+    Orch->>Audit: grounded answer event
+    Orch-->>API: answer + citations + action trace
+    API-->>UI: Tier 0 source-grounded response
+
+    Learner->>UI: My transcript has not been processed. ID S100002.
+    UI->>API: POST /api/v1/chat
+    API->>Orch: transcript-status request
+    Orch->>Banner: check synthetic learner and holds
+    Banner-->>Orch: active learner, mock payment hold
+    Orch->>Payment: check synthetic transcript payment
+    Payment-->>Orch: unpaid
+    Orch->>Workflow: trigger idempotent payment reminder
+    Workflow-->>Orch: synthetic workflow ID
+    Orch->>Audit: workflow outcome with hashed idempotency metadata
+    Orch-->>API: Tier 1 workflow response
+
+    Learner->>UI: This is urgent and frustrating.
+    UI->>API: POST /api/v1/chat
+    API->>Orch: urgent transcript context
+    Orch->>CRM: create priority synthetic case
+    CRM-->>Orch: mock case ID
+    Orch->>Audit: escalation event with redacted summary
+    Dashboard->>Audit: protected metrics and review queue
+    Audit-->>Dashboard: aggregate evidence only
+```
+
+The interview sequence traces the 5-7 minute walkthrough: Tier 0 grounded answer, Tier 1 transcript/payment workflow, urgent escalation, redacted dashboard evidence, and no real learner-system dependency.
+
 ## Data stores
 
 ### Conversation table
@@ -389,7 +443,7 @@ Docker Compose
 - workflow-sim
 ```
 
-The P10 Compose stack uses `ASKOC_PROVIDER=stub`, synthetic fixtures, service-DNS URLs for mock integrations, and `workflow-sim` for payment reminder automation. Host ports default to `8080`-`8085` and can be overridden with `ASKOC_API_PORT`, `ASKOC_BANNER_PORT`, `ASKOC_PAYMENT_PORT`, `ASKOC_CRM_PORT`, `ASKOC_WORKFLOW_PORT`, and `ASKOC_LMS_PORT`. PostgreSQL remains a later deployment option; the current P10 demo stack is fully deterministic without a database.
+The local Compose stack uses `ASKOC_PROVIDER=stub`, synthetic fixtures, service-DNS URLs for mock integrations, and `workflow-sim` for payment reminder automation. Host ports default to `8080`-`8085` and can be overridden with `ASKOC_API_PORT`, `ASKOC_BANNER_PORT`, `ASKOC_PAYMENT_PORT`, `ASKOC_CRM_PORT`, `ASKOC_WORKFLOW_PORT`, and `ASKOC_LMS_PORT`. PostgreSQL remains a later deployment option; the P11 portfolio demo stack is fully deterministic without a database.
 
 ```bash
 make smoke

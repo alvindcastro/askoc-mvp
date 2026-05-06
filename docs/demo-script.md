@@ -6,7 +6,18 @@ Show a 5–7 minute Go-based MVP that maps directly to the AI/Automation Solutio
 
 ## Opening pitch
 
-> “This is AskOC AI Concierge, a Go-based learner-service automation MVP. The current P10 build retrieves approved public source chunks for transcript answers, classifies transcript/payment messages with deterministic fallback or guarded LLM JSON, checks synthetic Banner/payment records, triggers an idempotent synthetic payment reminder through either the local workflow simulator or optional webhook client, escalates complex cases into a mock CRM, summarizes redacted audit events in an admin dashboard, runs a deterministic JSONL evaluation gate, and proves the demo with Docker Compose plus a one-command smoke test without relying on live AI by default.”
+> “This is AskOC AI Concierge, a Go-based learner-service automation MVP for higher education. It answers transcript questions from approved source chunks, checks synthetic Banner and payment records, triggers an idempotent workflow reminder, escalates urgent or blocked cases into a mock CRM, shows redacted dashboard evidence, and backs the demo with Go tests, an evaluation gate, Docker Compose, and a one-command smoke test. It uses only synthetic learner data and does not require live AI by default.”
+
+## Time-boxed run sheet
+
+| Minute | Focus | Screen or command | Proof point |
+|---:|---|---|---|
+| 0:00-0:45 | Problem, Go architecture, privacy boundary | README and chat UI | Hiring manager can understand the project quickly and see synthetic-data-only scope. |
+| 0:45-1:45 | Tier 0 grounded answer | `/chat` transcript-order question | RAG answer cites approved public transcript source chunks. |
+| 1:45-3:15 | Tier 1 transcript/payment workflow | `/chat` with `S100002` | Typed mock Banner/payment clients and idempotent workflow action run. |
+| 3:15-4:30 | Urgent or blocked escalation | `/chat` urgent message or `S100003` | Mock CRM case is created with redacted summary and priority routing. |
+| 4:30-5:30 | Dashboard evidence | `/admin` | Containment, escalation, workflow, stale-source, low-confidence, and review metrics are visible without raw PII. |
+| 5:30-7:00 | TDD/evaluation/release proof | terminal and reports | `make test`, `make eval`, `make smoke`, and reports show repeatable quality gates. |
 
 ## Demo setup
 
@@ -96,7 +107,7 @@ Show:
 - idempotency key,
 - workflow ID,
 - tested audit-port event,
-- safe notification summary.
+- safe reminder summary.
 
 Talking point:
 
@@ -122,7 +133,7 @@ Talking point:
 
 > “Sentiment does not make final decisions alone. It increases routing priority when combined with unresolved context and safe business rules.”
 
-## Minute 5: P10 audit dashboard, redaction, and evaluation
+## Minute 5: P11 audit dashboard, redaction, and evaluation
 
 Talking point:
 
@@ -196,7 +207,7 @@ Show:
 
 Talking point:
 
-> “I treat this as a maintained automation product. P10 has deterministic unit coverage for RAG allowlisting, ingestion, chunking, retrieval, source fallback, classification, LLM gateway behavior, prompt guardrails, workflow idempotency, simulator contracts, webhook retries, transcript decisions, action traces, CRM escalation, shared redaction, audit storage, admin metrics, dashboard rendering, retention controls, repo-level Docker and CI contracts, and a broader JSONL evaluation runner that fails critical regressions.”
+> “I treat this as a maintained automation product. The test suite has deterministic unit coverage for RAG allowlisting, ingestion, chunking, retrieval, source fallback, classification, LLM gateway behavior, prompt guardrails, workflow idempotency, simulator contracts, webhook retries, transcript decisions, action traces, CRM escalation, shared redaction, audit storage, admin metrics, dashboard rendering, retention controls, repo-level Docker and CI contracts, and a broader JSONL evaluation runner that fails critical regressions.”
 > “P6 adds the guarded LLM layer: OpenAI-compatible calls are optional, strict JSON is validated before use, prompt templates are versioned, and low-confidence or ungrounded model output falls back instead of triggering tools.”
 
 ## Expected demo path
@@ -209,11 +220,11 @@ All demo records are synthetic. Student IDs, payment states, holds, workflow IDs
 | 2 | Unpaid payment workflow | “I ordered my transcript but it has not been processed. My student ID is S100002.” | Payment status is unpaid and reminder workflow is accepted | Chat response shows `transcript_status`, `payment_status_checked`, `payment_reminder_triggered`, workflow ID, and no CRM handoff |
 | 3 | Financial-hold escalation | “My transcript still is not moving. My student ID is S100003.” | Financial hold is detected and staff handoff is created | Chat response shows `transcript_status`, `financial_hold_detected`, CRM case ID, and Registrar/Student Accounts handoff |
 | 4 | Urgent sentiment escalation | “This is really frustrating. I need this transcript for a job application.” | Urgent/negative sentiment creates a priority CRM case | Chat response shows urgent sentiment, `crm_case_created`, priority flag, case ID, and privacy-aware summary |
-| 5 | P10 TDD/eval/smoke evidence | Run package tests, eval gate, secret check, and smoke gate | Tests prove LLM gateway behavior, strict classification, prompt guardrails, source grounding, deterministic decisions, workflow simulator/webhook behavior, redaction, audit metrics, dashboard controls, Docker/CI contracts, env safety, and eval quality gates | `go test ./internal/eval ./cmd/eval`, `go test ./internal/build -run TestP10`, `go test ./...`, `make eval`, `make secret-check`, and `make smoke` pass |
+| 5 | P11 TDD/eval/smoke evidence | Run package tests, eval gate, secret check, and smoke gate | Tests prove LLM gateway behavior, strict classification, prompt guardrails, source grounding, deterministic decisions, workflow simulator/webhook behavior, redaction, audit metrics, dashboard controls, Docker/CI contracts, env safety, eval quality gates, and release readiness | `go test ./internal/eval ./cmd/eval`, `go test ./internal/build -run TestP10`, `go test ./...`, `make eval`, `make secret-check`, and `make smoke` pass |
 
 ## Demo acceptance matrix
 
-Each P10 row must be verifiable from the Go API response, local RAG chunks, local mock service logs, the workflow simulator or in-process workflow response, CRM simulator output, protected admin metrics, redacted audit-store tests, Docker/CI artifact tests, smoke-script output, or `reports/eval-summary.md`. Source references are approved public/curated learner-service content; synthetic records are the only data used for student/payment/hold state.
+Each P11 row must be verifiable from the Go API response, local RAG chunks, local mock service logs, the workflow simulator or in-process workflow response, CRM simulator output, protected admin metrics, redacted audit-store tests, Docker/CI artifact tests, smoke-script output, or `reports/eval-summary.md`. Source references are approved public/curated learner-service content; synthetic records are the only data used for student/payment/hold state.
 
 | ID | Scenario | Synthetic input | Expected intent | Expected source | Expected action | Expected handoff behavior | Pass evidence |
 |---|---|---|---|---|---|---|---|
@@ -224,6 +235,18 @@ Each P10 row must be verifiable from the Go API response, local RAG chunks, loca
 | D05 | Low-confidence source fallback | Transcript-adjacent question with no approved source | `unknown` or low-confidence transcript intent | No acceptable source above threshold | Do not answer from model memory; ask clarifying question or route to staff | Low-confidence handoff if learner needs account-specific help | Response shows no citation used for unsupported claim and logs low-confidence review item |
 
 Golden-path pass condition: D01-D04 pass in order during the 5-7 minute demo, and each expected action has at least one observable output. D05 is a safety check used when discussing fallback behavior.
+
+## Screenshot and GIF placeholders
+
+Final captures should be generated only from the local synthetic stack. The placeholder manifest lives in [docs/assets/README.md](assets/README.md). Before adding any image or GIF, inspect it for real student data, real tokens, private URLs, browser profile details, and unredacted raw messages.
+
+| Placeholder | Capture moment | Caption |
+|---|---|---|
+| `docs/assets/chat-grounded-answer-placeholder` | Transcript-order Tier 0 answer in `/chat` | Proves source-grounded answer with approved transcript citation, confidence, risk, and freshness metadata. |
+| `docs/assets/transcript-workflow-placeholder` | `S100002` transcript-status flow in `/chat` | Proves mock Banner/payment checks and idempotent payment reminder workflow with synthetic IDs only. |
+| `docs/assets/crm-escalation-placeholder` | `S100003` financial hold or urgent-sentiment escalation | Proves mock CRM handoff, priority routing, safe expectation-setting, and minimal redacted summary. |
+| `docs/assets/admin-dashboard-placeholder` | `/admin` after demo scenarios | Proves aggregate containment, escalation, workflow, stale-source, low-confidence, and review-queue metrics without raw PII. |
+| `docs/assets/eval-report-placeholder` | `reports/eval-summary.md` after `make eval` | Proves repeatable responsible-AI evidence and zero critical safety failures. |
 
 ## Backup plan
 

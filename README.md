@@ -1,6 +1,6 @@
 # AskOC AI Concierge
 
-**Go/Golang portfolio MVP for an AI/Automation Solution**
+**Go/Golang portfolio MVP for an AI/Automation Solutions Developer role**
 
 AskOC AI Concierge is a privacy-aware learner-service automation MVP designed for a higher-education digital learner experience team. It demonstrates how conversational AI, retrieval-augmented generation, workflow automation, and mock enterprise integrations can reduce Tier 0 and Tier 1 learner-service volume while improving response quality and routing.
 
@@ -9,6 +9,46 @@ The implementation is intentionally **Go-first**: the API gateway, AI orchestrat
 ## One-sentence pitch
 
 AskOC AI Concierge is a **Go-based AI learner-service agent** that uses RAG, workflow automation, mock Banner/CRM/LMS/payment integrations, and privacy-first synthetic data controls to answer common student questions and automate transcript/payment follow-up.
+
+## Two-minute reviewer path
+
+1. Read the problem, scope, and privacy boundary in this README.
+2. Run the repeatable local proof:
+
+```bash
+make smoke
+```
+
+3. Keep the stack running when you want to inspect the UI:
+
+```bash
+make compose-up
+```
+
+4. Open `http://localhost:8080/chat` for the learner chat and `http://localhost:8080/admin` for the protected dashboard. The local admin token is `demo-admin-token`.
+5. Skim [docs/demo-script.md](docs/demo-script.md), [docs/architecture.md](docs/architecture.md), and [reports/eval-summary.md](reports/eval-summary.md) for the 5-7 minute walkthrough, integration diagrams, and quality evidence.
+
+## Portfolio evidence at a glance
+
+| Evidence | What it proves | Where to verify |
+|---|---|---|
+| One-command smoke test | Docker Compose can run the synthetic transcript/payment demo and CRM handoff | `make smoke`, `scripts/smoke.sh` |
+| Go service architecture | Chat UI, Go API, orchestrator, RAG, mock enterprise APIs, workflow, audit, dashboard, and eval are separated by typed boundaries | [docs/architecture.md](docs/architecture.md) |
+| Responsible-AI gate | Intent, source, action, handoff, safety, and critical hallucination checks are repeatable | `make eval`, [reports/eval-summary.md](reports/eval-summary.md) |
+| Privacy boundary | All learner, payment, LMS, workflow, and CRM data is visibly synthetic and redacted before audit/dashboard use | [docs/privacy-impact-lite.md](docs/privacy-impact-lite.md), `data/synthetic-students.json` |
+| TDD delivery | Code phases were implemented behind failing tests, package tests, full-suite tests, eval, smoke, and changelog evidence | [docs/phases-and-tasks.md](docs/phases-and-tasks.md), [CHANGELOG.md](CHANGELOG.md) |
+
+## Screenshot and GIF placeholders
+
+These placeholders are intentionally textual until final captures are generated from the local synthetic stack. See [docs/assets/README.md](docs/assets/README.md) for the capture manifest. Any future image or GIF must show only `S10000X` demo IDs, mock workflow IDs, mock CRM IDs, local URLs, and placeholder tokens.
+
+| Placeholder | Intended capture | Caption/proof |
+|---|---|---|
+| Chat grounded answer | `/chat` after asking “How do I order my official transcript?” | Shows a Tier 0 answer with approved transcript source, confidence, risk, freshness, and safe action trace. |
+| Transcript workflow | `/chat` after the `S100002` transcript-status prompt | Shows mock Banner/payment checks and `payment_reminder_triggered` without real payment data. |
+| Escalation case | `/chat` after the `S100003` financial-hold or urgent-sentiment prompt | Shows privacy-aware CRM handoff, queue, priority, and synthetic case ID. |
+| Admin dashboard | `/admin` after demo conversations | Shows containment, escalation, workflow, stale-source, low-confidence, and review-queue metrics using redacted data. |
+| Eval report | `reports/eval-summary.md` after `make eval` | Shows zero critical safety failures and portfolio-readable quality evidence. |
 
 ## Why Go for this MVP
 
@@ -49,7 +89,7 @@ The MVP focuses on one high-value use case:
 | Intent recognition | Transcript/payment workflow plus safe fallback for other learner-service questions |
 | Sentiment analysis | Flags frustrated or urgent learners for priority routing |
 | Workflow automation | Transcript payment/status follow-up and CRM routing |
-| Enterprise integration | Mock Banner, payment, CRM, LMS, and notification APIs |
+| Enterprise integration | Mock Banner, payment, CRM, LMS, and workflow APIs |
 | Admin dashboard | Containment, escalation, top intents, confidence, unresolved questions |
 | Privacy by design | Synthetic records, PII redaction, audit logs, retention rules |
 | Deployment | Dockerized Go services with optional Azure deployment path |
@@ -83,7 +123,7 @@ A task is not done until the relevant package test and `go test ./...` pass. AI,
 | Retrieval | Azure AI Search REST client, PostgreSQL + pgvector, or local vector store |
 | Intent/sentiment | LLM structured JSON output, Azure AI Language REST, or lightweight Go classifier |
 | Automation | Power Automate cloud flow triggered by Go webhook client; local Go workflow simulator for demo |
-| Mock systems | Go microservices for Banner, CRM, payment, LMS, and notifications |
+| Mock systems | Go microservices for Banner, CRM, payment, LMS, and workflow simulation |
 | Database | PostgreSQL for app/audit data; SQLite acceptable for local MVP |
 | Observability | `log/slog`, trace IDs, OpenTelemetry-ready middleware |
 | Testing | Go table-driven tests, `httptest`, contract tests, and JSONL evaluation runner |
@@ -116,7 +156,7 @@ A task is not done until the relevant package test and `go test ./...` pass. AI,
 3. Assistant summarizes the case.
 4. Mock CRM case is created with transcript context, payment status, conversation summary, and priority flag.
 
-## Current P10 repository structure
+## Repository structure
 
 ```text
 askoc-ai-concierge/
@@ -173,9 +213,9 @@ askoc-ai-concierge/
     ...
 ```
 
-The current chat API uses guarded orchestration and evaluation: deterministic fallback intent/sentiment classification remains the default, while optional `openai-compatible` provider mode adds a tested REST LLM gateway, strict JSON classification parsing, versioned prompts, source-only answer guardrails, local RAG retrieval over approved public chunks, typed mock Banner/payment/CRM clients, idempotent payment-reminder workflow clients, a standalone local workflow simulator, an optional Power Automate-compatible webhook client with retry and signature headers, a safe action trace, CRM handoff routing for holds, urgent sentiment, low confidence, or explicit human handoff, shared PII redaction, an in-memory audit event store, protected admin metrics, a minimal dashboard, audit export/reset/purge controls, a redacted eval review queue endpoint, a deterministic JSONL evaluation runner, Docker Compose local stack, offline CI gate, safe env sample, secret check, and one-command smoke test. Later phases focus on portfolio polish.
+The P11-ready chat API uses guarded orchestration and evaluation: deterministic fallback intent/sentiment classification remains the default, while optional `openai-compatible` provider mode adds a tested REST LLM gateway, strict JSON classification parsing, versioned prompts, source-only answer guardrails, local RAG retrieval over approved public chunks, typed mock Banner/payment/CRM clients, idempotent payment-reminder workflow clients, a standalone local workflow simulator, an optional Power Automate-compatible webhook client with retry and signature headers, a safe action trace, CRM handoff routing for holds, urgent sentiment, low confidence, or explicit human handoff, shared PII redaction, an in-memory audit event store, protected admin metrics, a minimal dashboard, audit export/reset/purge controls, a redacted eval review queue endpoint, a deterministic JSONL evaluation runner, Docker Compose local stack, offline CI gate, safe env sample, secret check, one-command smoke test, architecture diagrams, demo script, screenshot placeholders, and final release checklist.
 
-## Current P10 commands
+## Quickstart and commands
 
 ```bash
 make dev
@@ -256,7 +296,7 @@ Mock LMS:     http://localhost:8085/api/v1/students/S100001/lms-access?course_id
 ```
 
 The chat API validates JSON requests, rejects empty or oversized messages, accepts synthetic student IDs in the `S` plus six digits format, includes trace IDs in responses and action results, routes transcript/payment decisions through the orchestrator, and uses P5 retrieval plus P6 source guardrails for transcript-request answers.
-P3 tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors. P4 adds deterministic classifier/orchestrator tests and an in-process workflow port that returns idempotent synthetic workflow IDs. P5 adds allowlist parsing, deterministic ingestion, chunking, local retrieval, and stale/high-risk source fallback tests. P6 adds the optional tested LLM gateway, strict JSON parser, prompt golden tests, classification fixtures, and low-confidence/source guardrails. P7 adds shared redaction for logs, sessions, audit payloads, and CRM summaries; audit events for orchestrator actions, workflow outcomes, guardrails, and escalations; protected aggregate admin metrics; redacted review queue items; and demo audit retention/export/reset controls. P8 adds `cmd/workflow-sim`, a Power Automate-compatible HTTP client, idempotency-key hashing in workflow audit metadata, and retry attempt counts for webhook responses. P9 adds `data/eval-questions.jsonl`, `cmd/eval`, `internal/eval`, JSON/Markdown reports, critical gate failures, and unresolved eval review queue support. P10 adds multi-service Docker packaging, local Compose orchestration, CI, env safety, and smoke verification.
+P3 tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors. P4 adds deterministic classifier/orchestrator tests and an in-process workflow port that returns idempotent synthetic workflow IDs. P5 adds allowlist parsing, deterministic ingestion, chunking, local retrieval, and stale/high-risk source fallback tests. P6 adds the optional tested LLM gateway, strict JSON parser, prompt golden tests, classification fixtures, and low-confidence/source guardrails. P7 adds shared redaction for logs, sessions, audit payloads, and CRM summaries; audit events for orchestrator actions, workflow outcomes, guardrails, and escalations; protected aggregate admin metrics; redacted review queue items; and demo audit retention/export/reset controls. P8 adds `cmd/workflow-sim`, a Power Automate-compatible HTTP client, idempotency-key hashing in workflow audit metadata, and retry attempt counts for webhook responses. P9 adds `data/eval-questions.jsonl`, `cmd/eval`, `internal/eval`, JSON/Markdown reports, critical gate failures, and unresolved eval review queue support. P10 adds multi-service Docker packaging, local Compose orchestration, CI, env safety, and smoke verification. P11 adds portfolio-facing README polish, diagram review, a timed demo script, synthetic screenshot placeholders, and a final release checklist.
 
 ## Demo data policy
 

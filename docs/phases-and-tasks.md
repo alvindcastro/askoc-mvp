@@ -664,7 +664,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ## P11 — Portfolio polish and interview readiness
 **Phase outcome:** Portfolio materials are polished for interview presentation.
-- [ ] **P11-T01 — Polish README for applicant storytelling**  
+- [x] **P11-T01 — Polish README for applicant storytelling**
   **Type:** Documentation  
   **Goal:** Make the project understandable to a hiring manager in under two minutes.  
   **Primary files:** `README.md`  
@@ -672,7 +672,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Review-gated documentation task.  
   **Tests/review:** Read README top-to-bottom and confirm it explains problem, solution, stack, demo, and privacy.  
   **Done when:** README includes screenshot placeholder, quickstart, architecture, success metrics, and TDD quality statement.
-- [ ] **P11-T02 — Add architecture diagram and sequence diagram**  
+- [x] **P11-T02 — Add architecture diagram and sequence diagram**
   **Type:** Documentation  
   **Goal:** Show enterprise integration thinking visually.  
   **Primary files:** `docs/architecture.md`  
@@ -680,7 +680,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Review-gated documentation task.  
   **Tests/review:** Trace golden path through diagram and verify every component exists in tasks or code.  
   **Done when:** Diagram includes chat UI, Go API, orchestrator, RAG, mock Banner/payment/CRM/LMS, workflow, audit, dashboard.
-- [ ] **P11-T03 — Finalize 5-7 minute demo script**  
+- [x] **P11-T03 — Finalize 5-7 minute demo script**
   **Type:** Documentation  
   **Goal:** Prepare a concise interview walkthrough that highlights the role requirements.  
   **Primary files:** `docs/demo-script.md`  
@@ -688,7 +688,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Review-gated documentation task.  
   **Tests/review:** Dry-run the script and verify it fits the time box.; Confirm every spoken claim can be shown in UI, logs, docs, or tests.  
   **Done when:** Demo covers Tier 0 answer, Tier 1 workflow, urgent escalation, dashboard, and TDD/evaluation evidence.
-- [ ] **P11-T04 — Prepare screenshots or short GIF placeholders**  
+- [x] **P11-T04 — Prepare screenshots or short GIF placeholders**
   **Type:** Documentation  
   **Goal:** Make the GitHub repo visually scannable.  
   **Primary files:** `README.md`, `docs/demo-script.md`  
@@ -696,7 +696,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Review-gated documentation task.  
   **Tests/review:** Check screenshots do not show real student data, real tokens, or private URLs.  
   **Done when:** README has image placeholders or links.; Captions explain what each screen proves.
-- [ ] **P11-T05 — Run final release checklist**  
+- [x] **P11-T05 — Run final release checklist**
   **Type:** Documentation  
   **Goal:** Confirm the portfolio is coherent, safe, and demonstrable.  
   **Primary files:** `docs/phases-and-tasks.md`, `docs/test-plan.md`, `docs/privacy-impact-lite.md`  
@@ -707,10 +707,10 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ### P11 phase gate
 
-- [ ] All P11 tasks above are complete or explicitly deferred with a reason.
-- [ ] All code tasks in P11 have failing-test evidence before implementation.
-- [ ] `go test ./...` passes after P11 code tasks.
-- [ ] Relevant docs are updated with any changed behavior or assumptions.
+- [x] All P11 tasks above are complete or explicitly deferred with a reason.
+- [x] No code tasks exist in P11; failing-test evidence is not applicable.
+- [x] `make test` passes as final release evidence.
+- [x] Relevant docs are updated with any changed behavior or assumptions.
 
 
 ---
@@ -719,11 +719,11 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 Before calling the MVP interview-ready:
 
-- [ ] `make test` passes.
-- [ ] `make eval` passes with zero critical policy errors.
-- [ ] `make smoke` passes against the local stack.
-- [ ] Demo uses only synthetic learner records.
-- [ ] Transcript request, unpaid payment reminder, financial-hold escalation, and urgent-sentiment escalation all work.
-- [ ] Dashboard shows containment, escalation, workflow, low-confidence, and stale-source metrics.
-- [ ] README, architecture, demo script, privacy notes, test plan, and evaluation report are consistent.
-- [ ] Known limitations are documented honestly.
+- [x] `make test` passes.
+- [x] `make eval` passes with zero critical policy errors.
+- [x] Smoke gate passes against the local stack; default `make smoke` built images but local port `8080` was occupied, and `ASKOC_API_PORT=18080 make smoke` passed.
+- [x] Demo uses only synthetic learner records.
+- [x] Transcript request, unpaid payment reminder, financial-hold escalation, and urgent-sentiment escalation all work.
+- [x] Dashboard shows containment, escalation, workflow, low-confidence, and stale-source metrics.
+- [x] README, architecture, demo script, privacy notes, test plan, and evaluation report are consistent.
+- [x] Known limitations are documented honestly.

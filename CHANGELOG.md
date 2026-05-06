@@ -2,6 +2,48 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-06 - P11 Portfolio Polish And Interview Readiness
+
+### P11-T01 - Polish README for applicant storytelling
+
+- What: added a two-minute reviewer path, portfolio evidence table, quickstart framing, screenshot/GIF placeholder section, and P11-ready capability summary.
+- Where: `README.md`.
+- When: 2026-05-06.
+- Why: make the project understandable to a hiring manager quickly while preserving the Go-first, synthetic-data-only story.
+- How: reviewed the README against the P11 prompt for problem, solution, stack, demo, privacy, success metrics, architecture, and TDD evidence, then moved the most important reviewer actions to the top.
+
+### P11-T02 - Add architecture diagram and sequence diagram
+
+- What: refreshed the Mermaid architecture diagram and added a P11 interview sequence diagram covering Tier 0 answer, Tier 1 workflow, urgent escalation, audit, dashboard, and evaluation evidence.
+- Where: `docs/architecture.md`.
+- When: 2026-05-06.
+- Why: show enterprise integration thinking visually without claiming unsupported services.
+- How: traced the golden path through existing commands/packages and removed stale notification-service overclaims from architecture-facing docs.
+
+### P11-T03 - Finalize 5-7 minute demo script
+
+- What: tightened the opening pitch, added a timed run sheet, updated P10-era wording to P11 release wording, and moved full test commands into prep/release evidence.
+- Where: `docs/demo-script.md`.
+- When: 2026-05-06.
+- Why: make the interview walkthrough concise enough for a 5-7 minute slot while keeping every spoken claim observable.
+- How: dry-run reviewed the script against the required Tier 0 answer, Tier 1 workflow, urgent escalation, dashboard, and TDD/evaluation proof points.
+
+### P11-T04 - Prepare screenshots or short GIF placeholders
+
+- What: added textual screenshot/GIF placeholders, captions, a capture manifest, and a portfolio screenshot privacy checklist.
+- Where: `README.md`, `docs/demo-script.md`, `docs/assets/README.md`, `docs/privacy-impact-lite.md`.
+- When: 2026-05-06.
+- Why: make the GitHub repo visually scannable without committing binary captures that could accidentally expose real data, tokens, or private URLs.
+- How: defined the future capture set for chat grounded answer, transcript workflow, CRM escalation, admin dashboard, and eval report, then documented allowed and disallowed visible values.
+
+### P11-T05 - Run final release checklist
+
+- What: marked P11 and MVP release gates complete, aligned roadmap/test-plan/scope/brainstorm docs, corrected stale notification overclaims, and recorded final release evidence.
+- Where: `docs/phases-and-tasks.md`, `docs/implementation-roadmap.md`, `docs/test-plan.md`, `docs/mvp-scope.md`, `docs/brainstorm.md`, `docs/golang-implementation.md`, `CHANGELOG.md`.
+- When: 2026-05-06.
+- Why: confirm the portfolio is coherent, safe, demonstrable, and honest about limitations.
+- How: verified `make test`, `make eval`, `make secret-check`, and `git diff --check`; default `make smoke` built images but found local port `8080` occupied, then the documented `ASKOC_API_PORT=18080 make smoke` path passed health, transcript workflow, and CRM smoke checks.
+
 ## 2026-05-06 - P10 Docker, CI, And Local Developer Experience
 
 ### P10-T01 - Create Dockerfiles for Go services
