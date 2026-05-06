@@ -41,10 +41,10 @@ Each command should have a small `main.go` that loads configuration, creates dep
 | `internal/handlers` | HTTP handlers and JSON encoding/decoding |
 | `internal/session` | In-memory demo conversation sessions with TTL and redaction before persistence |
 | `internal/validation` | Chat request validation and safe validation error codes |
-| `internal/orchestrator` | P5 deterministic chat decision workflow, source packaging, and dependency ports |
+| `internal/orchestrator` | P6 guarded chat decision workflow, prompt templates, source packaging, and dependency ports |
 | `internal/rag` | P5 allowlist parsing, ingestion, chunking, local retrieval, and source freshness metadata |
-| `internal/llm` | Later P6 provider interface and Azure/OpenAI-compatible REST client |
-| `internal/classifier` | P4 deterministic intent and sentiment fallback classification |
+| `internal/llm` | P6 provider-neutral request/response types and Azure/OpenAI-compatible REST client |
+| `internal/classifier` | P6 deterministic fallback, strict JSON parser, and fixture-backed intent/sentiment tests |
 | `internal/tools` | Banner, payment, CRM, LMS, notification clients |
 | `internal/workflow` | P4 in-process idempotent workflow port; later P8 webhook/simulator clients |
 | `internal/privacy` | Later P7 PII redaction, prompt-injection checks, safe summaries |
@@ -162,21 +162,21 @@ func ChatHandler(service ChatService) http.Handler {
 }
 ```
 
-P5 wires this handler to the deterministic orchestrator at `POST /api/v1/chat`. The orchestrator returns fallback intent/sentiment classification, local RAG source packaging for transcript-request answers, mock Banner/payment/CRM actions, idempotent payment-reminder workflow results, and optional handoff metadata without calling live AI. The Go UI is served at `/chat`.
+P6 wires this handler to the guarded orchestrator at `POST /api/v1/chat`. By default the orchestrator returns deterministic fallback intent/sentiment classification, local RAG source packaging for transcript-request answers, mock Banner/payment/CRM actions, idempotent payment-reminder workflow results, and optional handoff metadata without calling live AI. When `ASKOC_PROVIDER=openai-compatible` is explicitly configured, the same orchestrator uses the tested REST LLM gateway behind strict JSON parsing, prompt-version metadata, source-only answer validation, and deterministic fallback on timeout or unsafe output. The Go UI is served at `/chat`.
 
 ## Orchestrator decision flow
 
 ```text
 1. Create trace ID.
 2. Redact message for logging.
-3. Classify intent and sentiment.
-4. Retrieve approved source chunks for transcript-request answers and attach source confidence/risk/freshness metadata.
-5. If confidence is too low, create a normal CRM handoff without triggering sensitive tools.
-6. If transcript-status intent and student ID exists, call mock Banner and payment APIs.
-7. If unpaid, trigger payment reminder workflow.
-8. If hold, negative sentiment, urgent context, or low confidence, create CRM case.
-9. Generate deterministic response text with source-grounded answer or safe fallback.
-10. Record workflow audit-port events.
+3. Classify intent and sentiment with deterministic fallback or guarded LLM JSON output.
+4. Reject invalid, unknown, or low-confidence classification before sensitive tool checks.
+5. Retrieve approved source chunks for transcript-request answers and attach source confidence/risk/freshness metadata.
+6. If LLM mode is enabled, generate answer text only after source guardrails pass.
+7. If transcript-status intent and student ID exists, call mock Banner and payment APIs.
+8. If unpaid, trigger payment reminder workflow.
+9. If hold, negative sentiment, urgent context, or low confidence, create CRM case.
+10. Record workflow and guardrail audit-port events.
 11. Return structured response.
 ```
 
@@ -207,7 +207,7 @@ Example source config:
 
 ## LLM structured output
 
-For classification, require a strict JSON response:
+For classification, P6 requires a strict JSON response:
 
 ```json
 {
@@ -223,9 +223,11 @@ For classification, require a strict JSON response:
 Validate model output before using it:
 
 - reject invalid JSON,
-- clamp confidence values,
+- reject out-of-range confidence values,
 - default unknown intent to safe fallback,
 - never execute tools based only on low-confidence classification.
+
+The fixture target for P6 classification is 100% intent accuracy on the synthetic demo set in `data/classification-fixtures.jsonl`; `internal/classifier/e2e_test.go` fails with the fixture ID and expected intent when a regression occurs.
 
 ## Tool calling without magic
 

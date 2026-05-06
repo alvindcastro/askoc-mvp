@@ -21,8 +21,13 @@ func (o *Orchestrator) handleGroundedAnswer(ctx context.Context, req domain.Chat
 	switch status {
 	case groundingReady:
 		resp.Sources = sources
-		resp.Answer = "I found approved public source guidance for this demo. Use the linked approved public source for official transcript request steps, and ask staff for account-specific, fee, deadline, or eligibility details."
 		resp.Actions = append(resp.Actions, o.action(ctx, "rag_sources_retrieved", domain.ActionStatusCompleted, "Approved public source chunks met the retrieval confidence threshold.", ""))
+		if answer, ok := o.generateGroundedAnswer(ctx, req.Message, sources); ok {
+			resp.Answer = answer
+			resp.Actions = append(resp.Actions, o.action(ctx, "llm_answer_generated", domain.ActionStatusCompleted, "Guarded LLM answer generated from approved sources.", ""))
+			return resp
+		}
+		resp.Answer = "I found approved public source guidance for this demo. Use the linked approved public source for official transcript request steps, and ask staff for account-specific, fee, deadline, or eligibility details."
 	case groundingCaution:
 		resp.Sources = sources
 		resp.Answer = "I found an approved public source, but this transcript guidance needs staff confirmation before I present it as authoritative."

@@ -2,6 +2,64 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-06 - P6 LLM Gateway And Structured Classification
+
+### P6-T01 - Define LLM provider interface and request/response types
+
+- What: added provider-neutral LLM request/response types, role-tagged messages, grounding source and citation models, token usage metadata, timeout validation, and typed provider errors.
+- Where: `internal/llm/types.go`, `internal/llm/types_test.go`.
+- When: 2026-05-06.
+- Why: hide provider-specific details behind a replaceable Go interface before adding OpenAI-compatible runtime calls.
+- How: wrote failing JSON schema, provider error, unwrap, and timeout validation tests first, confirmed missing `internal/llm` symbols, then implemented the minimal provider-neutral types and safe error helpers.
+
+### P6-T02 - Implement OpenAI/Azure-compatible REST client
+
+- What: added a testable OpenAI/Azure-compatible chat completions client with configured endpoint, API key, model, timeout, context cancellation, safe status mapping, and prompt/body-safe errors.
+- Where: `internal/llm/openai_client.go`, `internal/llm/openai_client_test.go`.
+- When: 2026-05-06.
+- Why: allow optional live-provider demo wiring without making automated tests or the default local path depend on a real LLM service.
+- How: wrote `httptest.Server` payload, success parsing, 429, 500, timeout, and pre-canceled-context tests first, confirmed the missing client failures, then implemented the REST client without any live API calls.
+
+### P6-T03 - Parse strict JSON classification output
+
+- What: added strict JSON classification parsing for `intent`, `intent_confidence`, `sentiment`, `urgency`, `needs_handoff`, and `reason`, with safe fallback for malformed, non-strict, unknown, or low-confidence output.
+- Where: `internal/classifier/llm_parser.go`, `internal/classifier/llm_parser_test.go`.
+- When: 2026-05-06.
+- Why: ensure model output is typed and validated before it can influence transcript/payment tool decisions.
+- How: wrote parser tests for valid JSON, malformed JSON, unknown fields, trailing payloads, missing required fields, unknown intents, out-of-range confidence, and below-threshold tool disabling before implementing strict decoding and safe fallback results.
+
+### P6-T04 - Create prompt templates for classification and grounded answers
+
+- What: added versioned prompt templates for strict JSON classification and source-only grounded answers, plus prompt drift, privacy-boundary, and source-rule tests.
+- Where: `internal/orchestrator/prompts.go`, `internal/orchestrator/prompts_test.go`.
+- When: 2026-05-06.
+- Why: make LLM instructions reviewable, testable, and aligned with synthetic-data and no-direct-tool-calling rules.
+- How: wrote failing prompt tests first for strict JSON wording, allowed labels, source-only answer rules, synthetic-data privacy, and a golden prompt version, then implemented plain text prompt builders with `PromptVersion`.
+
+### P6-T05 - Add LLM fallback and guardrail behavior
+
+- What: added a guarded LLM-backed classifier, deterministic fallback on model/parser failure, source-only answer validation, prompt-version audit metadata, low-confidence classification blocking before sensitive tool calls, and optional LLM answer generation only when approved sources are present.
+- Where: `internal/orchestrator/ai_guardrails.go`, `internal/orchestrator/ai_guardrails_test.go`, `internal/orchestrator/orchestrator.go`, `internal/orchestrator/grounded_answer.go`, `internal/audit/event.go`, `cmd/api/main.go`, `cmd/api/main_test.go`, `internal/config/config.go`, `internal/config/config_test.go`.
+- When: 2026-05-06.
+- Why: keep the core demo reliable and safe if a model times out, returns malformed output, or suggests an unsupported answer, while preserving deterministic local behavior by default.
+- How: wrote failing orchestrator guardrail tests for timeout fallback, unsourced answer rejection, low-confidence no-tool behavior, and source-guarded LLM answers before implementing audit metadata, provider wiring, config validation for `ASKOC_PROVIDER_*`, and default stub mode.
+
+### P6-T06 - Add end-to-end classification tests with fixture messages
+
+- What: added a JSONL classification fixture set with 31 synthetic examples, at least five examples per supported intent, urgent/negative sentiment coverage, unknown/off-topic no-tool assertions, and regression messages that identify the fixture and expected intent.
+- Where: `data/classification-fixtures.jsonl`, `internal/classifier/e2e_test.go`, `internal/classifier/fallback.go`, `docs/model-evaluation.md`, `docs/test-plan.md`.
+- When: 2026-05-06.
+- Why: measure deterministic intent and sentiment behavior before using structured LLM classification in the demo.
+- How: wrote fixture coverage and accuracy tests first, confirmed classifier fixture regressions, then expanded fallback keyword coverage and documented the 100% synthetic fixture accuracy target.
+
+### P6 review evidence
+
+- What: completed P6 status and documentation sync.
+- Where: `docs/phases-and-tasks.md`, `docs/implementation-roadmap.md`, `README.md`, `docs/architecture.md`, `docs/golang-implementation.md`, `docs/test-plan.md`, `docs/model-evaluation.md`, `CHANGELOG.md`.
+- When: 2026-05-06.
+- Why: keep the task board, roadmap, runtime configuration, architecture notes, implementation guide, test plan, and evaluation expectations aligned with the optional guarded LLM gateway and strict classification behavior.
+- How: marked P6 tasks and gates complete after red-to-green package evidence, then verified the P6 package targets, full Go suite, vet, make test, and whitespace checks.
+
 ## 2026-05-06 - P5 RAG Ingestion And Source-Grounded Answers
 
 ### P5-T01 - Define source allowlist schema

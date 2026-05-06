@@ -6,7 +6,7 @@ Show a 5–7 minute Go-based MVP that maps directly to the AI/Automation Solutio
 
 ## Opening pitch
 
-> “This is AskOC AI Concierge, a Go-based learner-service automation MVP. The current P5 build retrieves approved public source chunks for transcript answers, classifies transcript/payment messages deterministically, checks synthetic Banner/payment records, triggers an idempotent synthetic payment reminder, and escalates complex cases into a mock CRM without relying on live AI.”
+> “This is AskOC AI Concierge, a Go-based learner-service automation MVP. The current P6 build retrieves approved public source chunks for transcript answers, classifies transcript/payment messages with deterministic fallback or guarded LLM JSON, checks synthetic Banner/payment records, triggers an idempotent synthetic payment reminder, and escalates complex cases into a mock CRM without relying on live AI by default.”
 
 ## Demo setup
 
@@ -118,7 +118,7 @@ Talking point:
 
 > “Sentiment does not make final decisions alone. It increases routing priority when combined with unresolved context and safe business rules.”
 
-## Minute 5: P5 source and action trace
+## Minute 5: P6 source and action trace
 
 Talking point:
 
@@ -151,6 +151,7 @@ Run:
 
 ```bash
 go test ./...
+go test ./internal/llm ./internal/classifier ./internal/orchestrator
 go test ./internal/rag ./internal/orchestrator
 go test ./internal/classifier ./internal/workflow ./internal/orchestrator
 ```
@@ -165,7 +166,8 @@ Show:
 
 Talking point:
 
-> “I treat this as a maintained automation product. P5 has deterministic unit coverage for RAG allowlisting, ingestion, chunking, retrieval, source fallback, classification, workflow idempotency, transcript decisions, action traces, and CRM escalation; P9 will add the broader evaluation runner.”
+> “I treat this as a maintained automation product. P6 has deterministic unit coverage for RAG allowlisting, ingestion, chunking, retrieval, source fallback, classification, LLM gateway behavior, prompt guardrails, workflow idempotency, transcript decisions, action traces, and CRM escalation; P9 will add the broader evaluation runner.”
+> “P6 adds the guarded LLM layer: OpenAI-compatible calls are optional, strict JSON is validated before use, prompt templates are versioned, and low-confidence or ungrounded model output falls back instead of triggering tools.”
 
 ## Expected demo path
 
@@ -177,11 +179,11 @@ All demo records are synthetic. Student IDs, payment states, holds, workflow IDs
 | 2 | Unpaid payment workflow | “I ordered my transcript but it has not been processed. My student ID is S100002.” | Payment status is unpaid and reminder workflow is accepted | Chat response shows `transcript_status`, `payment_status_checked`, `payment_reminder_triggered`, workflow ID, and no CRM handoff |
 | 3 | Financial-hold escalation | “My transcript still is not moving. My student ID is S100003.” | Financial hold is detected and staff handoff is created | Chat response shows `transcript_status`, `financial_hold_detected`, CRM case ID, and Registrar/Student Accounts handoff |
 | 4 | Urgent sentiment escalation | “This is really frustrating. I need this transcript for a job application.” | Urgent/negative sentiment creates a priority CRM case | Chat response shows urgent sentiment, `crm_case_created`, priority flag, case ID, and privacy-aware summary |
-| 5 | P5 TDD evidence | Run P5 package tests | Tests prove source grounding, deterministic decisions, and redaction | `go test ./internal/rag ./internal/orchestrator` and `go test ./internal/classifier ./internal/workflow ./internal/orchestrator` pass |
+| 5 | P6 TDD evidence | Run P6 package tests | Tests prove LLM gateway behavior, strict classification, prompt guardrails, source grounding, deterministic decisions, and redaction | `go test ./internal/llm ./internal/classifier ./internal/orchestrator` and `go test ./internal/rag ./internal/workflow ./internal/orchestrator` pass |
 
 ## Demo acceptance matrix
 
-Each P5 row must be verifiable from the Go API response, local RAG chunks, local mock service logs, the in-process workflow response, CRM simulator output, or unit-test audit fakes. Source references are approved public/curated learner-service content; synthetic records are the only data used for student/payment/hold state.
+Each P6 row must be verifiable from the Go API response, local RAG chunks, local mock service logs, the in-process workflow response, CRM simulator output, or unit-test audit fakes. Source references are approved public/curated learner-service content; synthetic records are the only data used for student/payment/hold state.
 
 | ID | Scenario | Synthetic input | Expected intent | Expected source | Expected action | Expected handoff behavior | Pass evidence |
 |---|---|---|---|---|---|---|---|

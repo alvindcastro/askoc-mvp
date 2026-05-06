@@ -116,7 +116,7 @@ A task is not done until the relevant package test and `go test ./...` pass. AI,
 3. Assistant summarizes the case.
 4. Mock CRM case is created with transcript context, payment status, conversation summary, and priority flag.
 
-## Current P5 repository structure
+## Current P6 repository structure
 
 ```text
 askoc-ai-concierge/
@@ -153,9 +153,9 @@ askoc-ai-concierge/
     ...
 ```
 
-The current chat API uses deterministic P5 orchestration: fallback intent/sentiment classification, local RAG retrieval over approved public source chunks, grounded transcript-request answers with confidence/risk/freshness metadata, typed mock Banner/payment/CRM clients, an in-process idempotent payment-reminder workflow port, a safe action trace, and CRM handoff routing for holds, urgent sentiment, low confidence, or explicit human handoff. Later phases add live LLM gateway behavior, the durable audit store/dashboard, the standalone workflow simulator, evaluation, and Docker.
+The current chat API uses P6 guarded orchestration: deterministic fallback intent/sentiment classification remains the default, while optional `openai-compatible` provider mode adds a tested REST LLM gateway, strict JSON classification parsing, versioned prompts, source-only answer guardrails, local RAG retrieval over approved public chunks, typed mock Banner/payment/CRM clients, an in-process idempotent payment-reminder workflow port, a safe action trace, and CRM handoff routing for holds, urgent sentiment, low confidence, or explicit human handoff. Later phases add the durable audit store/dashboard, the standalone workflow simulator, evaluation runner, and Docker.
 
-## Current P5 commands
+## Current P6 commands
 
 ```bash
 make dev
@@ -170,7 +170,7 @@ go run ./cmd/mock-crm
 go run ./cmd/mock-lms
 ```
 
-For the full P5 transcript-status demo, start the mock Banner, payment, and CRM services in separate terminals before `make dev`. The API loads local RAG chunks from `data/rag-chunks.json` at startup and talks to typed mock services through configurable local URLs. Auth is disabled by default for local demo use. Set `ASKOC_AUTH_ENABLED=true` and `ASKOC_AUTH_TOKEN=<demo-token>` to require a mock bearer token.
+For the full P6 transcript-status demo, start the mock Banner, payment, and CRM services in separate terminals before `make dev`. The API loads local RAG chunks from `data/rag-chunks.json` at startup and talks to typed mock services through configurable local URLs. Auth is disabled by default for local demo use. Set `ASKOC_AUTH_ENABLED=true` and `ASKOC_AUTH_TOKEN=<demo-token>` to require a mock bearer token.
 
 Current environment settings:
 
@@ -186,9 +186,11 @@ Current environment settings:
 | `ASKOC_PAYMENT_URL` | `http://localhost:8082` | Mock payment base URL used by P4 orchestration |
 | `ASKOC_CRM_URL` | `http://localhost:8083` | Mock CRM base URL used by P4 orchestration |
 | `ASKOC_RAG_CHUNKS_PATH` | `data/rag-chunks.json` | Local approved-source chunks used by P5 retrieval |
-| `ASKOC_PROVIDER` | `stub` | Future AI provider mode |
-| `ASKOC_PROVIDER_MODEL` | `demo-placeholder` | Future provider model name |
-| `ASKOC_PROVIDER_API_KEY` | empty | Future provider API key, never printed by config |
+| `ASKOC_PROVIDER` | `stub` | `stub` keeps deterministic mode; `openai-compatible` enables the tested REST LLM gateway |
+| `ASKOC_PROVIDER_MODEL` | `demo-placeholder` | Provider model/deployment name when LLM mode is enabled |
+| `ASKOC_PROVIDER_ENDPOINT` | empty | OpenAI-compatible or Azure chat completions endpoint; required only for `openai-compatible` |
+| `ASKOC_PROVIDER_TIMEOUT_SECONDS` | `5` | LLM request timeout |
+| `ASKOC_PROVIDER_API_KEY` | empty | Provider API key; required only for `openai-compatible` and redacted from config output |
 
 Current service URLs:
 
@@ -204,8 +206,8 @@ Mock CRM:     http://localhost:8083/api/v1/crm/cases
 Mock LMS:     http://localhost:8085/api/v1/students/S100001/lms-access?course_id=DEMO-LMS-101
 ```
 
-The chat API validates JSON requests, rejects empty or oversized messages, accepts synthetic student IDs in the `S` plus six digits format, includes trace IDs in responses and action results, routes transcript/payment decisions through the orchestrator, and uses P5 retrieval for source-grounded transcript-request answers.
-P3 tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors. P4 adds deterministic classifier/orchestrator tests and an in-process workflow port that returns idempotent synthetic workflow IDs until the P8 simulator exists. P5 adds allowlist parsing, deterministic ingestion, chunking, local retrieval, and stale/high-risk source fallback tests.
+The chat API validates JSON requests, rejects empty or oversized messages, accepts synthetic student IDs in the `S` plus six digits format, includes trace IDs in responses and action results, routes transcript/payment decisions through the orchestrator, and uses P5 retrieval plus P6 source guardrails for transcript-request answers.
+P3 tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors. P4 adds deterministic classifier/orchestrator tests and an in-process workflow port that returns idempotent synthetic workflow IDs until the P8 simulator exists. P5 adds allowlist parsing, deterministic ingestion, chunking, local retrieval, and stale/high-risk source fallback tests. P6 adds the optional tested LLM gateway, strict JSON parser, prompt golden tests, classification fixtures, and low-confidence/source guardrails.
 
 ## Demo data policy
 

@@ -8,7 +8,7 @@ All Go code tasks are governed by [TDD Policy](tdd-policy.md). For each code tas
 
 ## Purpose
 
-This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, and protect privacy in a Go-based demo environment. P5 currently covers deterministic classifier, local approved-source RAG retrieval, transcript/payment orchestration, in-process workflow idempotency, mock CRM handoff, source fallback, and safe action traces; durable audit/dashboard and the standalone workflow simulator remain later-phase coverage.
+This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, and protect privacy in a Go-based demo environment. P6 currently covers deterministic fallback classification, optional OpenAI-compatible LLM gateway behavior behind strict JSON parsing, local approved-source RAG retrieval, transcript/payment orchestration, in-process workflow idempotency, mock CRM handoff, source fallback, source-only LLM answer guardrails, and safe action traces; durable audit/dashboard and the standalone workflow simulator remain later-phase coverage.
 
 ## Test objectives
 
@@ -27,6 +27,7 @@ This test plan verifies that AskOC AI Concierge can answer learner-service quest
 | Frontend | Go server-rendered web chat or optional React UI |
 | Backend | Go `cmd/api` local container |
 | Knowledge base | P5 local JSON chunks from approved public sources in `data/rag-chunks.json` |
+| LLM gateway | P6 defaults to deterministic `stub`; optional `openai-compatible` mode is tested with fakes/`httptest` and must not call live APIs in automated tests |
 | Mock Banner API | Go service with synthetic student records |
 | Mock Payment API | Go service with synthetic payment records |
 | Mock CRM API | Go service with synthetic case creation |
@@ -37,6 +38,7 @@ This test plan verifies that AskOC AI Concierge can answer learner-service quest
 
 ```bash
 go test ./...
+go test ./internal/llm ./internal/classifier ./internal/orchestrator
 go test ./internal/classifier ./internal/workflow ./internal/orchestrator
 go test ./internal/rag ./internal/orchestrator
 go test ./internal/domain ./internal/validation ./internal/handlers ./internal/session
@@ -44,7 +46,7 @@ go test -race ./internal/session
 go test ./internal/orchestrator -run 'TestTranscriptStatus|TestUrgent|TestLowConfidence'
 ```
 
-P5 verification uses the package-specific RAG, classifier, workflow, and orchestrator tests plus `go test ./...`. Privacy, evaluation, dashboard, and broad race coverage remain later-phase checks unless those packages exist.
+P6 verification uses package-specific LLM, classifier, RAG, workflow, and orchestrator tests plus `go test ./...`. Privacy, evaluation runner, dashboard, and broad race coverage remain later-phase checks unless those packages exist.
 
 ## Test data
 
@@ -169,11 +171,16 @@ Can you guarantee my transfer credit will be approved?
 | `internal/mock/lms` | synthetic LMS access-status lookup and unknown-course fallback |
 | `internal/session` | create, append, read, expire, redaction, and concurrent access behavior |
 | `internal/classifier` | valid structured output, invalid JSON fallback, confidence thresholds |
+| `internal/llm` | provider-neutral payloads, safe provider errors, OpenAI-compatible request/response handling, rate-limit/retryable/timeout errors |
 | `internal/rag` | chunking, metadata, retrieval top-k ranking, stale source flags |
 | `internal/tools` | trace header forwarding, timeout handling, not-found/retryable/parse error mapping, response parsing, safe errors |
 | `internal/workflow` | idempotency, retry behavior, duplicate prevention |
 | `internal/orchestrator` | decision table for transcript/payment/escalation |
 | `internal/handlers` | request validation, status codes, trace IDs |
+
+## P6 classification fixture gate
+
+`data/classification-fixtures.jsonl` is the P6 synthetic intent/sentiment fixture set. The gate is 100% fixture intent accuracy for the supported demo intents: `transcript_request`, `transcript_status`, `fee_payment`, `human_handoff`, `escalation_request`, and `unknown`. The fixture test also requires at least five examples per intent, negative/urgent sentiment coverage, and no tool-trigger permission for unknown/off-topic fixtures.
 
 ## Example table-driven test cases
 

@@ -14,6 +14,7 @@ import (
 	"askoc-mvp/internal/classifier"
 	"askoc-mvp/internal/config"
 	"askoc-mvp/internal/handlers"
+	"askoc-mvp/internal/llm"
 	"askoc-mvp/internal/middleware"
 	"askoc-mvp/internal/orchestrator"
 	"askoc-mvp/internal/rag"
@@ -34,16 +35,22 @@ func main() {
 
 	mux := http.NewServeMux()
 	toolHTTPClient := &http.Client{Timeout: cfg.Workflow.Timeout}
+	llmPort, err := buildLLM(cfg, &http.Client{Timeout: cfg.Provider.Timeout})
+	if err != nil {
+		logger.Error("create llm provider", "error", err)
+		os.Exit(1)
+	}
+	auditRecorder := audit.NopRecorder{}
 	retriever := buildRetriever(context.Background(), cfg.RAG.ChunksPath, logger)
 	chatService, err := orchestrator.New(orchestrator.Dependencies{
-		Classifier: classifier.Fallback{},
+		Classifier: buildClassifier(cfg, llmPort, auditRecorder),
 		Retriever:  retriever,
-		LLM:        orchestrator.DisabledLLM{},
+		LLM:        llmPort,
 		Banner:     tools.NewBannerClient(cfg.Integrations.BannerURL, toolHTTPClient),
 		Payment:    tools.NewPaymentClient(cfg.Integrations.PaymentURL, toolHTTPClient),
 		Workflow:   workflow.NewInMemoryClient(),
 		CRM:        tools.NewCRMClient(cfg.Integrations.CRMURL, toolHTTPClient),
-		Audit:      audit.NopRecorder{},
+		Audit:      auditRecorder,
 	})
 	if err != nil {
 		logger.Error("create orchestrator", "error", err)
@@ -88,6 +95,59 @@ func main() {
 		logger.Error("api shutdown failed", "error", err)
 		os.Exit(1)
 	}
+}
+
+func buildLLM(cfg config.Config, httpClient *http.Client) (orchestrator.LLM, error) {
+	if cfg.Provider.Mode != "openai-compatible" {
+		return orchestrator.DisabledLLM{}, nil
+	}
+	provider, err := llm.NewOpenAIClient(llm.OpenAIClientConfig{
+		Endpoint:   cfg.Provider.Endpoint,
+		APIKey:     cfg.Provider.APIKey,
+		Model:      cfg.Provider.Model,
+		HTTPClient: httpClient,
+		Timeout:    cfg.Provider.Timeout,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return providerLLM{
+		provider: provider,
+		timeout:  cfg.Provider.Timeout,
+	}, nil
+}
+
+func buildClassifier(cfg config.Config, llmPort orchestrator.LLM, recorder audit.Recorder) orchestrator.IntentClassifier {
+	fallback := classifier.Fallback{}
+	if cfg.Provider.Mode != "openai-compatible" {
+		return fallback
+	}
+	return orchestrator.LLMBackedClassifier{
+		LLM:      llmPort,
+		Fallback: fallback,
+		Parse:    classifier.ParseLLMClassificationOutput,
+		Audit:    recorder,
+	}
+}
+
+type providerLLM struct {
+	provider llm.Provider
+	timeout  time.Duration
+}
+
+func (p providerLLM) GenerateAnswer(ctx context.Context, prompt string) (string, error) {
+	resp, err := p.provider.GenerateAnswer(ctx, llm.AnswerRequest{
+		Messages: []llm.Message{
+			{Role: llm.RoleUser, Content: prompt},
+		},
+		MaxTokens:   700,
+		Temperature: 0.2,
+		Timeout:     p.timeout,
+	})
+	if err != nil {
+		return "", err
+	}
+	return resp.Answer, nil
 }
 
 func buildRetriever(ctx context.Context, chunksPath string, logger *slog.Logger) orchestrator.Retriever {

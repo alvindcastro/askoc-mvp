@@ -11,6 +11,7 @@ type Event struct {
 	Status         string
 	ReferenceID    string
 	Message        string
+	Metadata       map[string]string
 }
 
 type Recorder interface {

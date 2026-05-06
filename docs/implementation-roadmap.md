@@ -21,7 +21,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 | [x] | P3 — Synthetic enterprise APIs and clients | Synthetic Banner/payment/CRM/LMS APIs and typed clients are working. | [Task list](phases-and-tasks.md#p3-synthetic-enterprise-apis-and-clients) |
 | [x] | P4 — Deterministic orchestration before AI | Transcript/payment orchestration works without relying on live AI. | [Task list](phases-and-tasks.md#p4-deterministic-orchestration-before-ai) |
 | [x] | P5 — RAG ingestion and source-grounded answers | Approved-source ingestion and retrieval produce grounded responses. | [Task list](phases-and-tasks.md#p5-rag-ingestion-and-source-grounded-answers) |
-| [ ] | P6 — LLM gateway and structured classification | LLM gateway, strict JSON classification, prompts, and guardrails are testable. | [Task list](phases-and-tasks.md#p6-llm-gateway-and-structured-classification) |
+| [x] | P6 — LLM gateway and structured classification | LLM gateway, strict JSON classification, prompts, and guardrails are testable. | [Task list](phases-and-tasks.md#p6-llm-gateway-and-structured-classification) |
 | [ ] | P7 — Privacy, audit, and dashboard | Privacy redaction, audit events, and dashboard metrics are in place. | [Task list](phases-and-tasks.md#p7-privacy-audit-and-dashboard) |
 | [ ] | P8 — Workflow automation and Power Automate option | Workflow simulator and optional Power Automate webhook path are ready. | [Task list](phases-and-tasks.md#p8-workflow-automation-and-power-automate-option) |
 | [ ] | P9 — Evaluation runner and quality gates | Evaluation runner produces quality reports and fails critical regressions. | [Task list](phases-and-tasks.md#p9-evaluation-runner-and-quality-gates) |
@@ -82,11 +82,11 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 ### P6 — LLM gateway and structured classification
 
-- [ ] LLM provider interface is provider-neutral.
-- [ ] REST client is tested with `httptest.Server`, not live APIs.
-- [ ] Strict JSON parser rejects malformed/unsafe output.
-- [ ] Prompt templates have golden tests.
-- [ ] Guardrails prevent model output from directly triggering tools.
+- [x] LLM provider interface is provider-neutral.
+- [x] REST client is tested with `httptest.Server`, not live APIs.
+- [x] Strict JSON parser rejects malformed/unsafe output.
+- [x] Prompt templates have golden tests.
+- [x] Guardrails prevent model output from directly triggering tools.
 
 ### P7 — Privacy, audit, and dashboard
 
@@ -143,7 +143,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 - [x] P1-P4 complete.
 - [x] P5 local RAG over curated source snippets.
-- [ ] P6 fallback classifier plus optional LLM client.
+- [x] P6 fallback classifier plus optional LLM client.
 - [ ] P7 redaction, audit store, and dashboard endpoint.
 - [ ] P8 local workflow simulator.
 - [ ] `go test ./...` and `make smoke` pass.

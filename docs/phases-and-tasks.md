@@ -380,7 +380,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ## P6 — LLM gateway and structured classification
 **Phase outcome:** LLM gateway, strict JSON classification, prompts, and guardrails are testable.
-- [ ] **P6-T01 — Define LLM provider interface and request/response types**  
+- [x] **P6-T01 — Define LLM provider interface and request/response types**
   **Type:** Code  
   **Goal:** Hide provider details behind typed Go interfaces.  
   **Primary files:** `internal/llm/types.go`, `internal/llm/types_test.go`  
@@ -388,7 +388,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** JSON schema for answer request/response marshals correctly.; Provider-neutral error type works.; Timeout field validation.  
   **Done when:** Orchestrator imports interfaces/types only.; Provider can be replaced without handler changes.
-- [ ] **P6-T02 — Implement OpenAI/Azure-compatible REST client**  
+- [x] **P6-T02 — Implement OpenAI/Azure-compatible REST client**
   **Type:** Code  
   **Goal:** Call an OpenAI-compatible chat/completions endpoint through a testable Go client.  
   **Primary files:** `internal/llm/openai_client.go`, `internal/llm/openai_client_test.go`  
@@ -396,7 +396,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** `httptest.Server` verifies request payload.; Client parses successful response.; Client handles 429/500/timeout.; No live API call in tests.  
   **Done when:** API key is read from config only.; Logs never include prompts containing PII.; Client supports context cancellation.
-- [ ] **P6-T03 — Parse strict JSON classification output**  
+- [x] **P6-T03 — Parse strict JSON classification output**
   **Type:** Code  
   **Goal:** Convert model output into trusted typed classification only after validation.  
   **Primary files:** `internal/classifier/llm_parser.go`, `internal/classifier/llm_parser_test.go`  
@@ -404,7 +404,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Valid JSON parses.; Malformed JSON fails safely.; Unknown intent maps to `unknown`.; Out-of-range confidence is rejected or clamped.; Tool-triggering is disabled below threshold.  
   **Done when:** Invalid model output never panics.; Low-confidence classification returns safe fallback.
-- [ ] **P6-T04 — Create prompt templates for classification and grounded answers**  
+- [x] **P6-T04 — Create prompt templates for classification and grounded answers**
   **Type:** Code  
   **Goal:** Make prompts versioned, testable, and aligned with privacy/safety rules.  
   **Primary files:** `internal/orchestrator/prompts.go`, `internal/orchestrator/prompts_test.go`  
@@ -412,7 +412,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Prompt contains strict JSON instruction.; Prompt includes source-only answer rule.; Prompt includes privacy/no-real-data rule.; Golden test catches accidental prompt drift.  
   **Done when:** Prompts are plain text constants or embedded templates.; Prompt version is included in audit metadata.
-- [ ] **P6-T05 — Add LLM fallback and guardrail behavior**  
+- [x] **P6-T05 — Add LLM fallback and guardrail behavior**
   **Type:** Code  
   **Goal:** Keep the demo reliable if the model is unavailable or produces unsafe output.  
   **Primary files:** `internal/orchestrator/ai_guardrails.go`, `internal/orchestrator/ai_guardrails_test.go`  
@@ -420,7 +420,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Model timeout uses deterministic fallback.; Unsafe answer without sources is rejected.; Tool calls require validated classification.; Sensitive/unsupported requests escalate.  
   **Done when:** No core demo path depends solely on live model availability.; Guardrail failures are logged and visible in dashboard.
-- [ ] **P6-T06 — Add end-to-end classification tests with fixture messages**  
+- [x] **P6-T06 — Add end-to-end classification tests with fixture messages**
   **Type:** Code  
   **Goal:** Measure intent and sentiment behavior before using the assistant in the demo.  
   **Primary files:** `data/classification-fixtures.jsonl`, `internal/classifier/e2e_test.go`  
@@ -431,10 +431,10 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ### P6 phase gate
 
-- [ ] All P6 tasks above are complete or explicitly deferred with a reason.
-- [ ] All code tasks in P6 have failing-test evidence before implementation.
-- [ ] `go test ./...` passes after P6 code tasks.
-- [ ] Relevant docs are updated with any changed behavior or assumptions.
+- [x] All P6 tasks above are complete or explicitly deferred with a reason.
+- [x] All code tasks in P6 have failing-test evidence before implementation.
+- [x] `go test ./...` passes after P6 code tasks.
+- [x] Relevant docs are updated with any changed behavior or assumptions.
 
 ---
 

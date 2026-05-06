@@ -29,9 +29,11 @@ type WorkflowConfig struct {
 }
 
 type ProviderConfig struct {
-	Mode   string
-	Model  string
-	APIKey string
+	Mode     string
+	Model    string
+	Endpoint string
+	APIKey   string
+	Timeout  time.Duration
 }
 
 type IntegrationConfig struct {
@@ -61,9 +63,11 @@ func LoadFromEnv(env map[string]string) (Config, error) {
 			Timeout: 5 * time.Second,
 		},
 		Provider: ProviderConfig{
-			Mode:   value(env, "ASKOC_PROVIDER", "stub"),
-			Model:  value(env, "ASKOC_PROVIDER_MODEL", "demo-placeholder"),
-			APIKey: value(env, "ASKOC_PROVIDER_API_KEY", ""),
+			Mode:     value(env, "ASKOC_PROVIDER", "stub"),
+			Model:    value(env, "ASKOC_PROVIDER_MODEL", "demo-placeholder"),
+			Endpoint: value(env, "ASKOC_PROVIDER_ENDPOINT", ""),
+			APIKey:   value(env, "ASKOC_PROVIDER_API_KEY", ""),
+			Timeout:  5 * time.Second,
 		},
 		Integrations: IntegrationConfig{
 			BannerURL:  value(env, "ASKOC_BANNER_URL", "http://localhost:8081"),
@@ -94,6 +98,22 @@ func LoadFromEnv(env map[string]string) (Config, error) {
 	if !validLogLevel(cfg.LogLevel) {
 		return Config{}, fmt.Errorf("ASKOC_LOG_LEVEL must be one of debug, info, warn, error")
 	}
+	if !validProviderMode(cfg.Provider.Mode) {
+		return Config{}, fmt.Errorf("ASKOC_PROVIDER must be one of stub, openai-compatible")
+	}
+	providerTimeout, err := parsePositiveSeconds(env, "ASKOC_PROVIDER_TIMEOUT_SECONDS", 5)
+	if err != nil {
+		return Config{}, err
+	}
+	cfg.Provider.Timeout = providerTimeout
+	if cfg.Provider.Mode == "openai-compatible" {
+		if strings.TrimSpace(cfg.Provider.Endpoint) == "" {
+			return Config{}, fmt.Errorf("ASKOC_PROVIDER_ENDPOINT must not be empty when ASKOC_PROVIDER=openai-compatible")
+		}
+		if strings.TrimSpace(cfg.Provider.APIKey) == "" {
+			return Config{}, fmt.Errorf("ASKOC_PROVIDER_API_KEY must not be empty when ASKOC_PROVIDER=openai-compatible")
+		}
+	}
 	if strings.TrimSpace(cfg.RAG.ChunksPath) == "" {
 		return Config{}, fmt.Errorf("ASKOC_RAG_CHUNKS_PATH must not be empty")
 	}
@@ -111,7 +131,7 @@ func (c Config) String() string {
 		providerKey = "REDACTED"
 	}
 	return fmt.Sprintf(
-		"http_addr:%s log_level:%s auth_enabled:%t auth_token:%s workflow_url:%s workflow_timeout:%s banner_url:%s payment_url:%s crm_url:%s rag_chunks_path:%s provider:%s provider_model:%s provider_api_key:%s",
+		"http_addr:%s log_level:%s auth_enabled:%t auth_token:%s workflow_url:%s workflow_timeout:%s banner_url:%s payment_url:%s crm_url:%s rag_chunks_path:%s provider:%s provider_model:%s provider_endpoint:%s provider_timeout:%s provider_api_key:%s",
 		c.HTTPAddr,
 		c.LogLevel,
 		c.Auth.Enabled,
@@ -124,6 +144,8 @@ func (c Config) String() string {
 		c.RAG.ChunksPath,
 		c.Provider.Mode,
 		c.Provider.Model,
+		c.Provider.Endpoint,
+		c.Provider.Timeout,
 		providerKey,
 	)
 }
@@ -176,6 +198,15 @@ func parsePositiveSeconds(env map[string]string, key string, fallback int) (time
 func validLogLevel(level string) bool {
 	switch level {
 	case "debug", "info", "warn", "error":
+		return true
+	default:
+		return false
+	}
+}
+
+func validProviderMode(mode string) bool {
+	switch mode {
+	case "stub", "openai-compatible":
 		return true
 	default:
 		return false
