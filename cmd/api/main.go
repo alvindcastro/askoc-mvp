@@ -13,6 +13,7 @@ import (
 	"askoc-mvp/internal/audit"
 	"askoc-mvp/internal/classifier"
 	"askoc-mvp/internal/config"
+	evalrunner "askoc-mvp/internal/eval"
 	"askoc-mvp/internal/handlers"
 	"askoc-mvp/internal/llm"
 	"askoc-mvp/internal/middleware"
@@ -41,6 +42,7 @@ func main() {
 		os.Exit(1)
 	}
 	auditStore := audit.NewMemoryStore()
+	reviewQueue := evalrunner.NewReviewQueue()
 	retriever := buildRetriever(context.Background(), cfg.RAG.ChunksPath, logger)
 	workflowPort, err := buildWorkflow(cfg, toolHTTPClient)
 	if err != nil {
@@ -70,6 +72,7 @@ func main() {
 	mux.Handle("/api/v1/admin/audit/export", handlers.AdminAuditExportHandler(auditStore, adminAccessToken(cfg)))
 	mux.Handle("/api/v1/admin/audit/reset", handlers.AdminAuditResetHandler(auditStore, adminAccessToken(cfg)))
 	mux.Handle("/api/v1/admin/audit/purge", handlers.AdminAuditPurgeHandler(auditStore, adminAccessToken(cfg)))
+	mux.Handle("/api/v1/admin/review-items", handlers.AdminReviewQueueHandler(reviewQueue, adminAccessToken(cfg)))
 	mux.Handle("/healthz", handlers.HealthHandler())
 	mux.Handle("/readyz", handlers.ReadyHandler())
 

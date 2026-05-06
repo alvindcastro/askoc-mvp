@@ -42,6 +42,8 @@ flowchart TD
     ORCH --> AUDIT
 
     AUDIT --> DASH[Admin Dashboard]
+    ORCH --> EVAL[Go Evaluation Runner]
+    EVAL --> REPORTS[JSON / Markdown Reports]
     ORCH --> DASH
 ```
 
@@ -63,7 +65,7 @@ flowchart TD
 | Mock CRM | `cmd/mock-crm` | Case creation and queue routing |
 | Mock LMS | `cmd/mock-lms` | LMS account/course access simulation |
 | Workflow simulator | `cmd/workflow-sim` | Local Power Automate-style payment reminder endpoint plus protected workflow metrics/export |
-| Evaluation | `cmd/eval` | Later phase: runs JSONL test set and reports metrics |
+| Evaluation | `cmd/eval` + `internal/eval` | Runs the JSONL test set against deterministic in-process fakes or a local chat API, scores quality, writes reports, and fails critical gates |
 
 ## Recommended Go project layout
 
@@ -98,6 +100,9 @@ data/
   rag-chunks.json
   synthetic-students.json
   eval-questions.jsonl
+reports/
+  eval-summary.json
+  eval-summary.md
 ```
 
 ## Core domain models

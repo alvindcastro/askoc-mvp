@@ -8,7 +8,7 @@ All Go code tasks are governed by [TDD Policy](tdd-policy.md). For each code tas
 
 ## Purpose
 
-This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, and protect privacy in a Go-based demo environment. P8 currently covers deterministic fallback classification, optional OpenAI-compatible LLM gateway behavior behind strict JSON parsing, local approved-source RAG retrieval, transcript/payment orchestration, in-process workflow idempotency, the standalone workflow simulator, optional Power Automate-compatible webhook retries/signature headers, mock CRM handoff, source fallback, source-only LLM answer guardrails, safe action traces, shared redaction, redacted audit storage, protected admin metrics, dashboard rendering, and audit retention/export/reset controls. The evaluation runner remains later-phase coverage.
+This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, and protect privacy in a Go-based demo environment. P9 currently covers deterministic fallback classification, optional OpenAI-compatible LLM gateway behavior behind strict JSON parsing, local approved-source RAG retrieval, transcript/payment orchestration, in-process workflow idempotency, the standalone workflow simulator, optional Power Automate-compatible webhook retries/signature headers, mock CRM handoff, source fallback, source-only LLM answer guardrails, safe action traces, shared redaction, redacted audit storage, protected admin metrics, dashboard rendering, audit retention/export/reset controls, a JSONL evaluation runner, JSON/Markdown quality reports, critical safety gates, and unresolved eval review items.
 
 ## Test objectives
 
@@ -33,6 +33,7 @@ This test plan verifies that AskOC AI Concierge can answer learner-service quest
 | Mock CRM API | Go service with synthetic case creation |
 | Automation workflow | P8 in-process idempotent workflow client by default; `cmd/workflow-sim` or Power Automate-compatible webhook client when `ASKOC_WORKFLOW_URL` is configured |
 | Dashboard | Go admin dashboard at `/admin` reading the in-memory audit event store through protected admin APIs |
+| Evaluation | P9 `cmd/eval` uses deterministic in-process fakes by default or a live local `/api/v1/chat` endpoint with `-base-url` |
 
 ## Go test commands
 
@@ -43,13 +44,16 @@ go test ./internal/llm ./internal/classifier ./internal/orchestrator
 go test ./internal/classifier ./internal/workflow ./internal/orchestrator
 go test ./internal/workflow -run 'TestSimulator|TestPowerAutomate|TestIdempotency'
 go test ./cmd/workflow-sim ./cmd/api ./internal/config ./internal/orchestrator
+go test ./internal/eval ./cmd/eval
 go test ./internal/rag ./internal/orchestrator
 go test ./internal/domain ./internal/validation ./internal/handlers ./internal/session
 go test -race ./internal/session
 go test ./internal/orchestrator -run 'TestTranscriptStatus|TestUrgent|TestLowConfidence'
+go run ./cmd/eval -input data/eval-questions.jsonl -output reports/eval-summary.json -markdown-output reports/eval-summary.md -fail-on-critical
+make eval
 ```
 
-P8 verification uses package-specific privacy, audit, handler, LLM, classifier, RAG, workflow, config, API, simulator, and orchestrator tests plus `go test ./...`. The evaluation runner and broad race coverage remain later-phase checks unless those packages exist.
+P9 verification uses package-specific privacy, audit, handler, LLM, classifier, RAG, workflow, config, API, simulator, orchestrator, and eval tests plus `go test ./...`. The deterministic evaluation gate is `make eval`; it must report zero critical failures before demo release.
 
 ## Test data
 
@@ -181,6 +185,7 @@ Can you guarantee my transfer credit will be approved?
 | `internal/orchestrator` | decision table for transcript/payment/escalation |
 | `internal/audit` | redacted memory store, trace queries, metrics, export, reset, prune, and retention policy |
 | `internal/handlers` | request validation, status codes, trace IDs, protected admin metrics, dashboard shell, audit export/reset/purge |
+| `internal/eval` | JSONL parsing, deterministic runner behavior, scoring, reports, gates, and unresolved review queue items |
 
 ## P6 classification fixture gate
 

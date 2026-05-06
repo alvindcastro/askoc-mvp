@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines how to evaluate AskOC AI Concierge for answer quality, retrieval quality, intent recognition, sentiment routing, automation decisions, and safety. The evaluation runner is designed as a Go command: `cmd/eval`.
+This document defines how to evaluate AskOC AI Concierge for answer quality, retrieval quality, intent recognition, sentiment routing, automation decisions, and safety. P9 implements the evaluation runner as the Go command `cmd/eval`.
 
 ## Evaluation philosophy
 
@@ -22,7 +22,8 @@ The assistant must:
 ## Evaluation command
 
 ```bash
-go run ./cmd/eval -input data/eval-questions.jsonl -output reports/eval-summary.json
+go run ./cmd/eval -input data/eval-questions.jsonl -output reports/eval-summary.json -markdown-output reports/eval-summary.md
+make eval
 ```
 
 Optional flags:
@@ -31,13 +32,16 @@ Optional flags:
 go run ./cmd/eval \
   -input data/eval-questions.jsonl \
   -output reports/eval-summary.json \
+  -markdown-output reports/eval-summary.md \
   -base-url http://localhost:8080/api/v1 \
   -fail-on-critical
 ```
 
+Without `-base-url`, `cmd/eval` uses an in-process deterministic evaluator wired to local RAG chunks, synthetic student fixtures, fallback classification, in-memory workflow, and fake Banner/payment/CRM ports. With `-base-url`, it posts each case to a local `POST /api/v1/chat` endpoint.
+
 ## JSONL test format
 
-Each line in `data/eval-questions.jsonl` should be one test case.
+Each line in `data/eval-questions.jsonl` is one test case.
 
 ```json
 {"id":"T001","prompt":"How do I order my official transcript?","expected_intent":"transcript_request","must_include_source":true,"expected_source_contains":"oc-transcript-request-2005-onwards","critical":true}
@@ -71,7 +75,7 @@ Acceptance-oriented cases should include the expected source, action, and handof
 
 ## Intent confusion matrix
 
-The Go evaluation runner should produce a confusion matrix.
+P9 records exact intent matches and aggregate intent accuracy in JSON and Markdown reports. A full confusion matrix can be derived from per-case results if needed later.
 
 Example:
 
@@ -93,7 +97,7 @@ Strict LLM classification output must be validated before use. Invalid JSON, unk
 
 ## RAG evaluation rubric
 
-P5 provides the first deterministic local RAG baseline: `internal/rag` tests validate allowlist parsing, ingestion boundaries, chunk metadata, local ranking, and freshness/risk handling; `internal/orchestrator` tests validate grounded answer packaging and safe fallback. P9 will turn these checks into a broader dataset runner.
+P5 provides the first deterministic local RAG baseline: `internal/rag` tests validate allowlist parsing, ingestion boundaries, chunk metadata, local ranking, and freshness/risk handling; `internal/orchestrator` tests validate grounded answer packaging and safe fallback. P9 turns those checks into a broader dataset runner with source recall, workflow decision, escalation, safety, and latency scoring.
 
 | Score | Meaning |
 |---:|---|
@@ -118,7 +122,7 @@ P5 provides the first deterministic local RAG baseline: `internal/rag` tests val
 
 ## Demo acceptance matrix
 
-These P0 acceptance cases define the measurable interview demo. They should be represented in `data/eval-questions.jsonl` once `cmd/eval` exists, and they should remain synthetic-data-only.
+These P0 acceptance cases define the measurable interview demo. They are represented in `data/eval-questions.jsonl` and remain synthetic-data-only.
 
 | ID | Scenario | Expected intent | Expected source check | Expected action check | Expected handoff check | Pass criteria |
 |---|---|---|---|---|---|---|
@@ -141,29 +145,33 @@ Test prompt injection and privacy cases:
 
 ## Go evaluation runner design
 
-`cmd/eval` should:
+`cmd/eval` does the following:
 
 1. Read JSONL cases.
-2. Send each prompt to `POST /api/v1/chat`.
+2. Sends each prompt either to the in-process deterministic evaluator or to `POST /api/v1/chat` when `-base-url` is set.
 3. Compare predicted intent, sentiment, sources, actions, and escalation.
 4. Run optional rubric checks.
 5. Record latency.
-6. Produce JSON and Markdown reports.
-7. Exit non-zero if critical tests fail.
+6. Produces JSON and Markdown reports.
+7. Exits non-zero when critical tests fail and `-fail-on-critical` is enabled.
 
 Example output:
 
 ```json
 {
-  "total_cases": 42,
-  "passed": 38,
-  "failed": 4,
-  "intent_accuracy": 0.88,
-  "source_recall_at_3": 0.93,
-  "critical_hallucinations": 0,
-  "workflow_decision_accuracy": 1.0,
-  "privacy_redaction_pass_rate": 1.0,
-  "average_latency_ms": 1830
+  "summary": {
+    "total_cases": 34,
+    "passed": 34,
+    "failed": 0,
+    "critical_failures": 0,
+    "critical_hallucinations": 0,
+    "intent_accuracy": 1.0,
+    "source_recall_at_3": 1.0,
+    "workflow_decision_accuracy": 1.0,
+    "escalation_accuracy": 1.0,
+    "safety_pass_rate": 1.0,
+    "average_latency_ms": 1
+  }
 }
 ```
 
@@ -180,6 +188,8 @@ For a production-like demo, track:
 - user feedback ratings.
 
 ## Review queue
+
+P9 adds an in-memory eval review queue and protected admin endpoint for unresolved items. Each item collapses duplicate normalized questions, can be resolved, and includes redacted question text plus sources/actions for review.
 
 The dashboard should list questions that need review:
 

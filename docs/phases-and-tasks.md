@@ -552,7 +552,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ## P9 — Evaluation runner and quality gates
 **Phase outcome:** Evaluation runner produces quality reports and fails critical regressions.
-- [ ] **P9-T01 — Create JSONL evaluation dataset**  
+- [x] **P9-T01 — Create JSONL evaluation dataset**
   **Type:** Code  
   **Goal:** Define repeatable test cases for intents, sources, workflow actions, escalations, and safety behavior.  
   **Primary files:** `data/eval-questions.jsonl`, `internal/eval/dataset.go`, `internal/eval/dataset_test.go`  
@@ -560,7 +560,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Dataset parser handles valid JSONL.; Invalid rows fail with line number.; Required expected fields are validated.; Dataset includes critical safety cases.  
   **Done when:** At least 30 evaluation examples exist.; Each case has expected intent and expected action/source behavior.
-- [ ] **P9-T02 — Build `cmd/eval` runner**  
+- [x] **P9-T02 — Build `cmd/eval` runner**
   **Type:** Code  
   **Goal:** Run the assistant against the evaluation dataset and produce repeatable quality results.  
   **Primary files:** `cmd/eval/main.go`, `internal/eval/runner.go`, `internal/eval/runner_test.go`  
@@ -568,7 +568,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Runner calls fake chat client for each case.; Timeouts are captured as failures.; Results include latency.; CLI exits zero when all critical tests pass.  
   **Done when:** `go run ./cmd/eval` works locally.; Runner can target in-process fake or live local API.
-- [ ] **P9-T03 — Implement scoring functions**  
+- [x] **P9-T03 — Implement scoring functions**
   **Type:** Code  
   **Goal:** Score intent accuracy, source grounding, action correctness, escalation precision, safety, and latency.  
   **Primary files:** `internal/eval/score.go`, `internal/eval/score_test.go`  
@@ -576,7 +576,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Intent exact match scoring.; Expected source present scoring.; Expected action present/absent scoring.; Critical hallucination scoring.; Latency threshold scoring.  
   **Done when:** Scores are deterministic.; Critical policy errors are separated from minor misses.
-- [ ] **P9-T04 — Generate JSON and Markdown evaluation reports**  
+- [x] **P9-T04 — Generate JSON and Markdown evaluation reports**
   **Type:** Code  
   **Goal:** Create portfolio-ready evidence of model/system quality.  
   **Primary files:** `internal/eval/report.go`, `internal/eval/report_test.go`, `reports/eval-summary.md`  
@@ -584,7 +584,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** JSON report contains summary and per-case results.; Markdown report contains metrics table.; Report redacts user messages when configured.  
   **Done when:** Reports can be committed as sample outputs.; Failures are readable by non-technical stakeholders.
-- [ ] **P9-T05 — Fail builds on critical evaluation failures**  
+- [x] **P9-T05 — Fail builds on critical evaluation failures**
   **Type:** Code  
   **Goal:** Make responsible AI behavior part of the development gate, not a manual afterthought.  
   **Primary files:** `cmd/eval/main.go`, `internal/eval/gates.go`, `internal/eval/gates_test.go`, `Makefile`  
@@ -592,7 +592,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Critical hallucination returns non-zero exit.; Missing required escalation returns non-zero exit.; Minor accuracy miss can be warning based on threshold.; Make target propagates exit code.  
   **Done when:** `make eval` fails for critical safety regressions.; README explains quality gate.
-- [ ] **P9-T06 — Create review queue for failed/low-confidence answers**  
+- [x] **P9-T06 — Create review queue for failed/low-confidence answers**
   **Type:** Code  
   **Goal:** Show how the system would improve over time through human review.  
   **Primary files:** `internal/eval/review_queue.go`, `internal/handlers/admin.go`, `internal/eval/review_queue_test.go`  
@@ -603,10 +603,10 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ### P9 phase gate
 
-- [ ] All P9 tasks above are complete or explicitly deferred with a reason.
-- [ ] All code tasks in P9 have failing-test evidence before implementation.
-- [ ] `go test ./...` passes after P9 code tasks.
-- [ ] Relevant docs are updated with any changed behavior or assumptions.
+- [x] All P9 tasks above are complete or explicitly deferred with a reason.
+- [x] All code tasks in P9 have failing-test evidence before implementation.
+- [x] `go test ./...` passes after P9 code tasks.
+- [x] Relevant docs are updated with any changed behavior or assumptions.
 
 ---
 

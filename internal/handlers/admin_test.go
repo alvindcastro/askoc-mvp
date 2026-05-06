@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"askoc-mvp/internal/audit"
+	"askoc-mvp/internal/domain"
 )
 
 func TestAdminMetricsRequiresBearerToken(t *testing.T) {
@@ -204,6 +205,44 @@ func TestAdminAuditPurgeAppliesDefaultRetention(t *testing.T) {
 	got := store.List(context.Background())
 	if len(got) != 1 || got[0].TraceID != "trace-new" {
 		t.Fatalf("remaining events = %+v, want only trace-new", got)
+	}
+}
+
+func TestAdminReviewQueueReturnsOpenRedactedItems(t *testing.T) {
+	handler := AdminReviewQueueHandler(fakeReviewQueue{}, "demo-admin-token")
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/review-items", nil)
+	req.Header.Set("Authorization", "Bearer demo-admin-token")
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d; body=%s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "classification_guardrail") || !strings.Contains(body, "oc-registrar-office") {
+		t.Fatalf("review queue body missing sources/actions: %s", body)
+	}
+	if strings.Contains(body, "learner@example.test") || strings.Contains(body, "12345678") {
+		t.Fatalf("review queue leaked PII: %s", body)
+	}
+}
+
+type fakeReviewQueue struct{}
+
+func (fakeReviewQueue) OpenReviewItems(context.Context) any {
+	return []struct {
+		Reason   string          `json:"reason"`
+		Question string          `json:"question"`
+		Sources  []domain.Source `json:"sources"`
+		Actions  []domain.Action `json:"actions"`
+	}{
+		{
+			Reason:   "low_confidence",
+			Question: "Email [REDACTED_EMAIL] and check [REDACTED_ID]",
+			Sources:  []domain.Source{{ID: "oc-registrar-office", Title: "Office of the Registrar"}},
+			Actions:  []domain.Action{{Type: "classification_guardrail", Status: domain.ActionStatusPending}},
+		},
 	}
 }
 

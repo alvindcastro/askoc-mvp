@@ -34,7 +34,7 @@ Golden flow:
 
 ## Strong architectural decisions
 
-- [ ] Use Go for API gateway, orchestrator, mock services, workflow simulator, ingestion, and evaluation runner.
+- [x] Use Go for API gateway, orchestrator, mock services, workflow simulator, ingestion, and evaluation runner.
 - [ ] Keep UI simple: Go templates + small JavaScript/HTMX is enough for the interview demo.
 - [ ] Build deterministic transcript workflow before live LLM integration.
 - [ ] Put all external dependencies behind interfaces.
@@ -76,7 +76,7 @@ The safest implementation order is:
 - [ ] Add RAG ingestion/retrieval.
 - [ ] Add LLM gateway and strict JSON classification.
 - [ ] Add workflow simulator and optional Power Automate client.
-- [ ] Add evaluation runner.
+- [x] Add evaluation runner.
 - [ ] Add Docker/CI/smoke test.
 - [ ] Polish portfolio docs and demo script.
 
@@ -95,7 +95,7 @@ TDD priorities:
 - [ ] Test malformed LLM output.
 - [ ] Test stale/low-confidence retrieval.
 - [ ] Test duplicate workflow prevention.
-- [ ] Test critical evaluation failures as build failures.
+- [x] Test critical evaluation failures as build failures.
 
 ## Interview positioning
 

@@ -2,6 +2,64 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-06 - P9 Evaluation Runner And Quality Gates
+
+### P9-T01 - Create JSONL evaluation dataset
+
+- What: added a 34-case JSONL evaluation dataset covering transcript answers, transcript status, payment workflow decisions, financial-hold escalation, human handoff, urgent sentiment, prompt injection, password redaction, unauthorized record-access refusal, and off-topic fallback.
+- Where: `data/eval-questions.jsonl`, `internal/eval/dataset.go`, `internal/eval/dataset_test.go`.
+- When: 2026-05-06.
+- Why: make the demo quality bar repeatable and synthetic-data-only instead of relying on manual spot checks.
+- How: wrote failing parser and fixture validation tests first for valid JSONL, line-numbered invalid rows, required expected fields, at least 30 cases, and critical safety coverage, then implemented strict JSONL parsing and case validation.
+
+### P9-T02 - Build `cmd/eval` runner
+
+- What: added `cmd/eval` plus a reusable runner that can call either a deterministic in-process chat client or a live local `/api/v1/chat` endpoint, records latency, captures timeouts, and writes reports.
+- Where: `cmd/eval/main.go`, `cmd/eval/main_test.go`, `internal/eval/runner.go`, `internal/eval/runner_test.go`, `internal/eval/deterministic_client.go`.
+- When: 2026-05-06.
+- Why: let the quality gate run offline by default while still supporting a local API contract check during demos.
+- How: wrote failing runner and CLI tests first for per-case fake-client calls, timeout capture, latency recording, and zero exit on a passing deterministic dataset, then implemented the runner, HTTP client, deterministic fixture-backed client, and command flags.
+
+### P9-T03 - Implement scoring functions
+
+- What: added deterministic scoring for intent, sentiment, source match, expected/forbidden actions, handoff queue, safety checks, forbidden critical claims, and latency warnings.
+- Where: `internal/eval/score.go`, `internal/eval/score_test.go`.
+- When: 2026-05-06.
+- Why: separate critical policy/safety regressions from minor misses and make action/source/handoff expectations machine-checkable.
+- How: wrote failing score tests first for exact intent/source/action/handoff matches, forbidden critical answer substrings, and latency thresholds, then implemented action aliasing for evaluation language such as `grounded_answer_returned` and `sentiment_classified`.
+
+### P9-T04 - Generate JSON and Markdown evaluation reports
+
+- What: added JSON and Markdown report generation with summary metrics, per-case results, quality-gate status, prompt redaction support, and committed sample outputs.
+- Where: `internal/eval/report.go`, `internal/eval/report_test.go`, `reports/eval-summary.json`, `reports/eval-summary.md`.
+- When: 2026-05-06.
+- Why: provide portfolio-ready evidence that a reviewer can read without replaying every test case.
+- How: wrote failing report tests first for JSON summary/per-case output, Markdown metrics tables, and prompt redaction, then generated fresh reports with `go run ./cmd/eval`.
+
+### P9-T05 - Fail builds on critical evaluation failures
+
+- What: added gate evaluation and `make eval`; critical safety, hallucination, or required-escalation failures return a non-zero exit while minor accuracy misses are warnings.
+- Where: `internal/eval/gates.go`, `internal/eval/gates_test.go`, `cmd/eval/main.go`, `Makefile`, `README.md`.
+- When: 2026-05-06.
+- Why: make responsible AI behavior part of the developer workflow rather than a manual demo checklist.
+- How: wrote failing gate tests first for critical hallucination, missing escalation, and warning-only minor misses, then wired gate results into `cmd/eval` and the Makefile target.
+
+### P9-T06 - Create review queue for failed/low-confidence answers
+
+- What: added an in-memory eval review queue with duplicate collapse, resolution, redacted questions, source/action context, critical failure reasons, and a protected admin endpoint consumed by the dashboard.
+- Where: `internal/eval/review_queue.go`, `internal/eval/review_queue_test.go`, `internal/handlers/admin.go`, `internal/handlers/admin_test.go`, `internal/handlers/admin_ui.go`, `cmd/api/main.go`, `web/templates/admin.html`, `web/static/admin.js`, `docs/api-spec.md`.
+- When: 2026-05-06.
+- Why: show how failed or low-confidence answers can become a staff review workflow without exposing raw PII.
+- How: wrote failing review queue and admin endpoint tests first for low-confidence additions, critical failures, duplicate normalized questions, resolution, sources/actions, and redaction, then implemented the queue and dashboard wiring.
+
+### P9 review evidence
+
+- What: completed P9 status and documentation sync.
+- Where: `docs/phases-and-tasks.md`, `docs/implementation-roadmap.md`, `README.md`, `docs/api-spec.md`, `docs/architecture.md`, `docs/golang-implementation.md`, `docs/test-plan.md`, `docs/model-evaluation.md`, `docs/demo-script.md`, `docs/brainstorm.md`, `CHANGELOG.md`.
+- When: 2026-05-06.
+- Why: keep the task board, roadmap, README, API contract, architecture notes, implementation guide, test plan, evaluation spec, demo script, and changelog aligned with the implemented P9 quality gate.
+- How: confirmed the red test state for new P9 packages, implemented the smallest passing code, generated reports with `go run ./cmd/eval -input data/eval-questions.jsonl -output reports/eval-summary.json -markdown-output reports/eval-summary.md -fail-on-critical`, then verified `go test ./internal/eval ./cmd/eval ./internal/handlers`, `make eval`, `go test ./...`, `make test`, `go vet ./...`, and `git diff --check`.
+
 ## 2026-05-06 - P8 Workflow Automation And Power Automate Option
 
 ### P8-T01 - Build local workflow simulator service

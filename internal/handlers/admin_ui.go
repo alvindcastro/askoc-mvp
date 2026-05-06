@@ -10,6 +10,7 @@ type adminPageData struct {
 	ExportEndpoint  string
 	ResetEndpoint   string
 	PurgeEndpoint   string
+	ReviewEndpoint  string
 }
 
 func AdminPageHandler(templatePath string) http.Handler {
@@ -32,6 +33,7 @@ func AdminPageHandler(templatePath string) http.Handler {
 			ExportEndpoint:  "/api/v1/admin/audit/export",
 			ResetEndpoint:   "/api/v1/admin/audit/reset",
 			PurgeEndpoint:   "/api/v1/admin/audit/purge",
+			ReviewEndpoint:  "/api/v1/admin/review-items",
 		})
 	})
 }

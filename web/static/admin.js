@@ -62,7 +62,14 @@
     renderList(document.getElementById("top-intents"), body.top_intents || [], function (item) {
       return item.intent + " - " + item.count;
     });
-    renderList(document.getElementById("review-items"), (body.review_queue && body.review_queue.items) || [], function (item) {
+    let reviewItems = (body.review_queue && body.review_queue.items) || [];
+    if (root.dataset.reviewEndpoint) {
+      const reviewBody = await request(root.dataset.reviewEndpoint, { method: "GET" });
+      if (reviewBody) {
+        reviewItems = reviewBody.items || reviewItems;
+      }
+    }
+    renderList(document.getElementById("review-items"), reviewItems, function (item) {
       return item.reason + " - " + (item.question || item.trace_id || "review item");
     });
     status.textContent = "Dashboard refreshed";
