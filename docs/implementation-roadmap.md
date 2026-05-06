@@ -26,7 +26,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 | [x] | P8 — Workflow automation and Power Automate option | Workflow simulator and optional Power Automate webhook path are ready. | [Task list](phases-and-tasks.md#p8-workflow-automation-and-power-automate-option) |
 | [x] | P9 — Evaluation runner and quality gates | Evaluation runner produces quality reports and fails critical regressions. | [Task list](phases-and-tasks.md#p9-evaluation-runner-and-quality-gates) |
 | [x] | P10 — Docker, CI, and local developer experience | Docker, CI, env safety, and smoke test support repeatable demos. | [Task list](phases-and-tasks.md#p10-docker-ci-and-local-developer-experience) |
-| [ ] | P11 — Portfolio polish and interview readiness | Portfolio materials are polished for interview presentation. | [Task list](phases-and-tasks.md#p11-portfolio-polish-and-interview-readiness) |
+| [x] | P11 — Portfolio polish and interview readiness | Portfolio materials are polished for interview presentation. | [Task list](phases-and-tasks.md#p11-portfolio-polish-and-interview-readiness) |
 
 
 ## Phase gates
@@ -122,11 +122,11 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 ### P11 — Portfolio polish and interview readiness
 
-- [ ] README explains the project in under two minutes.
-- [ ] Architecture diagram and sequence diagram are included.
-- [ ] Demo script fits 5-7 minutes.
-- [ ] Screenshots/GIFs contain synthetic data only.
-- [ ] Final release checklist is complete.
+- [x] README explains the project in under two minutes.
+- [x] Architecture diagram and sequence diagram are included.
+- [x] Demo script fits 5-7 minutes.
+- [x] Screenshots/GIF placeholders contain synthetic data only.
+- [x] Final release checklist is complete.
 
 ## Time-boxed delivery options
 
@@ -154,7 +154,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 - [x] P1-P9 complete.
 - [x] P9 evaluation runner and quality gates.
 - [x] P10 Docker Compose and CI.
-- [ ] P11 polished portfolio docs and demo assets.
+- [x] P11 polished portfolio docs and demo asset placeholders.
 - [x] Optional Power Automate webhook integration.
 
 ## Recommended build order

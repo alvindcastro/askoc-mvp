@@ -35,15 +35,15 @@ Golden flow:
 ## Strong architectural decisions
 
 - [x] Use Go for API gateway, orchestrator, mock services, workflow simulator, ingestion, and evaluation runner.
-- [ ] Keep UI simple: Go templates + small JavaScript/HTMX is enough for the interview demo.
-- [ ] Build deterministic transcript workflow before live LLM integration.
-- [ ] Put all external dependencies behind interfaces.
-- [ ] Use `httptest.Server` for client tests.
-- [ ] Use fakes for orchestrator tests.
-- [ ] Make RAG retrieval swappable: local retriever first, Azure AI Search or pgvector later.
-- [ ] Use structured JSON for LLM classification and validate it before actions.
-- [ ] Require source citations or safe fallback for policy/procedure answers.
-- [ ] Audit every tool call and workflow action with redacted payloads.
+- [x] Keep UI simple: Go templates + small JavaScript is enough for the interview demo.
+- [x] Build deterministic transcript workflow before live LLM integration.
+- [x] Put all external dependencies behind interfaces.
+- [x] Use `httptest.Server` for client tests.
+- [x] Use fakes for orchestrator tests.
+- [x] Make RAG retrieval swappable: local retriever first, Azure AI Search or pgvector later.
+- [x] Use structured JSON for LLM classification and validate it before actions.
+- [x] Require source citations or safe fallback for policy/procedure answers.
+- [x] Audit every tool call and workflow action with redacted payloads.
 
 ## MVP feature options
 
@@ -67,18 +67,18 @@ Golden flow:
 
 The safest implementation order is:
 
-- [ ] Freeze product story and privacy boundaries.
-- [ ] Create tested Go foundation.
-- [ ] Build chat API and simple UI.
-- [ ] Build synthetic enterprise APIs.
-- [ ] Build deterministic orchestrator workflow.
-- [ ] Add privacy redaction and audit before AI calls.
-- [ ] Add RAG ingestion/retrieval.
-- [ ] Add LLM gateway and strict JSON classification.
-- [ ] Add workflow simulator and optional Power Automate client.
+- [x] Freeze product story and privacy boundaries.
+- [x] Create tested Go foundation.
+- [x] Build chat API and simple UI.
+- [x] Build synthetic enterprise APIs.
+- [x] Build deterministic orchestrator workflow.
+- [x] Add privacy redaction and audit before AI calls.
+- [x] Add RAG ingestion/retrieval.
+- [x] Add LLM gateway and strict JSON classification.
+- [x] Add workflow simulator and optional Power Automate client.
 - [x] Add evaluation runner.
-- [ ] Add Docker/CI/smoke test.
-- [ ] Polish portfolio docs and demo script.
+- [x] Add Docker/CI/smoke test.
+- [x] Polish portfolio docs and demo script.
 
 The detailed task board is in [phases-and-tasks.md](phases-and-tasks.md).
 
@@ -88,13 +88,13 @@ Strict TDD is especially valuable in this MVP because AI systems can become vagu
 
 TDD priorities:
 
-- [ ] Test orchestration decisions before adding model calls.
-- [ ] Test fallback behavior more heavily than happy paths.
-- [ ] Test redaction before logging or storing conversation text.
-- [ ] Test tool-trigger thresholds before workflow automation.
-- [ ] Test malformed LLM output.
-- [ ] Test stale/low-confidence retrieval.
-- [ ] Test duplicate workflow prevention.
+- [x] Test orchestration decisions before adding model calls.
+- [x] Test fallback behavior more heavily than happy paths.
+- [x] Test redaction before logging or storing conversation text.
+- [x] Test tool-trigger thresholds before workflow automation.
+- [x] Test malformed LLM output.
+- [x] Test stale/low-confidence retrieval.
+- [x] Test duplicate workflow prevention.
 - [x] Test critical evaluation failures as build failures.
 
 ## Interview positioning
@@ -105,15 +105,15 @@ Use language like:
 
 ## Risks to call out honestly
 
-- [ ] Public-source content must be refreshed before a real deployment.
-- [ ] Real Banner/CRM/LMS integrations would require institutional API access, security review, and privacy impact assessment.
-- [ ] LLM outputs must be validated and constrained before any action is taken.
-- [ ] The MVP uses synthetic data and does not represent production-grade authentication or authorization.
-- [ ] Evaluation metrics are demo-scale and would need expansion with real stakeholder-reviewed test cases.
+- [x] Public-source content must be refreshed before a real deployment.
+- [x] Real Banner/CRM/LMS integrations would require institutional API access, security review, and privacy impact assessment.
+- [x] LLM outputs must be validated and constrained before any action is taken.
+- [x] The MVP uses synthetic data and does not represent production-grade authentication or authorization.
+- [x] Evaluation metrics are demo-scale and would need expansion with real stakeholder-reviewed test cases.
 
-## Recommended first coding task
+## Historical first coding task
 
-Start with **P1-T03 — Implement health and readiness endpoints** or **P2-T02 — Implement `POST /api/v1/chat` handler** because they make TDD visible quickly.
+This section is retained as a build-history note. The first visible TDD task could have been **P1-T03 — Implement health and readiness endpoints** or **P2-T02 — Implement `POST /api/v1/chat` handler** because they make TDD visible quickly.
 
 For example, the first visible TDD cycle could be:
 

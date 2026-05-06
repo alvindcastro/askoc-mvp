@@ -47,7 +47,7 @@ P10 packages these commands with a multi-service `Dockerfile` using the `APP` bu
 | `internal/rag` | Allowlist parsing, ingestion, chunking, local retrieval, and source freshness metadata |
 | `internal/llm` | Provider-neutral request/response types and Azure/OpenAI-compatible REST client |
 | `internal/classifier` | Deterministic fallback, strict JSON parser, and fixture-backed intent/sentiment tests |
-| `internal/tools` | Banner, payment, CRM, LMS, notification clients |
+| `internal/tools` | Banner, payment, CRM, and LMS clients |
 | `internal/workflow` | In-process idempotent workflow client, local simulator handler, idempotency hashing, and optional Power Automate-compatible webhook client |
 | `internal/privacy` | PII redaction, prompt-injection checks, safe summaries |
 | `internal/audit` | Audit event store, dashboard summaries, export, reset, purge, and workflow metrics |
