@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AskOC Admin Dashboard</title>
+  <link rel="stylesheet" href="/static/admin.css">
+</head>
+<body>
+  <main class="dashboard"
+    data-metrics-endpoint="{{.MetricsEndpoint}}"
+    data-export-endpoint="{{.ExportEndpoint}}"
+    data-reset-endpoint="{{.ResetEndpoint}}"
+    data-purge-endpoint="{{.PurgeEndpoint}}">
+    <header class="dashboard-header">
+      <div>
+        <p class="eyebrow">Synthetic operations</p>
+        <h1>AskOC Admin Dashboard</h1>
+      </div>
+      <form class="token-form" id="token-form">
+        <label>
+          <span>Admin token</span>
+          <input id="admin-token" type="password" autocomplete="off" placeholder="demo-admin-token">
+        </label>
+        <button type="submit">Refresh</button>
+      </form>
+    </header>
+
+    <section class="metric-strip" aria-label="Summary metrics">
+      <div>
+        <span>Total conversations</span>
+        <strong id="total-conversations">0</strong>
+      </div>
+      <div>
+        <span>Containment</span>
+        <strong id="containment-rate">0%</strong>
+      </div>
+      <div>
+        <span>Escalations</span>
+        <strong id="escalations">0</strong>
+      </div>
+      <div>
+        <span>Workflows</span>
+        <strong id="workflows">0</strong>
+      </div>
+    </section>
+
+    <section class="dashboard-grid">
+      <section class="panel" aria-labelledby="top-intents-title">
+        <h2 id="top-intents-title">Top intents</h2>
+        <ul id="top-intents"></ul>
+      </section>
+      <section class="panel" aria-labelledby="workflow-title">
+        <h2 id="workflow-title">Workflows</h2>
+        <dl>
+          <div><dt>Payment reminders</dt><dd id="payment-reminders">0</dd></div>
+          <div><dt>Workflow failures</dt><dd id="workflow-failures">0</dd></div>
+        </dl>
+      </section>
+      <section class="panel" aria-labelledby="review-title">
+        <h2 id="review-title">Low-confidence review</h2>
+        <p><span id="low-confidence-count">0</span> items</p>
+        <ul id="review-items"></ul>
+      </section>
+      <section class="panel" aria-labelledby="stale-title">
+        <h2 id="stale-title">Stale-source warnings</h2>
+        <p><span id="stale-source-count">0</span> items</p>
+      </section>
+    </section>
+
+    <section class="controls" aria-label="Audit controls">
+      <button type="button" id="export-audit">Export audit</button>
+      <button type="button" id="purge-audit">Purge expired</button>
+      <button type="button" id="reset-audit">Reset demo data</button>
+      <p id="admin-status" aria-live="polite">Waiting for token</p>
+    </section>
+  </main>
+  <script src="/static/admin.js" defer></script>
+</body>
+</html>

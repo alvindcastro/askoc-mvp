@@ -7,13 +7,14 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"askoc-mvp/internal/audit"
 	"askoc-mvp/internal/classifier"
 	"askoc-mvp/internal/domain"
 	"askoc-mvp/internal/middleware"
-	"askoc-mvp/internal/session"
+	"askoc-mvp/internal/privacy"
 	"askoc-mvp/internal/tools"
 	"askoc-mvp/internal/workflow"
 )
@@ -102,7 +103,7 @@ func New(deps Dependencies) (*Orchestrator, error) {
 		return nil, errors.New("orchestrator audit dependency is required")
 	}
 	if deps.Redact == nil {
-		deps.Redact = session.DefaultRedactor
+		deps.Redact = privacy.Redact
 	}
 
 	return &Orchestrator{
@@ -118,7 +119,7 @@ func New(deps Dependencies) (*Orchestrator, error) {
 	}, nil
 }
 
-func (o *Orchestrator) HandleChat(ctx context.Context, req domain.ChatRequest) (domain.ChatResponse, error) {
+func (o *Orchestrator) HandleChat(ctx context.Context, req domain.ChatRequest) (resp domain.ChatResponse, err error) {
 	traceID := traceID(ctx)
 	conversationID := conversationIDFor(req)
 
@@ -126,8 +127,13 @@ func (o *Orchestrator) HandleChat(ctx context.Context, req domain.ChatRequest) (
 	if err != nil {
 		return domain.ChatResponse{}, fmt.Errorf("classify chat: %w", err)
 	}
+	defer func() {
+		if err == nil {
+			o.recordResponseAudit(ctx, req, result, resp)
+		}
+	}()
 
-	resp := domain.ChatResponse{
+	resp = domain.ChatResponse{
 		ConversationID: conversationID,
 		TraceID:        traceID,
 		Intent: domain.IntentResult{
@@ -216,4 +222,57 @@ func (o *Orchestrator) action(ctx context.Context, actionType string, status dom
 func withIdempotency(action domain.Action, key string) domain.Action {
 	action.IdempotencyKey = key
 	return action
+}
+
+func (o *Orchestrator) recordResponseAudit(ctx context.Context, req domain.ChatRequest, result classifier.Result, resp domain.ChatResponse) {
+	for _, action := range resp.Actions {
+		metadata := map[string]string{
+			"intent":     string(resp.Intent.Name),
+			"confidence": strconv.FormatFloat(resp.Intent.Confidence, 'f', 2, 64),
+			"sentiment":  string(resp.Sentiment),
+		}
+		if strings.TrimSpace(req.Message) != "" {
+			metadata["question"] = o.redact(req.Message)
+		}
+		if resp.Intent.Confidence > 0 && resp.Intent.Confidence < classifier.SensitiveToolConfidence {
+			metadata["low_confidence"] = "true"
+		}
+		if action.Type == "source_confirmation_required" {
+			metadata["stale_source"] = "true"
+		}
+		if resp.Escalation != nil {
+			metadata["queue"] = resp.Escalation.Queue
+			metadata["priority"] = resp.Escalation.Priority
+			metadata["case_id"] = resp.Escalation.CaseID
+		}
+		if result.NeedsHandoff {
+			metadata["needs_handoff"] = "true"
+		}
+		o.recordAudit(ctx, audit.Event{
+			TraceID:        traceID(ctx),
+			ConversationID: resp.ConversationID,
+			StudentID:      req.StudentID,
+			Type:           auditTypeForAction(action.Type),
+			Action:         action.Type,
+			Status:         string(action.Status),
+			ReferenceID:    action.ReferenceID,
+			Message:        o.redact(action.Message),
+			Metadata:       metadata,
+		})
+	}
+}
+
+func auditTypeForAction(actionType string) string {
+	switch actionType {
+	case "intent_classified":
+		return audit.EventTypeIntent
+	case "classification_guardrail", "source_confirmation_required":
+		return audit.EventTypeGuardrail
+	case "payment_reminder_triggered":
+		return audit.EventTypeWorkflow
+	case "crm_case_created":
+		return audit.EventTypeEscalation
+	default:
+		return audit.EventTypeTool
+	}
 }

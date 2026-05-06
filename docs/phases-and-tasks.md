@@ -440,7 +440,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ## P7 — Privacy, audit, and dashboard
 **Phase outcome:** Privacy redaction, audit events, and dashboard metrics are in place.
-- [ ] **P7-T01 — Implement PII redaction**  
+- [x] **P7-T01 — Implement PII redaction**
   **Type:** Code  
   **Goal:** Redact emails, phone numbers, likely passwords, and non-synthetic IDs before logging or case summaries.  
   **Primary files:** `internal/privacy/redact.go`, `internal/privacy/redact_test.go`  
@@ -448,7 +448,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Email redaction.; Phone redaction.; Password phrase redaction.; Real-looking student number redaction.; Synthetic S100001-style IDs are allowed for demo.  
   **Done when:** Redactor is used by logs, audit, session store, and CRM summaries.; Tests cover false positives and false negatives.
-- [ ] **P7-T02 — Create audit event schema and store**  
+- [x] **P7-T02 — Create audit event schema and store**
   **Type:** Code  
   **Goal:** Record safe operational events for intent, sources, tool calls, workflow triggers, and escalations.  
   **Primary files:** `internal/audit/event.go`, `internal/audit/store.go`, `internal/audit/store_test.go`  
@@ -456,7 +456,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Record and query events by trace ID.; Event payload is redacted.; Concurrent writes are safe.; Retention timestamp is set.  
   **Done when:** Every orchestrator action can produce an audit event.; Audit store can run in memory for demo and later be backed by DB.
-- [ ] **P7-T03 — Wire redacted structured logging across services**  
+- [x] **P7-T03 — Wire redacted structured logging across services**
   **Type:** Code  
   **Goal:** Ensure logs are useful for debugging but safe for learner privacy.  
   **Primary files:** `internal/middleware/logging.go`, `internal/privacy/logging_test.go`  
@@ -464,7 +464,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Chat message is not logged raw.; Trace ID is logged.; Tool status is logged without raw payload.; Secret-like values are redacted.  
   **Done when:** No log line contains real-looking PII from tests.; Logger uses `slog` fields, not string concatenation.
-- [ ] **P7-T04 — Build admin metrics endpoint**  
+- [x] **P7-T04 — Build admin metrics endpoint**
   **Type:** Code  
   **Goal:** Summarize containment, escalation, top intents, confidence, workflow count, and low-confidence questions.  
   **Primary files:** `internal/handlers/admin.go`, `internal/handlers/admin_test.go`, `internal/audit/metrics.go`  
@@ -472,7 +472,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Metrics calculation from seeded audit events.; Endpoint requires admin/mock auth.; Empty store returns zeros safely.  
   **Done when:** Dashboard data can be generated after demo conversation.; Metrics are aggregate and redacted.
-- [ ] **P7-T05 — Create minimal admin dashboard UI**  
+- [x] **P7-T05 — Create minimal admin dashboard UI**
   **Type:** Code  
   **Goal:** Give stakeholders an at-a-glance view of AI adoption and operational risk.  
   **Primary files:** `web/templates/admin.html`, `web/static/admin.js`, `internal/handlers/admin_ui.go`  
@@ -480,7 +480,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Template renders metric labels.; Unauthorized request is rejected.; Review queue renders redacted question text only.  
   **Done when:** Dashboard shows top intents, escalations, workflows, low-confidence items, and stale-source warnings.; No raw PII appears.
-- [ ] **P7-T06 — Add retention and export controls**  
+- [x] **P7-T06 — Add retention and export controls**
   **Type:** Code  
   **Goal:** Document and enforce how demo audit data is kept, deleted, and exported.  
   **Primary files:** `internal/audit/retention.go`, `internal/audit/retention_test.go`, `docs/privacy-impact-lite.md`  
@@ -491,10 +491,10 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ### P7 phase gate
 
-- [ ] All P7 tasks above are complete or explicitly deferred with a reason.
-- [ ] All code tasks in P7 have failing-test evidence before implementation.
-- [ ] `go test ./...` passes after P7 code tasks.
-- [ ] Relevant docs are updated with any changed behavior or assumptions.
+- [x] All P7 tasks above are complete or explicitly deferred with a reason.
+- [x] All code tasks in P7 have failing-test evidence before implementation.
+- [x] `go test ./...` passes after P7 code tasks.
+- [x] Relevant docs are updated with any changed behavior or assumptions.
 
 ---
 

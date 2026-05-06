@@ -55,3 +55,13 @@ func TestBuildClassifierUsesGuardedLLMClassifierOnlyForConfiguredProvider(t *tes
 		t.Fatalf("openai-compatible classifier should use LLMBackedClassifier")
 	}
 }
+
+func TestAdminAccessTokenUsesConfiguredAuthTokenOrDemoFallback(t *testing.T) {
+	if got := adminAccessToken(config.Config{}); got != "demo-admin-token" {
+		t.Fatalf("adminAccessToken default = %q, want demo-admin-token", got)
+	}
+	cfg := config.Config{Auth: config.AuthConfig{Token: "configured-admin"}}
+	if got := adminAccessToken(cfg); got != "configured-admin" {
+		t.Fatalf("adminAccessToken override = %q, want configured-admin", got)
+	}
+}

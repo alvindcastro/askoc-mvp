@@ -22,7 +22,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 | [x] | P4 — Deterministic orchestration before AI | Transcript/payment orchestration works without relying on live AI. | [Task list](phases-and-tasks.md#p4-deterministic-orchestration-before-ai) |
 | [x] | P5 — RAG ingestion and source-grounded answers | Approved-source ingestion and retrieval produce grounded responses. | [Task list](phases-and-tasks.md#p5-rag-ingestion-and-source-grounded-answers) |
 | [x] | P6 — LLM gateway and structured classification | LLM gateway, strict JSON classification, prompts, and guardrails are testable. | [Task list](phases-and-tasks.md#p6-llm-gateway-and-structured-classification) |
-| [ ] | P7 — Privacy, audit, and dashboard | Privacy redaction, audit events, and dashboard metrics are in place. | [Task list](phases-and-tasks.md#p7-privacy-audit-and-dashboard) |
+| [x] | P7 — Privacy, audit, and dashboard | Privacy redaction, audit events, and dashboard metrics are in place. | [Task list](phases-and-tasks.md#p7-privacy-audit-and-dashboard) |
 | [ ] | P8 — Workflow automation and Power Automate option | Workflow simulator and optional Power Automate webhook path are ready. | [Task list](phases-and-tasks.md#p8-workflow-automation-and-power-automate-option) |
 | [ ] | P9 — Evaluation runner and quality gates | Evaluation runner produces quality reports and fails critical regressions. | [Task list](phases-and-tasks.md#p9-evaluation-runner-and-quality-gates) |
 | [ ] | P10 — Docker, CI, and local developer experience | Docker, CI, env safety, and smoke test support repeatable demos. | [Task list](phases-and-tasks.md#p10-docker-ci-and-local-developer-experience) |
@@ -90,11 +90,11 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 ### P7 — Privacy, audit, and dashboard
 
-- [ ] Redaction tests cover emails, phones, likely passwords, and non-synthetic IDs.
-- [ ] Audit events are redacted and queryable by trace ID.
-- [ ] Logs do not contain raw learner messages.
-- [ ] Admin metrics endpoint is tested.
-- [ ] Dashboard shows containment, escalation, workflows, and review queue.
+- [x] Redaction tests cover emails, phones, likely passwords, and non-synthetic IDs.
+- [x] Audit events are redacted and queryable by trace ID.
+- [x] Logs do not contain raw learner messages.
+- [x] Admin metrics endpoint is tested.
+- [x] Dashboard shows containment, escalation, workflows, and review queue.
 
 ### P8 — Workflow automation and Power Automate option
 
@@ -144,7 +144,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 - [x] P1-P4 complete.
 - [x] P5 local RAG over curated source snippets.
 - [x] P6 fallback classifier plus optional LLM client.
-- [ ] P7 redaction, audit store, and dashboard endpoint.
+- [x] P7 redaction, audit store, and dashboard endpoint.
 - [ ] P8 local workflow simulator.
 - [ ] `go test ./...` and `make smoke` pass.
 
@@ -163,9 +163,9 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 3. P2-T01 to P2-T05: expose the chat contract, UI skeleton, validation, and session store.
 4. P3-T01 to P3-T06: build synthetic systems and typed clients.
 5. P4-T01 to P4-T06: make the core transcript workflow work deterministically.
-6. P7-T01 and P7-T02: add redaction/audit before adding AI calls.
-7. P5-T01 to P5-T05: add grounded retrieval.
-8. P6-T01 to P6-T05: add LLM capability behind tests and guardrails.
+6. P5-T01 to P5-T05: add grounded retrieval.
+7. P6-T01 to P6-T05: add LLM capability behind tests and guardrails.
+8. P7-T01 to P7-T06: add redaction, audit storage, dashboard metrics, and retention controls.
 9. P8-T01 to P8-T04: complete automation story.
 10. P9 and P10: prove quality and repeatability.
 11. P11: polish the portfolio.

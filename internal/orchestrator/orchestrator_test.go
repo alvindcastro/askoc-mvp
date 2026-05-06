@@ -314,6 +314,44 @@ func TestUrgentEscalationRedactsCRMSummary(t *testing.T) {
 	}
 }
 
+func TestHandleChatAuditsEveryResponseActionWithRedactedQuestion(t *testing.T) {
+	deps := completeDeps()
+	classifierFake(t, deps).result = classifier.Result{
+		Intent:     domain.IntentHumanHandoff,
+		Confidence: 0.88,
+		Sentiment:  domain.SentimentUrgentNegative,
+	}
+	orch := mustNew(t, deps)
+
+	resp, err := orch.HandleChat(traceContext("trace-audit-actions"), domain.ChatRequest{
+		ConversationID: "conv-audit-actions",
+		Channel:        "web",
+		Message:        "Please call 250-555-0199 or email learner@example.test about student 12345678.",
+	})
+	if err != nil {
+		t.Fatalf("HandleChat returned error: %v", err)
+	}
+
+	events := auditFake(t, deps).events
+	if len(events) != len(resp.Actions) {
+		t.Fatalf("audit event count = %d, want one per response action %d; events=%+v actions=%+v", len(events), len(resp.Actions), events, resp.Actions)
+	}
+	for _, action := range resp.Actions {
+		if !auditFake(t, deps).has(action.Type, string(action.Status)) {
+			t.Fatalf("missing audit event for action %+v; events=%+v", action, events)
+		}
+	}
+	rendered := strings.Join(auditFake(t, deps).messages(), " ")
+	for _, leaked := range []string{"250-555-0199", "learner@example.test", "12345678"} {
+		if strings.Contains(rendered, leaked) {
+			t.Fatalf("audit leaked %q: %+v", leaked, events)
+		}
+	}
+	if !strings.Contains(rendered, "[REDACTED_PHONE]") || !strings.Contains(rendered, "[REDACTED_EMAIL]") || !strings.Contains(rendered, "[REDACTED_ID]") {
+		t.Fatalf("audit missing redaction markers: %+v", events)
+	}
+}
+
 func completeDeps() Dependencies {
 	return Dependencies{
 		Classifier: &fakeClassifier{result: classifier.Result{
@@ -595,4 +633,15 @@ func (f *fakeAudit) has(action, status string) bool {
 		}
 	}
 	return false
+}
+
+func (f *fakeAudit) messages() []string {
+	messages := make([]string, 0, len(f.events))
+	for _, event := range f.events {
+		messages = append(messages, event.Message)
+		for _, value := range event.Metadata {
+			messages = append(messages, value)
+		}
+	}
+	return messages
 }

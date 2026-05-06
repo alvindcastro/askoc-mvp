@@ -2,6 +2,64 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-06 - P7 Privacy, Audit, And Dashboard
+
+### P7-T01 - Implement PII redaction
+
+- What: added shared redaction for email addresses, separated/compact phone numbers, likely password/passcode/token/API-key assignments, and real-looking numeric IDs while preserving synthetic `S100001`-style demo IDs.
+- Where: `internal/privacy/redact.go`, `internal/privacy/redact_test.go`, `internal/session/store.go`, `internal/middleware/logging.go`, `internal/orchestrator/orchestrator.go`, `internal/mock/crm/crm_test.go`.
+- When: 2026-05-06.
+- Why: enforce one privacy boundary for logs, sessions, audit payloads, and CRM summaries without erasing synthetic demo traceability.
+- How: wrote failing redaction and logging tests first, confirmed missing `privacy.Redact`, then wired the shared redactor through session persistence, request logging, orchestrator CRM summaries, and mock CRM expectations.
+
+### P7-T02 - Create audit event schema and store
+
+- What: added timestamped audit event constants, JSON tags, an in-memory concurrency-safe audit store, trace queries, redacted storage, export with message content omitted, reset, and prune support.
+- Where: `internal/audit/event.go`, `internal/audit/store.go`, `internal/audit/store_test.go`.
+- When: 2026-05-06.
+- Why: give the demo a safe operational event stream for intent, tool, workflow, guardrail, and escalation evidence before a database-backed audit store exists.
+- How: implemented the audit package behind failing store tests for trace lookup, redaction, concurrent writes, retention timestamps, export, reset, and pruning, then aligned the store with the shared privacy redactor.
+
+### P7-T03 - Wire redacted structured logging across services
+
+- What: updated request logging to use the shared redactor, added privacy logging coverage for query secrets and PII, and kept request logs structured with method, path, status, and trace ID only.
+- Where: `internal/middleware/logging.go`, `internal/middleware/logging_test.go`, `internal/privacy/logging_test.go`.
+- When: 2026-05-06.
+- Why: preserve useful local troubleshooting logs without storing raw learner messages or secret-like values.
+- How: added a failing privacy logging test proving raw body and query PII are absent, then routed `BasicRedactor` through `privacy.Redact` while keeping `slog` field-based logging.
+
+### P7-T04 - Build admin metrics endpoint
+
+- What: added aggregate audit summaries for total conversations, containment/escalation rates, top intents, workflow counts/failures, low-confidence items, stale-source warnings, and action/status/type buckets behind a protected admin endpoint.
+- Where: `internal/audit/metrics.go`, `internal/handlers/admin.go`, `internal/handlers/admin_test.go`, `cmd/api/main.go`, `cmd/api/main_test.go`.
+- When: 2026-05-06.
+- Why: make staff-facing demo metrics observable from actual redacted audit events instead of response-body-only traces.
+- How: wrote failing seeded-audit and empty-store handler tests first, then implemented `SummaryFromEvents`, bearer-token admin checks, `GET /api/v1/admin/metrics`, and default local admin token handling.
+
+### P7-T05 - Create minimal admin dashboard UI
+
+- What: added a server-rendered admin dashboard shell with JavaScript for protected metrics refresh plus top intents, escalation, workflow, low-confidence review, stale-source, export, purge, and reset controls.
+- Where: `internal/handlers/admin_ui.go`, `internal/handlers/admin_ui_test.go`, `web/templates/admin.html`, `web/static/admin.js`, `web/static/admin.css`, `cmd/api/main.go`.
+- When: 2026-05-06.
+- Why: give stakeholders a quick operational view of adoption and risk while keeping sensitive review text redacted.
+- How: wrote failing dashboard-render tests first, then implemented `GET /admin`, the dashboard template, admin JavaScript, and restrained dashboard styling.
+
+### P7-T06 - Add retention and export controls
+
+- What: added a seven-day demo retention policy, purge helper, protected audit export endpoint, protected purge endpoint, protected reset endpoint, and docs for export/reset/purge behavior.
+- Where: `internal/audit/retention.go`, `internal/audit/retention_test.go`, `internal/handlers/admin.go`, `internal/handlers/admin_test.go`, `docs/privacy-impact-lite.md`, `docs/api-spec.md`.
+- When: 2026-05-06.
+- Why: make demo audit data short-lived, resettable, and exportable without exposing raw messages.
+- How: wrote failing retention and admin control tests first, then implemented default retention pruning, export with omitted message content, reset, purge, and matching privacy/API documentation.
+
+### P7 review evidence
+
+- What: completed P7 status and documentation sync.
+- Where: `docs/phases-and-tasks.md`, `docs/implementation-roadmap.md`, `README.md`, `docs/demo-script.md`, `docs/test-plan.md`, `docs/privacy-impact-lite.md`, `docs/api-spec.md`, `CHANGELOG.md`.
+- When: 2026-05-06.
+- Why: keep the task board, roadmap, README, demo script, test plan, privacy notes, and API contract aligned with implemented privacy, audit, dashboard, and retention behavior.
+- How: marked P7 tasks and gates complete after red-to-green package evidence, then verified focused P7 packages and the full Go suite with `go test ./...`.
+
 ## 2026-05-06 - P6 LLM Gateway And Structured Classification
 
 ### P6-T01 - Define LLM provider interface and request/response types

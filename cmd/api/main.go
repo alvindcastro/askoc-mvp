@@ -40,17 +40,17 @@ func main() {
 		logger.Error("create llm provider", "error", err)
 		os.Exit(1)
 	}
-	auditRecorder := audit.NopRecorder{}
+	auditStore := audit.NewMemoryStore()
 	retriever := buildRetriever(context.Background(), cfg.RAG.ChunksPath, logger)
 	chatService, err := orchestrator.New(orchestrator.Dependencies{
-		Classifier: buildClassifier(cfg, llmPort, auditRecorder),
+		Classifier: buildClassifier(cfg, llmPort, auditStore),
 		Retriever:  retriever,
 		LLM:        llmPort,
 		Banner:     tools.NewBannerClient(cfg.Integrations.BannerURL, toolHTTPClient),
 		Payment:    tools.NewPaymentClient(cfg.Integrations.PaymentURL, toolHTTPClient),
 		Workflow:   workflow.NewInMemoryClient(),
 		CRM:        tools.NewCRMClient(cfg.Integrations.CRMURL, toolHTTPClient),
-		Audit:      auditRecorder,
+		Audit:      auditStore,
 	})
 	if err != nil {
 		logger.Error("create orchestrator", "error", err)
@@ -58,8 +58,13 @@ func main() {
 	}
 	mux.Handle("/", handlers.ChatPageHandler("web/templates/chat.html"))
 	mux.Handle("/chat", handlers.ChatPageHandler("web/templates/chat.html"))
+	mux.Handle("/admin", handlers.AdminPageHandler("web/templates/admin.html"))
 	mux.Handle("/static/", http.StripPrefix("/static/", handlers.StaticFileHandler("web/static")))
 	mux.Handle("/api/v1/chat", handlers.ChatHandler(chatService))
+	mux.Handle("/api/v1/admin/metrics", handlers.AdminMetricsHandler(auditStore, adminAccessToken(cfg)))
+	mux.Handle("/api/v1/admin/audit/export", handlers.AdminAuditExportHandler(auditStore, adminAccessToken(cfg)))
+	mux.Handle("/api/v1/admin/audit/reset", handlers.AdminAuditResetHandler(auditStore, adminAccessToken(cfg)))
+	mux.Handle("/api/v1/admin/audit/purge", handlers.AdminAuditPurgeHandler(auditStore, adminAccessToken(cfg)))
 	mux.Handle("/healthz", handlers.HealthHandler())
 	mux.Handle("/readyz", handlers.ReadyHandler())
 
@@ -128,6 +133,13 @@ func buildClassifier(cfg config.Config, llmPort orchestrator.LLM, recorder audit
 		Parse:    classifier.ParseLLMClassificationOutput,
 		Audit:    recorder,
 	}
+}
+
+func adminAccessToken(cfg config.Config) string {
+	if cfg.Auth.Token != "" {
+		return cfg.Auth.Token
+	}
+	return "demo-admin-token"
 }
 
 type providerLLM struct {
