@@ -260,7 +260,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ## P4 — Deterministic orchestration before AI
 **Phase outcome:** Transcript/payment orchestration works without relying on live AI.
-- [ ] **P4-T01 — Define orchestrator ports and dependency injection**  
+- [x] **P4-T01 — Define orchestrator ports and dependency injection**
   **Type:** Code  
   **Goal:** Make the orchestrator testable by depending on interfaces for retrieval, classification, LLM, tools, workflow, and audit.  
   **Primary files:** `internal/orchestrator/orchestrator.go`, `internal/orchestrator/orchestrator_test.go`  
@@ -268,7 +268,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Compile-time interface fakes.; Test orchestrator can be constructed with fake dependencies.; Nil dependency validation test.  
   **Done when:** No live network dependencies in orchestrator tests.; Every external dependency has a small interface.
-- [ ] **P4-T02 — Implement fallback intent and sentiment classifier**  
+- [x] **P4-T02 — Implement fallback intent and sentiment classifier**
   **Type:** Code  
   **Goal:** Provide deterministic behavior for demos and tests before using an LLM.  
   **Primary files:** `internal/classifier/fallback.go`, `internal/classifier/fallback_test.go`  
@@ -276,7 +276,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Table-driven messages map to expected intents.; Frustration/urgency phrases map to negative/high urgency.; Unknown questions map to unknown with low confidence.  
   **Done when:** Classifier returns typed confidence.; Low confidence cannot trigger sensitive tools.
-- [ ] **P4-T03 — Implement transcript-status decision flow**  
+- [x] **P4-T03 — Implement transcript-status decision flow**
   **Type:** Code  
   **Goal:** Handle the core Tier 1 scenario using synthetic Banner and payment data.  
   **Primary files:** `internal/orchestrator/transcript.go`, `internal/orchestrator/transcript_test.go`  
@@ -284,7 +284,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** S100001 -> ready/no workflow.; S100002 -> unpaid/payment reminder.; S100003 -> hold/CRM escalation.; S100004 -> unknown/handoff.; Missing student ID prompts for synthetic ID.  
   **Done when:** Response contains user-friendly answer plus machine-readable actions.; No payment reminder is sent for paid records.; Financial holds route to staff, not self-service.
-- [ ] **P4-T04 — Trigger payment reminder workflow from orchestrator**  
+- [x] **P4-T04 — Trigger payment reminder workflow from orchestrator**
   **Type:** Code  
   **Goal:** Connect the transcript decision flow to workflow automation.  
   **Primary files:** `internal/workflow/client.go`, `internal/orchestrator/transcript_test.go`  
@@ -292,7 +292,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Unpaid transcript calls workflow exactly once.; Idempotency key is passed.; Workflow failure is reported safely and audited.; Paid transcript does not call workflow.  
   **Done when:** Workflow action appears in chat response.; Failures do not create duplicate reminders.; Audit event records workflow attempt.
-- [ ] **P4-T05 — Create CRM escalation summary and priority routing**  
+- [x] **P4-T05 — Create CRM escalation summary and priority routing**
   **Type:** Code  
   **Goal:** Turn unresolved, urgent, or sensitive conversations into staff-ready mock cases.  
   **Primary files:** `internal/orchestrator/escalation.go`, `internal/orchestrator/escalation_test.go`  
@@ -300,7 +300,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Negative sentiment creates priority case.; Low confidence creates normal handoff.; Financial hold routes to Finance/Registrar queue.; Summary redacts emails/phone numbers.  
   **Done when:** CRM case includes intent, queue, priority, trace ID, and redacted summary.; Learner receives a clear handoff message.
-- [ ] **P4-T06 — Return action trace in chat responses**  
+- [x] **P4-T06 — Return action trace in chat responses**
   **Type:** Code  
   **Goal:** Make the demo transparent by showing what was checked, triggered, and escalated.  
   **Primary files:** `internal/domain/chat.go`, `internal/orchestrator/orchestrator_test.go`  
@@ -311,10 +311,10 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ### P4 phase gate
 
-- [ ] All P4 tasks above are complete or explicitly deferred with a reason.
-- [ ] All code tasks in P4 have failing-test evidence before implementation.
-- [ ] `go test ./...` passes after P4 code tasks.
-- [ ] Relevant docs are updated with any changed behavior or assumptions.
+- [x] All P4 tasks above are complete or explicitly deferred with a reason.
+- [x] All code tasks in P4 have failing-test evidence before implementation.
+- [x] `go test ./...` passes after P4 code tasks.
+- [x] Relevant docs are updated with any changed behavior or assumptions.
 
 ---
 

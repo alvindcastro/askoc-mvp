@@ -2,6 +2,64 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-06 - P4 Deterministic Orchestration Before AI
+
+### P4-T01 - Define orchestrator ports and dependency injection
+
+- What: added the deterministic orchestrator package with small ports for classifier, retriever, LLM, Banner, payment, workflow, CRM, and audit dependencies, then wired `cmd/api` to the orchestrator.
+- Where: `internal/orchestrator/orchestrator.go`, `internal/orchestrator/orchestrator_test.go`, `internal/audit/event.go`, `cmd/api/main.go`, `internal/config/config.go`, `internal/config/config_test.go`.
+- When: 2026-05-06.
+- Why: make chat orchestration testable with fakes and keep the API independent of live AI, retrieval, and raw HTTP tool details.
+- How: wrote constructor and compile-time interface tests first, confirmed missing package/dependency failures, then implemented dependency validation, disabled retrieval/LLM ports, mock-service URL config, API wiring, and a no-op audit recorder.
+
+### P4-T02 - Implement fallback intent and sentiment classifier
+
+- What: added deterministic fallback classification for transcript request, transcript status, fee payment, human handoff, escalation, unknown intent, and neutral/negative/urgent sentiment.
+- Where: `internal/classifier/fallback.go`, `internal/classifier/fallback_test.go`, `internal/domain/chat.go`.
+- When: 2026-05-06.
+- Why: provide reliable demo behavior before live LLM classification exists and prevent low-confidence results from triggering sensitive tool calls.
+- How: wrote table-driven classifier and low-confidence threshold tests first, then implemented keyword-based intent/sentiment mapping and typed confidence gating.
+
+### P4-T03 - Implement transcript-status decision flow
+
+- What: added transcript-status orchestration for `S100001` ready/no reminder, `S100002` unpaid/reminder, `S100003` financial-hold escalation, `S100004` unresolved handoff, and missing synthetic ID prompts.
+- Where: `internal/orchestrator/transcript.go`, `internal/orchestrator/orchestrator_test.go`, `docs/test-plan.md`, `docs/model-evaluation.md`.
+- When: 2026-05-06.
+- Why: make the core Tier 1 transcript/payment demo work from deterministic synthetic Banner and payment states.
+- How: wrote fake-tool orchestrator tests for each synthetic record before implementation, then added Banner/payment decision branches, safe answers, source packaging, and no-tool behavior when the student ID is missing.
+
+### P4-T04 - Trigger payment reminder workflow from orchestrator
+
+- What: added an in-process idempotent payment-reminder workflow port and orchestrator workflow attempt/completion/failure action handling.
+- Where: `internal/workflow/client.go`, `internal/workflow/client_test.go`, `internal/orchestrator/transcript.go`, `internal/orchestrator/orchestrator_test.go`, `docs/api-spec.md`, `docs/power-automate-flow.md`.
+- When: 2026-05-06.
+- Why: connect unpaid transcript decisions to workflow automation without waiting for the P8 standalone simulator or a real Power Automate webhook.
+- How: wrote idempotency and workflow-failure tests first, then implemented stable idempotency keys, local synthetic workflow IDs, safe workflow-failure messages, and audit-port events for attempted/completed/failed workflow attempts.
+
+### P4-T05 - Create CRM escalation summary and priority routing
+
+- What: added CRM handoff creation for financial holds, unresolved synthetic transcript status, urgent/negative sentiment, human handoff, and low-confidence fallback.
+- Where: `internal/orchestrator/escalation.go`, `internal/orchestrator/orchestrator_test.go`, `docs/demo-script.md`, `docs/architecture.md`.
+- When: 2026-05-06.
+- Why: turn unresolved or sensitive deterministic conversations into staff-ready mock CRM cases without automating approvals, denials, or financial judgments.
+- How: wrote CRM routing and summary-redaction tests first, then implemented Registrar/Student Accounts routing, priority staff routing, normal learner-support handoff, safe learner messages, and redacted CRM summaries.
+
+### P4-T06 - Return action trace in chat responses
+
+- What: extended learner-facing chat actions with `trace_id` and `idempotency_key`, and returned deterministic action names/statuses for classifier, Banner, payment, workflow, and CRM steps.
+- Where: `internal/domain/chat.go`, `internal/orchestrator/orchestrator.go`, `internal/orchestrator/transcript.go`, `docs/api-spec.md`, `README.md`.
+- When: 2026-05-06.
+- Why: make the interview demo explainable from the response body without exposing logs or raw internal errors.
+- How: wrote action-trace assertions in orchestrator tests first, then attached trace IDs to every action, included workflow IDs/idempotency keys where relevant, and kept internal workflow/CRM errors out of answers and action messages.
+
+### P4 review evidence
+
+- What: completed P4 status and documentation sync.
+- Where: `docs/phases-and-tasks.md`, `docs/implementation-roadmap.md`, `README.md`, `docs/api-spec.md`, `docs/architecture.md`, `docs/golang-implementation.md`, `docs/test-plan.md`, `docs/model-evaluation.md`, `docs/demo-script.md`, `docs/power-automate-flow.md`, `CHANGELOG.md`.
+- When: 2026-05-06.
+- Why: keep the task board, roadmap, API contract, demo script, workflow notes, and verification expectations aligned with deterministic P4 behavior and explicitly leave RAG, durable audit/dashboard, and standalone workflow simulation to later phases.
+- How: marked P4 tasks and gates complete after confirming the red test state, then verified `go test ./internal/classifier ./internal/workflow ./internal/orchestrator`, `go test ./internal/config ./cmd/api ./internal/classifier ./internal/workflow ./internal/orchestrator`, `go test ./...`, `go vet ./...`, and `make test` pass.
+
 ## 2026-05-06 - P3 Synthetic Enterprise APIs And Clients
 
 ### P3-T01 - Create synthetic fixture loader

@@ -9,11 +9,12 @@ import (
 )
 
 type Config struct {
-	HTTPAddr string
-	LogLevel string
-	Auth     AuthConfig
-	Workflow WorkflowConfig
-	Provider ProviderConfig
+	HTTPAddr     string
+	LogLevel     string
+	Auth         AuthConfig
+	Workflow     WorkflowConfig
+	Provider     ProviderConfig
+	Integrations IntegrationConfig
 }
 
 type AuthConfig struct {
@@ -30,6 +31,12 @@ type ProviderConfig struct {
 	Mode   string
 	Model  string
 	APIKey string
+}
+
+type IntegrationConfig struct {
+	BannerURL  string
+	PaymentURL string
+	CRMURL     string
 }
 
 func Load() (Config, error) {
@@ -52,6 +59,11 @@ func LoadFromEnv(env map[string]string) (Config, error) {
 			Mode:   value(env, "ASKOC_PROVIDER", "stub"),
 			Model:  value(env, "ASKOC_PROVIDER_MODEL", "demo-placeholder"),
 			APIKey: value(env, "ASKOC_PROVIDER_API_KEY", ""),
+		},
+		Integrations: IntegrationConfig{
+			BannerURL:  value(env, "ASKOC_BANNER_URL", "http://localhost:8081"),
+			PaymentURL: value(env, "ASKOC_PAYMENT_URL", "http://localhost:8082"),
+			CRMURL:     value(env, "ASKOC_CRM_URL", "http://localhost:8083"),
 		},
 	}
 
@@ -88,13 +100,16 @@ func (c Config) String() string {
 		providerKey = "REDACTED"
 	}
 	return fmt.Sprintf(
-		"http_addr:%s log_level:%s auth_enabled:%t auth_token:%s workflow_url:%s workflow_timeout:%s provider:%s provider_model:%s provider_api_key:%s",
+		"http_addr:%s log_level:%s auth_enabled:%t auth_token:%s workflow_url:%s workflow_timeout:%s banner_url:%s payment_url:%s crm_url:%s provider:%s provider_model:%s provider_api_key:%s",
 		c.HTTPAddr,
 		c.LogLevel,
 		c.Auth.Enabled,
 		authToken,
 		c.Workflow.URL,
 		c.Workflow.Timeout,
+		c.Integrations.BannerURL,
+		c.Integrations.PaymentURL,
+		c.Integrations.CRMURL,
 		c.Provider.Mode,
 		c.Provider.Model,
 		providerKey,

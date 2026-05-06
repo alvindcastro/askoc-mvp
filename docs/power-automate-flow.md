@@ -33,7 +33,7 @@ cmd/api or internal/workflow
 
 ### Option B: Local Go workflow simulator
 
-For a fully local demo, `cmd/workflow-sim` simulates the Power Automate flow.
+For a fully local P8 demo, `cmd/workflow-sim` simulates the Power Automate flow. P4 currently uses the same request/response shape through an in-process idempotent workflow port so transcript orchestration can be tested before the standalone simulator exists.
 
 ```text
 cmd/api
@@ -52,8 +52,10 @@ Recommended approach: build Option B first, then add Option A as a webhook-compa
   "conversation_id": "conv_01JABC123",
   "trace_id": "trace_01JABC456",
   "item": "official_transcript",
+  "amount_due": 15.00,
+  "currency": "CAD",
   "reason": "Transcript request cannot be processed until payment is complete.",
-  "idempotency_key": "payment-reminder:S100002:official-transcript:2026-05-06"
+  "idempotency_key": "payment-reminder:trace_01JABC456:S100002:official_transcript"
 }
 ```
 
@@ -71,24 +73,27 @@ Recommended approach: build Option B first, then add Option A as a webhook-compa
 ## Go workflow client interface
 
 ```go
-type Client interface {
-    TriggerPaymentReminder(ctx context.Context, req PaymentReminderRequest) (WorkflowResult, error)
+type PaymentReminderSender interface {
+    SendPaymentReminder(ctx context.Context, req PaymentReminderRequest) (PaymentReminderResponse, error)
 }
 
 type PaymentReminderRequest struct {
-    StudentID       string `json:"student_id"`
-    ConversationID  string `json:"conversation_id"`
-    TraceID         string `json:"trace_id"`
-    Item            string `json:"item"`
-    Reason          string `json:"reason"`
-    IdempotencyKey  string `json:"idempotency_key"`
+    StudentID       string  `json:"student_id"`
+    ConversationID  string  `json:"conversation_id,omitempty"`
+    TraceID         string  `json:"trace_id,omitempty"`
+    Item            string  `json:"item"`
+    AmountDue       float64 `json:"amount_due,omitempty"`
+    Currency        string  `json:"currency,omitempty"`
+    Reason          string  `json:"reason"`
+    IdempotencyKey  string  `json:"idempotency_key"`
 }
 
-type WorkflowResult struct {
-    WorkflowID string    `json:"workflow_id"`
-    Status     string    `json:"status"`
-    Message    string    `json:"message"`
-    CreatedAt  time.Time `json:"created_at"`
+type PaymentReminderResponse struct {
+    WorkflowID     string `json:"workflow_id"`
+    Status         string `json:"status"`
+    Message        string `json:"message,omitempty"`
+    IdempotencyKey string `json:"idempotency_key,omitempty"`
+    Synthetic      bool   `json:"synthetic"`
 }
 ```
 
@@ -170,7 +175,7 @@ Reference: WF-2026-000789
   "conversation_id": "conv_01JABC123",
   "student_id": "S100002",
   "workflow_id": "WF-2026-000789",
-  "idempotency_key": "payment-reminder:S100002:official-transcript:2026-05-06",
+  "idempotency_key": "payment-reminder:trace_01JABC456:S100002:official_transcript",
   "created_at": "2026-05-06T12:06:00Z"
 }
 ```

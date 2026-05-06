@@ -49,20 +49,20 @@ flowchart TD
 
 | Service | Go package/command | Responsibility |
 |---|---|---|
-| Public API | `cmd/api` | Serves chat UI, REST API, dashboard endpoints |
-| Orchestrator | `internal/orchestrator` | Coordinates intent, retrieval, LLM, tools, workflow, escalation |
-| RAG ingestor | `cmd/ingest` + `internal/rag` | Fetches approved public pages, chunks content, writes index |
-| LLM gateway | `internal/llm` | Wraps Azure OpenAI/OpenAI-compatible REST calls |
-| Classifier | `internal/classifier` | Intent/sentiment via structured LLM output or Azure AI Language REST |
+| Public API | `cmd/api` | Serves chat UI, REST API, and P4 chat orchestration |
+| Orchestrator | `internal/orchestrator` | Coordinates deterministic P4 intent, tools, workflow, and escalation ports |
+| RAG ingestor | `cmd/ingest` + `internal/rag` | Later phase: fetches approved public pages, chunks content, writes index |
+| LLM gateway | `internal/llm` | Later phase: wraps Azure OpenAI/OpenAI-compatible REST calls |
+| Classifier | `internal/classifier` | P4 deterministic fallback intent/sentiment; later LLM/parser path plugs in behind the port |
 | Tool clients | `internal/tools` | Typed clients for Banner, payment, CRM, LMS, notification |
-| Privacy | `internal/privacy` | Redaction, safe logging, prompt-injection checks |
-| Audit | `internal/audit` | Interaction, source, tool-call, workflow, and feedback events |
-| Workflow | `internal/workflow` | Power Automate webhook client and local workflow simulator |
+| Privacy | `internal/privacy` | Later phase: redaction, safe logging, prompt-injection checks |
+| Audit | `internal/audit` | P4 audit port types; later phase: durable interaction, source, tool-call, workflow, and feedback events |
+| Workflow | `internal/workflow` | P4 in-process idempotent workflow port; P8 adds simulator/webhook clients |
 | Mock Banner | `cmd/mock-banner` | Synthetic student records and holds |
 | Mock payment | `cmd/mock-payment` | Synthetic transcript payment status |
 | Mock CRM | `cmd/mock-crm` | Case creation and queue routing |
 | Mock LMS | `cmd/mock-lms` | LMS account/course access simulation |
-| Evaluation | `cmd/eval` | Runs JSONL test set and reports metrics |
+| Evaluation | `cmd/eval` | Later phase: runs JSONL test set and reports metrics |
 
 ## Recommended Go project layout
 
@@ -130,7 +130,7 @@ type ChatResponse struct {
 }
 ```
 
-P2 implements these models in `internal/domain` with provider-neutral request/response structs, source citations, action traces, and handoff metadata. Request validation lives in `internal/validation`, and demo conversation history is kept in a TTL-based in-memory store under `internal/session`.
+P4 implements these models in `internal/domain` with provider-neutral request/response structs, source citations, learner-safe action traces, idempotency key metadata, and handoff metadata. Request validation lives in `internal/validation`; the deterministic orchestrator lives in `internal/orchestrator`.
 
 ## Component responsibilities
 
@@ -167,19 +167,18 @@ Responsibilities:
 
 ### 3. Go AI orchestrator
 
-The orchestrator coordinates the full interaction.
+The P4 orchestrator coordinates the deterministic transcript/payment interaction before live AI is introduced.
 
 Responsibilities:
 
 - classify intent,
 - classify sentiment and urgency,
-- decide whether retrieval is needed,
-- retrieve relevant content,
+- attach the current transcript source placeholder,
 - call mock enterprise APIs,
-- generate grounded responses,
-- trigger workflow automation,
+- generate deterministic responses,
+- trigger the in-process P4 workflow port,
 - decide when to escalate,
-- record audit events.
+- record workflow audit-port events.
 
 Recommended orchestrator interface:
 
@@ -259,7 +258,7 @@ sequenceDiagram
     participant Orchestrator as Go Orchestrator
     participant Search as Knowledge Index
     participant LLM as LLM Gateway
-    participant Audit as Audit Store
+    participant Audit as Audit Port
 
     Learner->>UI: How do I order my transcript?
     UI->>API: POST /api/v1/chat
@@ -283,14 +282,14 @@ sequenceDiagram
     participant Orchestrator as Go Orchestrator
     participant Banner as Go Mock Banner API
     participant Payment as Go Mock Payment API
-    participant Workflow as Power Automate / Go Workflow Sim
+    participant Workflow as P4 Workflow Port
     participant CRM as Go Mock CRM API
     participant Audit as Audit Store
 
     Learner->>API: My transcript has not been processed
     API->>Orchestrator: message
     Orchestrator->>Banner: check student status and holds
-    Banner-->>Orchestrator: active student, no hold
+    Banner-->>Orchestrator: active student, mock payment hold
     Orchestrator->>Payment: check transcript payment
     Payment-->>Orchestrator: unpaid
     Orchestrator->>Workflow: trigger payment reminder

@@ -30,6 +30,15 @@ func TestLoadFromEnvUsesSafeDefaults(t *testing.T) {
 	if cfg.Workflow.Timeout != 5*time.Second {
 		t.Fatalf("Workflow.Timeout = %s, want 5s", cfg.Workflow.Timeout)
 	}
+	if cfg.Integrations.BannerURL != "http://localhost:8081" {
+		t.Fatalf("Integrations.BannerURL = %q, want mock Banner default", cfg.Integrations.BannerURL)
+	}
+	if cfg.Integrations.PaymentURL != "http://localhost:8082" {
+		t.Fatalf("Integrations.PaymentURL = %q, want mock Payment default", cfg.Integrations.PaymentURL)
+	}
+	if cfg.Integrations.CRMURL != "http://localhost:8083" {
+		t.Fatalf("Integrations.CRMURL = %q, want mock CRM default", cfg.Integrations.CRMURL)
+	}
 	if cfg.Provider.Mode != "stub" {
 		t.Fatalf("Provider.Mode = %q, want stub", cfg.Provider.Mode)
 	}
@@ -46,6 +55,9 @@ func TestLoadFromEnvUsesOverrides(t *testing.T) {
 		"ASKOC_LOG_LEVEL":                "debug",
 		"ASKOC_WORKFLOW_URL":             "http://workflow.local/hook",
 		"ASKOC_WORKFLOW_TIMEOUT_SECONDS": "12",
+		"ASKOC_BANNER_URL":               "http://banner.local",
+		"ASKOC_PAYMENT_URL":              "http://payment.local",
+		"ASKOC_CRM_URL":                  "http://crm.local",
 		"ASKOC_PROVIDER":                 "openai-compatible",
 		"ASKOC_PROVIDER_MODEL":           "gpt-demo",
 		"ASKOC_PROVIDER_API_KEY":         "sk-demo-secret",
@@ -68,6 +80,9 @@ func TestLoadFromEnvUsesOverrides(t *testing.T) {
 	}
 	if cfg.Workflow.Timeout != 12*time.Second {
 		t.Fatalf("Workflow.Timeout = %s", cfg.Workflow.Timeout)
+	}
+	if cfg.Integrations.BannerURL != "http://banner.local" || cfg.Integrations.PaymentURL != "http://payment.local" || cfg.Integrations.CRMURL != "http://crm.local" {
+		t.Fatalf("Integrations = %+v", cfg.Integrations)
 	}
 	if cfg.Provider.Mode != "openai-compatible" || cfg.Provider.Model != "gpt-demo" {
 		t.Fatalf("Provider = %+v", cfg.Provider)

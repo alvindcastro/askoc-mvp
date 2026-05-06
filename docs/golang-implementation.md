@@ -25,9 +25,9 @@ cmd/mock-banner
 cmd/mock-payment
 cmd/mock-crm
 cmd/mock-lms
-cmd/workflow-sim
-cmd/ingest
-cmd/eval
+cmd/workflow-sim   # later P8
+cmd/ingest         # later P5
+cmd/eval           # later P9
 ```
 
 Each command should have a small `main.go` that loads configuration, creates dependencies, registers routes, and starts an HTTP server.
@@ -41,14 +41,14 @@ Each command should have a small `main.go` that loads configuration, creates dep
 | `internal/handlers` | HTTP handlers and JSON encoding/decoding |
 | `internal/session` | In-memory demo conversation sessions with TTL and redaction before persistence |
 | `internal/validation` | Chat request validation and safe validation error codes |
-| `internal/orchestrator` | Main chat decision workflow |
-| `internal/rag` | Ingestion, chunking, retrieval, source metadata |
-| `internal/llm` | LLM provider interface and Azure/OpenAI-compatible REST client |
-| `internal/classifier` | Intent and sentiment classification |
+| `internal/orchestrator` | P4 deterministic chat decision workflow and dependency ports |
+| `internal/rag` | Later P5 ingestion, chunking, retrieval, source metadata |
+| `internal/llm` | Later P6 provider interface and Azure/OpenAI-compatible REST client |
+| `internal/classifier` | P4 deterministic intent and sentiment fallback classification |
 | `internal/tools` | Banner, payment, CRM, LMS, notification clients |
-| `internal/workflow` | Power Automate webhook client and local workflow simulator client |
-| `internal/privacy` | PII redaction, prompt-injection checks, safe summaries |
-| `internal/audit` | Audit event writing and dashboard summaries |
+| `internal/workflow` | P4 in-process idempotent workflow port; later P8 webhook/simulator clients |
+| `internal/privacy` | Later P7 PII redaction, prompt-injection checks, safe summaries |
+| `internal/audit` | P4 audit event port types; later P7 event store and dashboard summaries |
 | `internal/middleware` | Trace IDs, recovery, logging, auth, rate limits |
 
 ## Dependency rule
@@ -162,7 +162,7 @@ func ChatHandler(service ChatService) http.Handler {
 }
 ```
 
-P2 wires this handler to a deterministic placeholder service at `POST /api/v1/chat`. The placeholder returns intent, source, action, and optional handoff metadata without calling live AI, retrieval, workflow, or enterprise APIs. The Go UI is served at `/chat`.
+P4 wires this handler to the deterministic orchestrator at `POST /api/v1/chat`. The orchestrator returns fallback intent/sentiment classification, transcript source packaging, mock Banner/payment/CRM actions, idempotent payment-reminder workflow results, and optional handoff metadata without calling live AI or retrieval. The Go UI is served at `/chat`.
 
 ## Orchestrator decision flow
 
@@ -170,13 +170,13 @@ P2 wires this handler to a deterministic placeholder service at `POST /api/v1/ch
 1. Create trace ID.
 2. Redact message for logging.
 3. Classify intent and sentiment.
-4. Retrieve sources for policy/procedure questions.
-5. If source confidence is too low, produce fallback and/or escalate.
+4. Attach the deterministic transcript source placeholder for transcript/payment intents.
+5. If confidence is too low, create a normal CRM handoff without triggering sensitive tools.
 6. If transcript-status intent and student ID exists, call mock Banner and payment APIs.
 7. If unpaid, trigger payment reminder workflow.
 8. If hold, negative sentiment, urgent context, or low confidence, create CRM case.
-9. Generate grounded response.
-10. Write audit events.
+9. Generate deterministic P4 response text.
+10. Record workflow audit-port events.
 11. Return structured response.
 ```
 
@@ -301,18 +301,21 @@ Response:
 
 ```go
 type PaymentReminderRequest struct {
-    TraceID       string `json:"trace_id"`
-    StudentID     string `json:"student_id"`
-    ConversationID string `json:"conversation_id"`
-    Reason        string `json:"reason"`
-    IdempotencyKey string `json:"idempotency_key"`
+    StudentID      string  `json:"student_id"`
+    ConversationID string  `json:"conversation_id,omitempty"`
+    TraceID        string  `json:"trace_id,omitempty"`
+    Item           string  `json:"item"`
+    AmountDue      float64 `json:"amount_due,omitempty"`
+    Currency       string  `json:"currency,omitempty"`
+    Reason         string  `json:"reason"`
+    IdempotencyKey string  `json:"idempotency_key"`
 }
 ```
 
 Use idempotency keys to avoid duplicate reminders:
 
 ```text
-payment-reminder:S100002:official-transcript:2026-05-06
+payment-reminder:trace_01JABC456:S100002:official_transcript
 ```
 
 ## Privacy redaction
@@ -344,9 +347,9 @@ func TestTranscriptStatusWorkflow(t *testing.T) {
         wantAction  string
         wantEscalate bool
     }{
-        {"paid no hold", "S100001", "paid", "none", "status_checked", false},
-        {"unpaid", "S100002", "unpaid", "none", "payment_reminder_sent", false},
-        {"financial hold", "S100003", "paid", "financial", "crm_case_created", true},
+        {"paid no hold", "S100001", "paid", "none", "payment_reminder_skipped", false},
+        {"unpaid with payment hold", "S100002", "unpaid", "mock_payment_hold", "payment_reminder_triggered", false},
+        {"financial hold", "S100003", "review_required", "mock_financial_hold", "crm_case_created", true},
     }
 
     for _, tt := range tests {
@@ -363,36 +366,30 @@ func TestTranscriptStatusWorkflow(t *testing.T) {
 
 ```bash
 go test ./...
-go test -race ./...
+go test ./internal/classifier ./internal/workflow ./internal/orchestrator
+go test -race ./internal/session
 go run ./cmd/api
 go run ./cmd/mock-banner
 go run ./cmd/mock-payment
 go run ./cmd/mock-crm
 go run ./cmd/mock-lms
-go run ./cmd/workflow-sim
-go run ./cmd/ingest -sources data/seed-sources.json
-go run ./cmd/eval -input data/eval-questions.jsonl
 ```
+
+`cmd/workflow-sim`, `cmd/ingest`, and `cmd/eval` are later-phase commands.
 
 ## Makefile targets
 
 ```makefile
-.PHONY: dev test race ingest eval
+.PHONY: dev test test-race
 
 dev:
-	docker compose up --build
+	go run ./cmd/api
 
 test:
 	go test ./...
 
-race:
-	go test -race ./...
-
-ingest:
-	go run ./cmd/ingest -sources data/seed-sources.json
-
-eval:
-	go run ./cmd/eval -input data/eval-questions.jsonl
+test-race:
+	go test -race ./internal/session
 ```
 
 ## What to show in GitHub
