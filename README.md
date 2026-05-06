@@ -226,7 +226,7 @@ askoc-ai-concierge/
     ...
 ```
 
-The P11-ready chat API uses guarded orchestration and evaluation: deterministic fallback intent/sentiment classification remains the default, while optional `openai-compatible` provider mode adds a tested REST LLM gateway, strict JSON classification parsing, versioned prompts, source-only answer guardrails, local RAG retrieval over approved public chunks, typed mock Banner/payment/CRM clients, idempotent payment-reminder workflow clients, a standalone local workflow simulator, an optional Power Automate-compatible webhook client with retry and signature headers, a safe action trace, CRM handoff routing for holds, urgent sentiment, low confidence, or explicit human handoff, shared PII redaction, an in-memory audit event store, protected admin metrics, a minimal dashboard, audit export/reset/purge controls, a redacted eval review queue endpoint, a deterministic JSONL evaluation runner, Docker Compose local stack, offline CI gate, safe env sample, secret check, one-command smoke test, architecture diagrams, demo script, screenshot placeholders, and final release checklist.
+The chat API uses guarded orchestration and evaluation: deterministic fallback intent/sentiment classification remains the default, while optional `openai-compatible` provider mode adds a tested REST LLM gateway, strict JSON classification parsing, versioned prompts, source-only answer guardrails, local RAG retrieval over approved public chunks, typed mock Banner/payment/CRM clients, idempotent payment-reminder workflow clients, a standalone local workflow simulator, an optional Power Automate-compatible webhook client with retry and signature headers, a safe action trace, CRM handoff routing for holds, urgent sentiment, low confidence, or explicit human handoff, shared PII redaction, an in-memory audit event store, protected admin metrics, a minimal dashboard, audit export/reset/purge controls, a redacted eval review queue endpoint, a deterministic JSONL evaluation runner, Docker Compose local stack, offline CI gate, safe env sample, secret check, one-command smoke test, architecture diagrams, demo script, screenshot placeholders, and final release checklist.
 
 ## Quickstart and commands
 
@@ -242,7 +242,7 @@ make compose-test
 make smoke
 go test ./...
 go vet ./...
-go test ./internal/build -run TestP10
+go test ./internal/build
 go test ./internal/eval ./cmd/eval
 go run ./cmd/ingest -sources data/seed-sources.json -out data/rag-chunks.json
 go run ./cmd/eval -input data/eval-questions.jsonl -output reports/eval-summary.json -markdown-output reports/eval-summary.md
@@ -274,10 +274,10 @@ Current environment settings:
 | `ASKOC_WORKFLOW_SIGNATURE` | empty | Optional workflow webhook signature/header value; redacted from config output |
 | `ASKOC_WORKFLOW_SIGNATURE_HEADER` | `X-AskOC-Workflow-Signature` | Header name used when `ASKOC_WORKFLOW_SIGNATURE` is set |
 | `ASKOC_WORKFLOW_MAX_RETRIES` | `1` | Retry count for transient workflow webhook `5xx` responses |
-| `ASKOC_BANNER_URL` | `http://localhost:8081` | Mock Banner base URL used by P4 orchestration |
-| `ASKOC_PAYMENT_URL` | `http://localhost:8082` | Mock payment base URL used by P4 orchestration |
-| `ASKOC_CRM_URL` | `http://localhost:8083` | Mock CRM base URL used by P4 orchestration |
-| `ASKOC_RAG_CHUNKS_PATH` | `data/rag-chunks.json` | Local approved-source chunks used by P5 retrieval |
+| `ASKOC_BANNER_URL` | `http://localhost:8081` | Mock Banner base URL used by the orchestrator |
+| `ASKOC_PAYMENT_URL` | `http://localhost:8082` | Mock payment base URL used by the orchestrator |
+| `ASKOC_CRM_URL` | `http://localhost:8083` | Mock CRM base URL used by the orchestrator |
+| `ASKOC_RAG_CHUNKS_PATH` | `data/rag-chunks.json` | Local approved-source chunks used by retrieval |
 | `ASKOC_PROVIDER` | `stub` | `stub` keeps deterministic mode; `openai-compatible` enables the tested REST LLM gateway |
 | `ASKOC_PROVIDER_MODEL` | `demo-placeholder` | Provider model/deployment name when LLM mode is enabled |
 | `ASKOC_PROVIDER_ENDPOINT` | empty | OpenAI-compatible or Azure chat completions endpoint; required only for `openai-compatible` |
@@ -308,8 +308,8 @@ Workflow Sim: http://localhost:8084/api/v1/automation/payment-reminder
 Mock LMS:     http://localhost:8085/api/v1/students/S100001/lms-access?course_id=DEMO-LMS-101
 ```
 
-The chat API validates JSON requests, rejects empty or oversized messages, accepts synthetic student IDs in the `S` plus six digits format, includes trace IDs in responses and action results, routes transcript/payment decisions through the orchestrator, and uses P5 retrieval plus P6 source guardrails for transcript-request answers.
-P3 tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors. P4 adds deterministic classifier/orchestrator tests and an in-process workflow port that returns idempotent synthetic workflow IDs. P5 adds allowlist parsing, deterministic ingestion, chunking, local retrieval, and stale/high-risk source fallback tests. P6 adds the optional tested LLM gateway, strict JSON parser, prompt golden tests, classification fixtures, and low-confidence/source guardrails. P7 adds shared redaction for logs, sessions, audit payloads, and CRM summaries; audit events for orchestrator actions, workflow outcomes, guardrails, and escalations; protected aggregate admin metrics; redacted review queue items; and demo audit retention/export/reset controls. P8 adds `cmd/workflow-sim`, a Power Automate-compatible HTTP client, idempotency-key hashing in workflow audit metadata, and retry attempt counts for webhook responses. P9 adds `data/eval-questions.jsonl`, `cmd/eval`, `internal/eval`, JSON/Markdown reports, critical gate failures, and unresolved eval review queue support. P10 adds multi-service Docker packaging, local Compose orchestration, CI, env safety, and smoke verification. P11 adds portfolio-facing README polish, diagram review, a timed demo script, synthetic screenshot placeholders, and a final release checklist.
+The chat API validates JSON requests, rejects empty or oversized messages, accepts synthetic student IDs in the `S` plus six digits format, includes trace IDs in responses and action results, routes transcript/payment decisions through the orchestrator, and uses approved-source retrieval plus source guardrails for transcript-request answers.
+Tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors. Deterministic classifier/orchestrator tests cover the core routing behavior, and an in-process workflow port returns idempotent synthetic workflow IDs. The retrieval layer covers allowlist parsing, deterministic ingestion, chunking, local retrieval, and stale/high-risk source fallback tests. The guarded LLM layer covers the optional tested LLM gateway, strict JSON parser, prompt golden tests, classification fixtures, and low-confidence/source guardrails. Privacy controls cover shared redaction for logs, sessions, audit payloads, and CRM summaries; audit events for orchestrator actions, workflow outcomes, guardrails, and escalations; protected aggregate admin metrics; redacted review queue items; and demo audit retention/export/reset controls. Workflow support includes `cmd/workflow-sim`, a Power Automate-compatible HTTP client, idempotency-key hashing in workflow audit metadata, and retry attempt counts for webhook responses. Evaluation support includes `data/eval-questions.jsonl`, `cmd/eval`, `internal/eval`, JSON/Markdown reports, critical gate failures, and unresolved eval review queue support. Release support includes multi-service Docker packaging, local Compose orchestration, CI, env safety, smoke verification, portfolio-facing documentation, diagram review, a timed demo script, synthetic screenshot placeholders, and a final release checklist.
 
 ## Demo data policy
 

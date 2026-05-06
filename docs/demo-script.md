@@ -98,7 +98,7 @@ Show:
 
 Talking point:
 
-> “This answer is grounded by the P5 local retriever. The API only cites chunks from `data/rag-chunks.json`, which is generated from the approved source allowlist, and it falls back or asks for staff confirmation when confidence is low or the source is stale/high-risk.”
+> “This answer is grounded by the local approved-source retrieval layer. The API only cites chunks from `data/rag-chunks.json`, which is generated from the approved source allowlist, and it falls back or asks for staff confirmation when confidence is low or the source is stale/high-risk.”
 
 ## Minute 2: Tier 1 transaction support
 
@@ -155,7 +155,7 @@ Show:
 
 Talking point:
 
-> “The workflow boundary is idempotent and testable without external services. P8 adds a standalone Go simulator plus an optional Power Automate-compatible webhook client behind the same interface, including retry handling and redacted audit metadata.”
+> “The workflow boundary is idempotent and testable without external services. The demo includes a standalone Go simulator plus an optional Power Automate-compatible webhook client behind the same interface, including retry handling and redacted audit metadata.”
 
 ## Minute 4: Sentiment and escalation
 
@@ -186,7 +186,7 @@ Talking point:
 
 > “Sentiment does not make final decisions alone. It increases routing priority when combined with unresolved context and safe business rules.”
 
-## Minute 5: P11 audit dashboard, redaction, and evaluation
+## Minute 5: Audit dashboard, redaction, and evaluation
 
 Talking point:
 
@@ -264,7 +264,7 @@ go test ./internal/privacy ./internal/audit ./internal/handlers
 go test ./internal/llm ./internal/classifier ./internal/orchestrator
 go test ./internal/rag ./internal/orchestrator
 go test ./internal/classifier ./internal/workflow ./internal/orchestrator
-go test ./internal/build -run TestP10
+go test ./internal/build
 make eval
 make secret-check
 make smoke
@@ -281,7 +281,7 @@ Show:
 Talking point:
 
 > “I treat this as a maintained automation product. The test suite has deterministic unit coverage for RAG allowlisting, ingestion, chunking, retrieval, source fallback, classification, LLM gateway behavior, prompt guardrails, workflow idempotency, simulator contracts, webhook retries, transcript decisions, action traces, CRM escalation, shared redaction, audit storage, admin metrics, dashboard rendering, retention controls, repo-level Docker and CI contracts, and a broader JSONL evaluation runner that fails critical regressions.”
-> “P6 adds the guarded LLM layer: OpenAI-compatible calls are optional, strict JSON is validated before use, prompt templates are versioned, and low-confidence or ungrounded model output falls back instead of triggering tools.”
+> “The guarded LLM layer keeps OpenAI-compatible calls optional, validates strict JSON before use, versions prompt templates, and falls back when model output is low-confidence or ungrounded.”
 
 ## Expected demo path
 
@@ -293,15 +293,15 @@ All demo records are synthetic. Student IDs, payment states, holds, workflow IDs
 | 2 | Unpaid payment workflow | “I ordered my transcript but it has not been processed. My student ID is S100002.” | Payment status is unpaid and reminder workflow is accepted | Chat response shows `transcript_status`, `payment_status_checked`, `payment_reminder_triggered`, workflow ID, and no CRM handoff |
 | 3 | Financial-hold escalation | “My transcript still is not moving. My student ID is S100003.” | Financial hold is detected and staff handoff is created | Chat response shows `transcript_status`, `financial_hold_detected`, CRM case ID, and Registrar/Student Accounts handoff |
 | 4 | Urgent sentiment escalation | “This is really frustrating. I need this transcript for a job application.” | Urgent/negative sentiment creates a priority CRM case | Chat response shows urgent sentiment, `crm_case_created`, priority flag, case ID, and privacy-aware summary |
-| 5 | P11 TDD/eval/smoke evidence | Run package tests, eval gate, secret check, and smoke gate | Tests prove LLM gateway behavior, strict classification, prompt guardrails, source grounding, deterministic decisions, workflow simulator/webhook behavior, redaction, audit metrics, dashboard controls, Docker/CI contracts, env safety, eval quality gates, and release readiness | `go test ./internal/eval ./cmd/eval`, `go test ./internal/build -run TestP10`, `go test ./...`, `make eval`, `make secret-check`, and `make smoke` pass |
+| 5 | TDD, evaluation, and smoke evidence | Run package tests, eval gate, secret check, and smoke gate | Tests prove LLM gateway behavior, strict classification, prompt guardrails, source grounding, deterministic decisions, workflow simulator/webhook behavior, redaction, audit metrics, dashboard controls, Docker/CI contracts, env safety, eval quality gates, and release readiness | `go test ./internal/eval ./cmd/eval`, `go test ./internal/build`, `go test ./...`, `make eval`, `make secret-check`, and `make smoke` pass |
 
 ## Demo acceptance matrix
 
-Each P11 row must be verifiable from the Go API response, local RAG chunks, local mock service logs, the workflow simulator or in-process workflow response, CRM simulator output, protected admin metrics, redacted audit-store tests, Docker/CI artifact tests, smoke-script output, or `reports/eval-summary.md`. Source references are approved public/curated learner-service content; synthetic records are the only data used for student/payment/hold state.
+Each acceptance row must be verifiable from the Go API response, local RAG chunks, local mock service logs, the workflow simulator or in-process workflow response, CRM simulator output, protected admin metrics, redacted audit-store tests, Docker/CI artifact tests, smoke-script output, or `reports/eval-summary.md`. Source references are approved public/curated learner-service content; synthetic records are the only data used for student/payment/hold state.
 
 | ID | Scenario | Synthetic input | Expected intent | Expected source | Expected action | Expected handoff behavior | Pass evidence |
 |---|---|---|---|---|---|---|---|
-| D01 | Transcript answer | “How do I order my official transcript?” | `transcript_request` | P5 local chunk `oc-transcript-request-2005-onwards-seed-001` or refreshed chunk from the same allowlisted source | Return concise grounded answer with source link | No handoff; keep learner in chat | Response includes source, retrieval confidence, risk/freshness metadata, and zero critical unsupported claims |
+| D01 | Transcript answer | “How do I order my official transcript?” | `transcript_request` | Local approved-source chunk `oc-transcript-request-2005-onwards-seed-001` or refreshed chunk from the same allowlisted source | Return concise grounded answer with source link | No handoff; keep learner in chat | Response includes source, retrieval confidence, risk/freshness metadata, and zero critical unsupported claims |
 | D02 | Unpaid payment workflow | `S100002` transcript status prompt | `transcript_status` | Transcript/payment guidance source chunk plus synthetic payment record `S100002` | Check mock Banner, check mock Payment, trigger `payment_reminder_triggered` | No CRM handoff unless workflow fails or confidence is low | Response includes unpaid status, workflow ID, idempotency key, and redacted workflow audit events |
 | D03 | Financial-hold escalation | `S100003` transcript status prompt | `transcript_status` | Transcript/hold guidance source chunk plus synthetic Banner record `S100003` | Check mock Banner, detect `financial_hold`, create CRM case | Handoff to Registrar/Student Accounts queue with minimal summary and case ID | Response includes hold-safe wording, CRM case ID, queue/priority, and no payment reminder |
 | D04 | Urgent sentiment escalation | Frustrated urgent transcript message | `escalation_request` or human handoff intent with urgent sentiment | Transcript source chunk when transcript context is present | Classify sentiment as urgent/negative and create priority CRM case | Priority handoff to staff; assistant does not promise a deadline or outcome | Response includes priority flag, CRM case ID, redacted summary, and safe expectation-setting |
