@@ -4,17 +4,18 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 ## Roadmap rules
 
-- [ ] Keep the MVP focused on transcript/payment support, source-grounded answers, workflow automation, escalation, and dashboard evidence.
+- [x] Freeze the MVP around transcript/payment support, source-grounded answers, workflow automation, escalation, and dashboard evidence.
 - [ ] Use Go for backend services, mock integrations, workflow simulator, ingestion, evaluation, and dashboards unless a task explicitly says otherwise.
-- [ ] Use synthetic learner records only.
+- [x] Use synthetic learner records only.
 - [ ] Enforce [Strict TDD Policy](tdd-policy.md) on every code task.
-- [ ] Do not connect to real Banner, CRM, LMS, payment, or private portal systems.
+- [x] Do not connect to real Banner, CRM, LMS, payment, authentication, or private portal systems.
+- [x] Defer nice-to-have workflows and real integrations until after the MVP.
 
 ## Phase checklist
 
 | Status | Phase | Primary outcome | Detailed tasks |
 |---|---|---|---|
-| [ ] | P0 — Product framing and applicant strategy | Applicant story, scope, privacy boundary, source limits, and demo matrix are frozen. | [Task list](phases-and-tasks.md#p0-product-framing-and-applicant-strategy) |
+| [x] | P0 — Product framing and applicant strategy | Applicant story, scope, privacy boundary, source limits, and demo matrix are frozen. | [Task list](phases-and-tasks.md#p0-product-framing-and-applicant-strategy) |
 | [ ] | P1 — Go project foundation | Go project compiles, serves health endpoints, and has API hygiene. | [Task list](phases-and-tasks.md#p1-go-project-foundation) |
 | [ ] | P2 — Chat API and UI skeleton | Chat API and minimal UI exist with deterministic placeholder behavior. | [Task list](phases-and-tasks.md#p2-chat-api-and-ui-skeleton) |
 | [ ] | P3 — Synthetic enterprise APIs and clients | Synthetic Banner/payment/CRM/LMS APIs and typed clients are working. | [Task list](phases-and-tasks.md#p3-synthetic-enterprise-apis-and-clients) |
@@ -32,11 +33,11 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 ### P0 — Product framing and applicant strategy
 
-- [ ] Applicant story is clear and role-specific.
-- [ ] Synthetic-data and privacy boundary is documented.
-- [ ] Public source allowlist is defined.
-- [ ] Golden demo scenarios are measurable.
-- [ ] Nice-to-haves are deferred.
+- [x] Applicant story is clear and role-specific.
+- [x] Synthetic-data and privacy boundary is documented.
+- [x] Public source allowlist is defined.
+- [x] Golden demo scenarios are measurable.
+- [x] Nice-to-haves are deferred.
 
 ### P1 — Go project foundation
 

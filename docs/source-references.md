@@ -4,6 +4,32 @@
 
 This document lists recommended public content and technical references for the AskOC AI Concierge MVP. The MVP should use only approved public sources and synthetic data.
 
+## Source allowlist boundary
+
+The learner-service knowledge base for the MVP is limited to `data/seed-sources.json`.
+
+Allowlisted knowledge sources must be:
+
+- public web pages already approved in this repo,
+- directly relevant to learner-service support,
+- represented with source URL, title, department, risk level, freshness rule, and knowledge-domain metadata,
+- reviewed before demos when the source covers deadlines, fees, platform transitions, admissions, or policy.
+
+The MVP must not ingest:
+
+- private portal pages,
+- pages requiring login or learner-specific authentication,
+- myOkanagan account pages or personal dashboards,
+- Banner, CRM, LMS, payment, or student-record system data,
+- private files, email, chat exports, ticket queues, or copied learner records,
+- URLs that are not in `data/seed-sources.json`.
+
+If a question falls outside the allowlisted knowledge domains, the assistant should provide a safe fallback or create a mock staff handoff instead of guessing.
+
+## Approved learner-service seed sources
+
+The P0-T03 allowlist currently contains only the public Okanagan College URLs below. These URLs were selected from this repo's existing documentation and spot-checked as accessible public web pages on 2026-05-06.
+
 ## Okanagan College public content examples
 
 ### Office of the Registrar
@@ -58,6 +84,8 @@ https://www.okanagancollege.ca/it-services/it-security/information-security-guid
 
 ## Go technical references
 
+The references in this section are implementation references only. They are not learner-service RAG sources and should not be used to answer learner policy/procedure questions.
+
 ### Go documentation
 
 Useful for language, modules, testing, and standard tooling.
@@ -99,6 +127,8 @@ https://go.dev/doc/effective_go
 ```
 
 ## Azure and automation references
+
+The references in this section are implementation references only. They are not learner-service RAG sources and should not be used to answer learner policy/procedure questions.
 
 ### Azure for Go developers
 
@@ -187,6 +217,8 @@ Start with 10–20 public pages covering:
 - IT support.
 - Privacy/security guidance.
 
+Do not add a suggested topic to `data/seed-sources.json` until a public source URL is approved and listed there.
+
 ## Ingestion metadata template
 
 Each ingested document should store:
@@ -203,6 +235,8 @@ Each ingested document should store:
 }
 ```
 
+For the P0 allowlist, seed records also include `allowlisted`, `private_portal`, `knowledge_domains`, `requires_freshness_check`, `stale_after_days`, and `verification_basis`.
+
 ## Source freshness rule
 
 For demo purposes, any source involving fees, deadlines, platform transitions, admissions, or policy should be treated as time-sensitive.
@@ -212,3 +246,5 @@ Recommended rule:
 - Re-ingest and review before each demo.
 - Show retrieval timestamp in admin view.
 - Escalate if a question depends on a missing or stale source.
+
+If a source is stale, missing, or conflicts with another source, the assistant must not present the answer as authoritative. It should say that verified information is unavailable in the demo knowledge base and offer staff follow-up.

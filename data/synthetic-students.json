@@ -1,0 +1,122 @@
+{
+  "fixture_name": "askoc-demo-synthetic-students",
+  "fixture_version": "P0-T02",
+  "synthetic_only": true,
+  "data_notice": "All records in this file are invented for a local AskOC AI Concierge demo. They are not real Okanagan College learner, payment, transcript, or CRM records.",
+  "id_policy": {
+    "student_id_pattern": "S10000X",
+    "transaction_id_prefix": "SYNTH-PAY-",
+    "crm_case_id_prefix": "MOCK-CRM-",
+    "notes": "IDs are synthetic demo identifiers and must not be mapped to institutional systems."
+  },
+  "students": [
+    {
+      "student_id": "S100001",
+      "synthetic": true,
+      "demo_record": true,
+      "preferred_name": "Demo Learner One",
+      "program": "General Studies Demo Program",
+      "status": "active",
+      "transcript": {
+        "request_id": "SYNTH-TRN-100001",
+        "status": "ready_for_processing",
+        "requested_at": "2026-05-01T16:10:00Z",
+        "delivery_method": "electronic_demo",
+        "holds": []
+      },
+      "payment": {
+        "status": "paid",
+        "amount_due": 0,
+        "currency": "CAD",
+        "transaction_id": "SYNTH-PAY-100001"
+      },
+      "crm": {
+        "case_id": null,
+        "case_status": "none"
+      },
+      "demo_notes": "Baseline happy-path transcript scenario."
+    },
+    {
+      "student_id": "S100002",
+      "synthetic": true,
+      "demo_record": true,
+      "preferred_name": "Demo Learner Two",
+      "program": "Business Administration Demo Program",
+      "status": "active",
+      "transcript": {
+        "request_id": "SYNTH-TRN-100002",
+        "status": "blocked_by_unpaid_fee",
+        "requested_at": "2026-05-02T19:25:00Z",
+        "delivery_method": "electronic_demo",
+        "holds": [
+          "mock_payment_hold"
+        ]
+      },
+      "payment": {
+        "status": "unpaid",
+        "amount_due": 15,
+        "currency": "CAD",
+        "transaction_id": "SYNTH-PAY-100002"
+      },
+      "crm": {
+        "case_id": null,
+        "case_status": "none"
+      },
+      "demo_notes": "Core workflow scenario: trigger synthetic payment reminder."
+    },
+    {
+      "student_id": "S100003",
+      "synthetic": true,
+      "demo_record": true,
+      "preferred_name": "Demo Learner Three",
+      "program": "Science Demo Program",
+      "status": "active",
+      "transcript": {
+        "request_id": "SYNTH-TRN-100003",
+        "status": "needs_staff_review",
+        "requested_at": "2026-05-03T14:40:00Z",
+        "delivery_method": "mail_demo",
+        "holds": [
+          "mock_financial_hold"
+        ]
+      },
+      "payment": {
+        "status": "review_required",
+        "amount_due": 40,
+        "currency": "CAD",
+        "transaction_id": "SYNTH-PAY-100003"
+      },
+      "crm": {
+        "case_id": "MOCK-CRM-100003",
+        "case_status": "open"
+      },
+      "demo_notes": "Escalation scenario for unresolved hold and staff follow-up."
+    },
+    {
+      "student_id": "S100004",
+      "synthetic": true,
+      "demo_record": true,
+      "preferred_name": "Demo Learner Four",
+      "program": "Arts Demo Program",
+      "status": "inactive_demo",
+      "transcript": {
+        "request_id": "SYNTH-TRN-100004",
+        "status": "not_found",
+        "requested_at": null,
+        "delivery_method": null,
+        "holds": []
+      },
+      "payment": {
+        "status": "not_applicable",
+        "amount_due": 0,
+        "currency": "CAD",
+        "transaction_id": null
+      },
+      "crm": {
+        "case_id": "MOCK-CRM-100004",
+        "case_status": "queued"
+      },
+      "demo_notes": "Safe fallback scenario when a transcript request cannot be found in synthetic systems."
+    }
+  ]
+}

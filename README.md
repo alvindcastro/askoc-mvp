@@ -1,14 +1,14 @@
 # AskOC AI Concierge
 
-**Go/Golang portfolio MVP for an AI/Automation Solutions**
+**Go/Golang portfolio MVP for an AI/Automation Solutions Developer role**
 
-AskOC AI Concierge is a privacy-aware learner-service automation MVP designed for a higher-education digital learner experience team. It demonstrates how conversational AI, retrieval-augmented generation, workflow automation, and enterprise integrations can reduce Tier 0 and Tier 1 learner-service volume while improving response quality and routing.
+AskOC AI Concierge is a privacy-aware learner-service automation MVP designed for a higher-education digital learner experience team. It demonstrates how conversational AI, retrieval-augmented generation, workflow automation, and mock enterprise integrations can reduce Tier 0 and Tier 1 learner-service volume while improving response quality and routing.
 
 The implementation is intentionally **Go-first**: the API gateway, AI orchestrator, mock enterprise integrations, ingestion jobs, workflow simulator, audit service, and evaluation runner are all designed to be written in Go.
 
 ## One-sentence pitch
 
-AskOC AI Concierge is a **Go-based AI learner-service agent** that uses RAG, intent detection, sentiment analysis, mock Banner/CRM/LMS integrations, and Power Automate-style workflows to answer common student questions and automate transcript/payment follow-up.
+AskOC AI Concierge is a **Go-based AI learner-service agent** that uses RAG, workflow automation, mock Banner/CRM/LMS/payment integrations, and privacy-first synthetic data controls to answer common student questions and automate transcript/payment follow-up.
 
 ## Why Go for this MVP
 
@@ -46,7 +46,7 @@ The MVP focuses on one high-value use case:
 |---|---|
 | Conversational AI | Web chatbot with grounded answers and safe fallback |
 | RAG | Retrieval over curated public learner-service content |
-| Intent recognition | Transcript, fees, portal, LMS, registration, refund, application status, key dates, escalation |
+| Intent recognition | Transcript/payment workflow plus safe fallback for other learner-service questions |
 | Sentiment analysis | Flags frustrated or urgent learners for priority routing |
 | Workflow automation | Transcript payment/status follow-up and CRM routing |
 | Enterprise integration | Mock Banner, payment, CRM, LMS, and notification APIs |
@@ -193,10 +193,10 @@ Do not use real student data. Use synthetic records only.
 
 | Student ID | Name | Transcript payment | Hold | Expected result |
 |---|---|---:|---|---|
-| `S100001` | Maya Chen | Paid | None | Ready for processing |
-| `S100002` | Jordan Patel | Unpaid | None | Payment reminder workflow |
-| `S100003` | Alex Morgan | Paid | Financial hold | CRM escalation |
-| `S100004` | Sam Rivera | Unknown | None | Human handoff |
+| `S100001` | Demo Learner One | Paid | None | Ready for processing |
+| `S100002` | Demo Learner Two | Unpaid | None | Payment reminder workflow |
+| `S100003` | Demo Learner Three | Review required | Mock financial hold | CRM escalation |
+| `S100004` | Demo Learner Four | Not applicable | None | Human handoff |
 
 ## Success metrics
 
@@ -219,7 +219,7 @@ Do not use real student data. Use synthetic records only.
 - public-content RAG,
 - mock Go student/payment/CRM/LMS APIs,
 - synthetic student records,
-- transcript workflow,
+- transcript/payment workflow,
 - admin analytics dashboard,
 - privacy and audit documentation.
 
@@ -230,7 +230,8 @@ Do not use real student data. Use synthetic records only.
 - real payment processing,
 - real student records,
 - scraping private portals,
-- production fine-tuned LLM deployment.
+- production fine-tuned LLM deployment,
+- nice-to-have workflows beyond the transcript/payment demo slice.
 
 ## References for content grounding
 
