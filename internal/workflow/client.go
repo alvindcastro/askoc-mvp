@@ -27,6 +27,7 @@ type PaymentReminderResponse struct {
 	Message        string `json:"message,omitempty"`
 	IdempotencyKey string `json:"idempotency_key,omitempty"`
 	Synthetic      bool   `json:"synthetic"`
+	AttemptCount   int    `json:"attempt_count,omitempty"`
 }
 
 type PaymentReminderSender interface {
@@ -73,6 +74,7 @@ func (c *InMemoryClient) SendPaymentReminder(ctx context.Context, req PaymentRem
 		Message:        "Payment reminder workflow accepted by local deterministic P4 client.",
 		IdempotencyKey: req.IdempotencyKey,
 		Synthetic:      true,
+		AttemptCount:   1,
 	}
 	c.responses[req.IdempotencyKey] = resp
 	return resp, nil

@@ -30,6 +30,15 @@ func TestLoadFromEnvUsesSafeDefaults(t *testing.T) {
 	if cfg.Workflow.Timeout != 5*time.Second {
 		t.Fatalf("Workflow.Timeout = %s, want 5s", cfg.Workflow.Timeout)
 	}
+	if cfg.Workflow.Signature != "" {
+		t.Fatalf("Workflow.Signature = %q, want empty default", cfg.Workflow.Signature)
+	}
+	if cfg.Workflow.SignatureHeader != "X-AskOC-Workflow-Signature" {
+		t.Fatalf("Workflow.SignatureHeader = %q, want default signature header", cfg.Workflow.SignatureHeader)
+	}
+	if cfg.Workflow.MaxRetries != 1 {
+		t.Fatalf("Workflow.MaxRetries = %d, want one retry by default", cfg.Workflow.MaxRetries)
+	}
 	if cfg.Integrations.BannerURL != "http://localhost:8081" {
 		t.Fatalf("Integrations.BannerURL = %q, want mock Banner default", cfg.Integrations.BannerURL)
 	}
@@ -58,21 +67,24 @@ func TestLoadFromEnvUsesSafeDefaults(t *testing.T) {
 
 func TestLoadFromEnvUsesOverrides(t *testing.T) {
 	cfg, err := LoadFromEnv(map[string]string{
-		"ASKOC_HTTP_ADDR":                "127.0.0.1:9090",
-		"ASKOC_AUTH_ENABLED":             "true",
-		"ASKOC_AUTH_TOKEN":               "demo-token",
-		"ASKOC_LOG_LEVEL":                "debug",
-		"ASKOC_WORKFLOW_URL":             "http://workflow.local/hook",
-		"ASKOC_WORKFLOW_TIMEOUT_SECONDS": "12",
-		"ASKOC_BANNER_URL":               "http://banner.local",
-		"ASKOC_PAYMENT_URL":              "http://payment.local",
-		"ASKOC_CRM_URL":                  "http://crm.local",
-		"ASKOC_RAG_CHUNKS_PATH":          "tmp/test-rag-chunks.json",
-		"ASKOC_PROVIDER":                 "openai-compatible",
-		"ASKOC_PROVIDER_MODEL":           "gpt-demo",
-		"ASKOC_PROVIDER_ENDPOINT":        "http://llm.local/v1/chat/completions",
-		"ASKOC_PROVIDER_API_KEY":         "sk-demo-secret",
-		"ASKOC_PROVIDER_TIMEOUT_SECONDS": "9",
+		"ASKOC_HTTP_ADDR":                 "127.0.0.1:9090",
+		"ASKOC_AUTH_ENABLED":              "true",
+		"ASKOC_AUTH_TOKEN":                "demo-token",
+		"ASKOC_LOG_LEVEL":                 "debug",
+		"ASKOC_WORKFLOW_URL":              "http://workflow.local/hook",
+		"ASKOC_WORKFLOW_TIMEOUT_SECONDS":  "12",
+		"ASKOC_WORKFLOW_SIGNATURE":        "workflow-secret",
+		"ASKOC_WORKFLOW_SIGNATURE_HEADER": "X-Demo-Signature",
+		"ASKOC_WORKFLOW_MAX_RETRIES":      "2",
+		"ASKOC_BANNER_URL":                "http://banner.local",
+		"ASKOC_PAYMENT_URL":               "http://payment.local",
+		"ASKOC_CRM_URL":                   "http://crm.local",
+		"ASKOC_RAG_CHUNKS_PATH":           "tmp/test-rag-chunks.json",
+		"ASKOC_PROVIDER":                  "openai-compatible",
+		"ASKOC_PROVIDER_MODEL":            "gpt-demo",
+		"ASKOC_PROVIDER_ENDPOINT":         "http://llm.local/v1/chat/completions",
+		"ASKOC_PROVIDER_API_KEY":          "sk-demo-secret",
+		"ASKOC_PROVIDER_TIMEOUT_SECONDS":  "9",
 	})
 	if err != nil {
 		t.Fatalf("LoadFromEnv returned error: %v", err)
@@ -92,6 +104,15 @@ func TestLoadFromEnvUsesOverrides(t *testing.T) {
 	}
 	if cfg.Workflow.Timeout != 12*time.Second {
 		t.Fatalf("Workflow.Timeout = %s", cfg.Workflow.Timeout)
+	}
+	if cfg.Workflow.Signature != "workflow-secret" {
+		t.Fatalf("Workflow.Signature was not loaded")
+	}
+	if cfg.Workflow.SignatureHeader != "X-Demo-Signature" {
+		t.Fatalf("Workflow.SignatureHeader = %q", cfg.Workflow.SignatureHeader)
+	}
+	if cfg.Workflow.MaxRetries != 2 {
+		t.Fatalf("Workflow.MaxRetries = %d", cfg.Workflow.MaxRetries)
 	}
 	if cfg.Integrations.BannerURL != "http://banner.local" || cfg.Integrations.PaymentURL != "http://payment.local" || cfg.Integrations.CRMURL != "http://crm.local" {
 		t.Fatalf("Integrations = %+v", cfg.Integrations)
@@ -133,6 +154,16 @@ func TestLoadFromEnvRejectsInvalidValues(t *testing.T) {
 			name:    "negative workflow timeout",
 			env:     map[string]string{"ASKOC_WORKFLOW_TIMEOUT_SECONDS": "-1"},
 			wantErr: "ASKOC_WORKFLOW_TIMEOUT_SECONDS",
+		},
+		{
+			name:    "invalid workflow retries",
+			env:     map[string]string{"ASKOC_WORKFLOW_MAX_RETRIES": "many"},
+			wantErr: "ASKOC_WORKFLOW_MAX_RETRIES",
+		},
+		{
+			name:    "negative workflow retries",
+			env:     map[string]string{"ASKOC_WORKFLOW_MAX_RETRIES": "-1"},
+			wantErr: "ASKOC_WORKFLOW_MAX_RETRIES",
 		},
 		{
 			name:    "unsupported log level",
@@ -181,19 +212,21 @@ func TestLoadFromEnvRejectsInvalidValues(t *testing.T) {
 
 func TestConfigStringRedactsSecrets(t *testing.T) {
 	cfg, err := LoadFromEnv(map[string]string{
-		"ASKOC_AUTH_ENABLED":     "true",
-		"ASKOC_AUTH_TOKEN":       "demo-token",
-		"ASKOC_PROVIDER_API_KEY": "sk-demo-secret",
+		"ASKOC_AUTH_ENABLED":       "true",
+		"ASKOC_AUTH_TOKEN":         "demo-token",
+		"ASKOC_PROVIDER_API_KEY":   "sk-demo-secret",
+		"ASKOC_WORKFLOW_URL":       "http://workflow.local/hook?sig=url-secret",
+		"ASKOC_WORKFLOW_SIGNATURE": "workflow-secret",
 	})
 	if err != nil {
 		t.Fatalf("LoadFromEnv returned error: %v", err)
 	}
 
 	got := cfg.String()
-	if strings.Contains(got, "demo-token") || strings.Contains(got, "sk-demo-secret") {
+	if strings.Contains(got, "demo-token") || strings.Contains(got, "sk-demo-secret") || strings.Contains(got, "workflow-secret") || strings.Contains(got, "url-secret") {
 		t.Fatalf("Config.String leaked secrets: %s", got)
 	}
-	if !strings.Contains(got, "auth_token:REDACTED") || !strings.Contains(got, "provider_api_key:REDACTED") {
+	if !strings.Contains(got, "auth_token:REDACTED") || !strings.Contains(got, "provider_api_key:REDACTED") || !strings.Contains(got, "workflow_url:REDACTED") || !strings.Contains(got, "workflow_signature:REDACTED") {
 		t.Fatalf("Config.String did not mark redacted secrets: %s", got)
 	}
 }

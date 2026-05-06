@@ -128,6 +128,47 @@ func TestTranscriptStatusUnpaidRecordTriggersWorkflowAndAudit(t *testing.T) {
 	assertActionsHaveTrace(t, resp, "trace-unpaid")
 }
 
+func TestTranscriptStatusWorkflowAuditIncludesHashedIdempotencyKey(t *testing.T) {
+	deps := completeDeps()
+	workflowFake(t, deps).resp.AttemptCount = 2
+	orch := mustNew(t, deps)
+
+	_, err := orch.HandleChat(traceContext("trace-audit-hash"), domain.ChatRequest{
+		ConversationID: "conv-audit-hash",
+		Channel:        "web",
+		Message:        "I ordered my transcript but it has not been processed.",
+		StudentID:      "S100002",
+	})
+	if err != nil {
+		t.Fatalf("HandleChat returned error: %v", err)
+	}
+
+	rawKey := workflow.PaymentReminderKey("trace-audit-hash", "S100002", "official_transcript")
+	for _, event := range auditFake(t, deps).events {
+		if event.Type != audit.EventTypeWorkflow {
+			continue
+		}
+		if event.TraceID != "trace-audit-hash" || event.Action == "" || event.Status == "" {
+			t.Fatalf("workflow audit event = %+v, want trace, action, and status", event)
+		}
+		gotHash := event.Metadata["idempotency_key_hash"]
+		if gotHash == "" {
+			t.Fatalf("workflow audit event missing idempotency key hash: %+v", event)
+		}
+		if gotHash == rawKey {
+			t.Fatalf("workflow audit event stored raw idempotency key in metadata: %+v", event)
+		}
+		if event.Status == audit.StatusCompleted && event.Action == audit.ActionPaymentReminder && event.Metadata["attempt_count"] != "2" {
+			t.Fatalf("workflow audit event metadata = %+v, want retry attempt count", event.Metadata)
+		}
+		for _, value := range event.Metadata {
+			if strings.Contains(value, rawKey) {
+				t.Fatalf("workflow audit metadata leaked raw idempotency key: %+v", event)
+			}
+		}
+	}
+}
+
 func TestTranscriptStatusWorkflowFailureIsSafeAndAudited(t *testing.T) {
 	deps := completeDeps()
 	workflowFake(t, deps).err = errors.New("private webhook token leaked")

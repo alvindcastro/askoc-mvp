@@ -49,19 +49,20 @@ flowchart TD
 
 | Service | Go package/command | Responsibility |
 |---|---|---|
-| Public API | `cmd/api` | Serves chat UI, REST API, P6 provider wiring, local retrieval wiring, and chat orchestration |
+| Public API | `cmd/api` | Serves chat UI, REST API, provider wiring, local retrieval wiring, workflow client selection, and chat orchestration |
 | Orchestrator | `internal/orchestrator` | Coordinates guarded classification, prompt templates, local RAG source packaging, tools, workflow, and escalation ports |
 | RAG ingestor | `cmd/ingest` + `internal/rag` | Fetches approved public pages, cleans HTML, chunks content, and writes local JSON chunks |
 | LLM gateway | `internal/llm` | P6 provider-neutral types and tested Azure OpenAI/OpenAI-compatible REST calls |
 | Classifier | `internal/classifier` | P6 deterministic fallback, strict JSON parser, and fixture-backed intent/sentiment checks |
 | Tool clients | `internal/tools` | Typed clients for Banner, payment, CRM, LMS, notification |
-| Privacy | `internal/privacy` | Later phase: redaction, safe logging, prompt-injection checks |
-| Audit | `internal/audit` | P4 audit port types; later phase: durable interaction, source, tool-call, workflow, and feedback events |
-| Workflow | `internal/workflow` | P4 in-process idempotent workflow port; P8 adds simulator/webhook clients |
+| Privacy | `internal/privacy` | Shared redaction for logs, sessions, audit payloads, and CRM summaries |
+| Audit | `internal/audit` | Redacted in-memory event store, dashboard summaries, export, reset, purge, and workflow metrics |
+| Workflow | `internal/workflow` | In-process idempotent client, local simulator handler, idempotency hashing, and optional Power Automate-compatible webhook client |
 | Mock Banner | `cmd/mock-banner` | Synthetic student records and holds |
 | Mock payment | `cmd/mock-payment` | Synthetic transcript payment status |
 | Mock CRM | `cmd/mock-crm` | Case creation and queue routing |
 | Mock LMS | `cmd/mock-lms` | LMS account/course access simulation |
+| Workflow simulator | `cmd/workflow-sim` | Local Power Automate-style payment reminder endpoint plus protected workflow metrics/export |
 | Evaluation | `cmd/eval` | Later phase: runs JSONL test set and reports metrics |
 
 ## Recommended Go project layout
@@ -220,7 +221,7 @@ The MVP uses Go services to simulate enterprise integrations.
 
 ### 6. Automation workflow
 
-The automation layer represents Power Automate or an equivalent workflow engine.
+The automation layer represents either the local Go workflow simulator, the in-process fallback client, or Power Automate through the same webhook-compatible interface.
 
 Example workflow:
 
@@ -287,7 +288,7 @@ sequenceDiagram
     participant Orchestrator as Go Orchestrator
     participant Banner as Go Mock Banner API
     participant Payment as Go Mock Payment API
-    participant Workflow as P4 Workflow Port
+    participant Workflow as Workflow Client or Simulator
     participant CRM as Go Mock CRM API
     participant Audit as Audit Store
 
@@ -401,5 +402,5 @@ Power Automate for workflow automation
 | Prompt injection | System instruction isolation, retrieved-content treatment, allowlisted tools |
 | Privacy leak | Redaction before logging, synthetic records only, minimal CRM summaries |
 | Tool misuse | Typed tool inputs, allowlisted actions, audit logging |
-| Duplicate reminders | Idempotency key per student/workflow/window |
-| Workflow outage | Retry once, log failure, create CRM case if needed |
+| Duplicate reminders | Idempotency key per trace/student/action plus hashed idempotency metadata in audit events |
+| Workflow outage | Retry transient webhook failures within the configured limit, log safe failure, create CRM case if needed |

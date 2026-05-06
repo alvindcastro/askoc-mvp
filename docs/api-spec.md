@@ -10,11 +10,11 @@ This document defines a simple REST API surface for the AskOC AI Concierge MVP. 
 http://localhost:8080/api/v1
 ```
 
-The implemented P7 chat route is `POST http://localhost:8080/api/v1/chat`. The web chat UI is served at `GET http://localhost:8080/chat`, and the admin dashboard shell is served at `GET http://localhost:8080/admin`.
+The implemented P8 chat route is `POST http://localhost:8080/api/v1/chat`. The web chat UI is served at `GET http://localhost:8080/chat`, the admin dashboard shell is served at `GET http://localhost:8080/admin`, and the local workflow simulator exposes `POST http://localhost:8084/api/v1/automation/payment-reminder`.
 
 ## Authentication
 
-For the MVP, use a mock bearer token. Learner chat auth is disabled by default in local demo mode. P7 admin metrics, audit export, audit purge, and audit reset require `Authorization: Bearer demo-admin-token` unless `ASKOC_AUTH_TOKEN` is configured.
+For the MVP, use a mock bearer token. Learner chat auth is disabled by default in local demo mode. P8 admin metrics, audit export, audit purge, and audit reset require `Authorization: Bearer demo-admin-token` unless `ASKOC_AUTH_TOKEN` is configured.
 
 ```http
 Authorization: Bearer demo-token
@@ -55,7 +55,7 @@ X-Trace-ID: optional-client-generated-trace-id
 | `GET` | `/students/{student_id}/payment-status` | Check synthetic transcript payment status | `cmd/mock-payment` |
 | `POST` | `/crm/cases` | Create mock CRM case | `cmd/mock-crm` |
 | `GET` | `/students/{student_id}/lms-access` | Check synthetic LMS access status | `cmd/mock-lms` |
-| `POST` | `/automation/payment-reminder` | Trigger mock payment reminder workflow | `cmd/workflow-sim` or Power Automate |
+| `POST` | `/api/v1/automation/payment-reminder` on port `8084` | Trigger mock payment reminder workflow | `cmd/workflow-sim` or Power Automate-compatible webhook target |
 | `GET` | `/admin/metrics` | Get protected dashboard summary metrics | `cmd/api` |
 | `GET` | `/admin/audit/export` | Export redacted audit events with message content omitted | `cmd/api` |
 | `POST` | `/admin/audit/purge` | Purge expired in-memory demo audit events | `cmd/api` |
@@ -145,7 +145,7 @@ P6 validation and orchestration rules:
 - `student_id` is optional, but when present it must use the synthetic demo shape `S` plus six digits, such as `S100002`.
 - transcript-status messages can also include a synthetic ID in the message body, such as `My student ID is S100002`.
 - invalid JSON, validation failures, and service failures return the common safe error shape and never echo raw request bodies.
-- Default `stub` mode does not call live AI. It uses deterministic classifier logic, local retrieval over approved source chunks, typed mock Banner/payment/CRM clients, and an in-process idempotent workflow port.
+- Default `stub` mode does not call live AI. It uses deterministic classifier logic, local retrieval over approved source chunks, typed mock Banner/payment/CRM clients, and an in-process idempotent workflow client unless `ASKOC_WORKFLOW_URL` points to `cmd/workflow-sim` or a Power Automate HTTP trigger.
 - Optional `openai-compatible` mode uses a tested REST LLM gateway behind strict JSON classification parsing, versioned prompts, source-only answer validation, and deterministic fallback on model timeout or unsafe output.
 - Low-confidence classification cannot trigger Banner, payment, or workflow checks; it routes to staff handoff instead.
 - policy/procedure answers include approved source metadata or return a safe fallback when retrieval confidence is low.
@@ -367,14 +367,20 @@ Checks synthetic LMS account and demo course access status. This endpoint never 
 
 ---
 
-## `POST /automation/payment-reminder`
+## `POST /api/v1/automation/payment-reminder`
 
 Triggers a payment reminder workflow.
 
-This endpoint can be implemented by:
+This endpoint is implemented by `cmd/workflow-sim` for local development. The API can also send the same request shape to a Power Automate cloud flow with an HTTP request trigger when `ASKOC_WORKFLOW_URL` is configured.
 
-1. `cmd/workflow-sim` for local development, or
-2. Power Automate cloud flow with an HTTP request trigger.
+### Request headers from the Go webhook client
+
+```http
+Content-Type: application/json
+X-Trace-ID: trace_01JABC456
+Idempotency-Key: payment-reminder:trace_01JABC456:S100002:official_transcript
+X-AskOC-Workflow-Signature: <optional configured signature>
+```
 
 ### Request
 
@@ -395,12 +401,21 @@ This endpoint can be implemented by:
 
 ```json
 {
-  "workflow_id": "WF-2026-000789",
+  "workflow_id": "LOCAL-WF-CD66B7682DD8",
   "status": "accepted",
-  "message": "Payment reminder workflow accepted.",
-  "created_at": "2026-05-06T12:06:00Z"
+  "message": "Payment reminder workflow accepted by local deterministic P4 client.",
+  "idempotency_key": "payment-reminder:trace_01JABC456:S100002:official_transcript",
+  "synthetic": true,
+  "attempt_count": 1
 }
 ```
+
+### Errors
+
+- Invalid JSON or unknown fields return `400 invalid_workflow_request`.
+- Missing `idempotency_key`, `student_id`, or `item` returns `400 invalid_workflow_request` with safe validation guidance.
+- Duplicate idempotency keys return `202 Accepted` with the same workflow ID and do not create duplicate reminders.
+- The simulator records workflow audit metadata with `idempotency_key_hash`, not the raw idempotency key.
 
 ---
 
@@ -482,7 +497,7 @@ Exports audit events for demo troubleshooting. Requires a mock admin bearer toke
 
 ## `POST /api/v1/admin/audit/purge`
 
-Purges in-memory audit events older than the P7 default seven-day demo retention policy.
+Purges in-memory audit events older than the default seven-day demo retention policy.
 
 ### Response
 

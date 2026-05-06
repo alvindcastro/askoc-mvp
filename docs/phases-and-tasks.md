@@ -500,7 +500,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ## P8 — Workflow automation and Power Automate option
 **Phase outcome:** Workflow simulator and optional Power Automate webhook path are ready.
-- [ ] **P8-T01 — Build local workflow simulator service**  
+- [x] **P8-T01 — Build local workflow simulator service**
   **Type:** Code  
   **Goal:** Simulate Power Automate-style HTTP-triggered flows for offline demos.  
   **Primary files:** `cmd/workflow-sim/main.go`, `internal/workflow/sim_handler.go`, `internal/workflow/sim_handler_test.go`  
@@ -508,31 +508,31 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Payment reminder payload accepted.; Missing idempotency key rejected.; Duplicate idempotency key returns same workflow ID.; Invalid payload returns 400.  
   **Done when:** Simulator returns workflow ID and status.; Workflow events are visible in dashboard.
-- [ ] **P8-T02 — Implement workflow idempotency and retry policy**  
+- [x] **P8-T02 — Implement workflow idempotency and retry policy**
   **Type:** Code  
   **Goal:** Prevent duplicate payment reminders and handle transient failures safely.  
-  **Primary files:** `internal/workflow/idempotency.go`, `internal/workflow/client_test.go`  
+  **Primary files:** `internal/workflow/idempotency.go`, `internal/workflow/idempotency_test.go`, `internal/workflow/client.go`, `internal/workflow/client_test.go`, `internal/workflow/powerautomate.go`, `internal/workflow/powerautomate_test.go`
   **Prompt:** [`P8-T02` in task-prompts.md](task-prompts.md#p8-t02-implement-workflow-idempotency-and-retry-policy)  
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Same trace/student/action creates same idempotency key.; Transient 500 is retried within limit.; Permanent 400 is not retried.; Context cancellation stops retry.  
   **Done when:** No duplicate learner reminders in repeated calls.; Retry behavior is observable in audit logs.
-- [ ] **P8-T03 — Add optional Power Automate webhook client**  
+- [x] **P8-T03 — Add optional Power Automate webhook client**
   **Type:** Code  
   **Goal:** Show RPA/workflow integration relevance while keeping local simulator as default.  
-  **Primary files:** `internal/workflow/powerautomate.go`, `internal/workflow/powerautomate_test.go`  
+  **Primary files:** `internal/workflow/powerautomate.go`, `internal/workflow/powerautomate_test.go`, `internal/config/config.go`, `cmd/api/main.go`
   **Prompt:** [`P8-T03` in task-prompts.md](task-prompts.md#p8-t03-add-optional-power-automate-webhook-client)  
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Client sends expected JSON schema to `httptest.Server`.; Signature/header is included when configured.; Webhook URL missing falls back to simulator config.; Secrets are not logged.  
   **Done when:** Same interface supports simulator and Power Automate.; Docs explain secure webhook storage.
-- [ ] **P8-T04 — Audit workflow outcomes and errors**  
+- [x] **P8-T04 — Audit workflow outcomes and errors**
   **Type:** Code  
   **Goal:** Make workflow automation measurable and debuggable.  
-  **Primary files:** `internal/orchestrator/transcript.go`, `internal/audit/event.go`, `internal/workflow/client_test.go`  
+  **Primary files:** `internal/orchestrator/transcript.go`, `internal/orchestrator/orchestrator.go`, `internal/orchestrator/orchestrator_test.go`, `internal/workflow/sim_handler.go`, `internal/workflow/sim_handler_test.go`
   **Prompt:** [`P8-T04` in task-prompts.md](task-prompts.md#p8-t04-audit-workflow-outcomes-and-errors)  
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Success event recorded.; Failure event recorded with safe message.; Dashboard count increments.; No raw payload is stored.  
   **Done when:** Every workflow attempt has trace ID, action, status, and idempotency key hash.
-- [ ] **P8-T05 — Document Power Automate flow schema and setup**  
+- [x] **P8-T05 — Document Power Automate flow schema and setup**
   **Type:** Documentation  
   **Goal:** Provide enough detail for an interviewer to see how the Go webhook would connect to Power Automate.  
   **Primary files:** `docs/power-automate-flow.md`  
@@ -543,10 +543,10 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ### P8 phase gate
 
-- [ ] All P8 tasks above are complete or explicitly deferred with a reason.
-- [ ] All code tasks in P8 have failing-test evidence before implementation.
-- [ ] `go test ./...` passes after P8 code tasks.
-- [ ] Relevant docs are updated with any changed behavior or assumptions.
+- [x] All P8 tasks above are complete or explicitly deferred with a reason.
+- [x] All code tasks in P8 have failing-test evidence before implementation.
+- [x] `go test ./...` passes after P8 code tasks.
+- [x] Relevant docs are updated with any changed behavior or assumptions.
 
 ---
 

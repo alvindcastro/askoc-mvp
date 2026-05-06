@@ -9,6 +9,7 @@ import (
 	"askoc-mvp/internal/classifier"
 	"askoc-mvp/internal/config"
 	"askoc-mvp/internal/orchestrator"
+	"askoc-mvp/internal/workflow"
 )
 
 func TestBuildLLMUsesDisabledLLMForDefaultProvider(t *testing.T) {
@@ -53,6 +54,33 @@ func TestBuildClassifierUsesGuardedLLMClassifierOnlyForConfiguredProvider(t *tes
 	openAICfg := config.Config{Provider: config.ProviderConfig{Mode: "openai-compatible"}}
 	if _, ok := buildClassifier(openAICfg, orchestrator.DisabledLLM{}, audit.NopRecorder{}).(orchestrator.LLMBackedClassifier); !ok {
 		t.Fatalf("openai-compatible classifier should use LLMBackedClassifier")
+	}
+}
+
+func TestBuildWorkflowUsesInMemoryClientWhenWebhookURLIsMissing(t *testing.T) {
+	got, err := buildWorkflow(config.Config{}, http.DefaultClient)
+	if err != nil {
+		t.Fatalf("buildWorkflow returned error: %v", err)
+	}
+	if _, ok := got.(*workflow.InMemoryClient); !ok {
+		t.Fatalf("buildWorkflow returned %T, want in-memory workflow client", got)
+	}
+}
+
+func TestBuildWorkflowUsesPowerAutomateClientWhenWebhookURLIsConfigured(t *testing.T) {
+	got, err := buildWorkflow(config.Config{
+		Workflow: config.WorkflowConfig{
+			URL:             "http://workflow.local/hook",
+			Signature:       "workflow-secret",
+			SignatureHeader: "X-Demo-Signature",
+			MaxRetries:      2,
+		},
+	}, http.DefaultClient)
+	if err != nil {
+		t.Fatalf("buildWorkflow returned error: %v", err)
+	}
+	if _, ok := got.(*workflow.PowerAutomateClient); !ok {
+		t.Fatalf("buildWorkflow returned %T, want Power Automate workflow client", got)
 	}
 }
 

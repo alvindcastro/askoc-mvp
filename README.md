@@ -116,7 +116,7 @@ A task is not done until the relevant package test and `go test ./...` pass. AI,
 3. Assistant summarizes the case.
 4. Mock CRM case is created with transcript context, payment status, conversation summary, and priority flag.
 
-## Current P7 repository structure
+## Current P8 repository structure
 
 ```text
 askoc-ai-concierge/
@@ -130,6 +130,7 @@ askoc-ai-concierge/
     mock-payment/         # Synthetic transcript payment status API
     mock-crm/             # Synthetic CRM case creation API
     mock-lms/             # Synthetic LMS access-status API
+    workflow-sim/         # Local Power Automate-style workflow simulator
   internal/
     audit/
     classifier/
@@ -158,9 +159,9 @@ askoc-ai-concierge/
     ...
 ```
 
-The current chat API uses P7 guarded orchestration: deterministic fallback intent/sentiment classification remains the default, while optional `openai-compatible` provider mode adds a tested REST LLM gateway, strict JSON classification parsing, versioned prompts, source-only answer guardrails, local RAG retrieval over approved public chunks, typed mock Banner/payment/CRM clients, an in-process idempotent payment-reminder workflow port, a safe action trace, CRM handoff routing for holds, urgent sentiment, low confidence, or explicit human handoff, shared PII redaction, an in-memory audit event store, protected admin metrics, a minimal dashboard, and audit export/reset/purge controls. Later phases add the standalone workflow simulator, evaluation runner, Docker, and optional external workflow webhook path.
+The current chat API uses P8 guarded orchestration: deterministic fallback intent/sentiment classification remains the default, while optional `openai-compatible` provider mode adds a tested REST LLM gateway, strict JSON classification parsing, versioned prompts, source-only answer guardrails, local RAG retrieval over approved public chunks, typed mock Banner/payment/CRM clients, idempotent payment-reminder workflow clients, a standalone local workflow simulator, an optional Power Automate-compatible webhook client with retry and signature headers, a safe action trace, CRM handoff routing for holds, urgent sentiment, low confidence, or explicit human handoff, shared PII redaction, an in-memory audit event store, protected admin metrics, a minimal dashboard, and audit export/reset/purge controls. Later phases add the evaluation runner, Docker, and CI repeatability.
 
-## Current P7 commands
+## Current P8 commands
 
 ```bash
 make dev
@@ -169,13 +170,14 @@ make test-race
 go test ./...
 go vet ./...
 go run ./cmd/ingest -sources data/seed-sources.json -out data/rag-chunks.json
+go run ./cmd/workflow-sim
 go run ./cmd/mock-banner
 go run ./cmd/mock-payment
 go run ./cmd/mock-crm
 go run ./cmd/mock-lms
 ```
 
-For the full P7 transcript-status demo, start the mock Banner, payment, and CRM services in separate terminals before `make dev`. The API loads local RAG chunks from `data/rag-chunks.json` at startup and talks to typed mock services through configurable local URLs. Auth is disabled by default for learner chat. Admin metrics, audit export, purge, and reset routes require a bearer token; by default use `demo-admin-token`, or set `ASKOC_AUTH_TOKEN=<demo-token>` to reuse the configured mock token.
+For the full P8 transcript-status demo, start the mock Banner, payment, CRM, and optionally workflow simulator services in separate terminals before `make dev`. The API loads local RAG chunks from `data/rag-chunks.json` at startup and talks to typed mock services through configurable local URLs. If `ASKOC_WORKFLOW_URL` is empty, the API uses the in-process idempotent workflow client; set `ASKOC_WORKFLOW_URL=http://localhost:8084/api/v1/automation/payment-reminder` to route reminders through `cmd/workflow-sim`, or point it at a Power Automate HTTP trigger for the optional webhook path. Auth is disabled by default for learner chat. Admin metrics, audit export, purge, and reset routes require a bearer token; by default use `demo-admin-token`, or set `ASKOC_AUTH_TOKEN=<demo-token>` to reuse the configured mock token.
 
 Current environment settings:
 
@@ -185,8 +187,11 @@ Current environment settings:
 | `ASKOC_AUTH_ENABLED` | `false` | Enables mock bearer-token auth |
 | `ASKOC_AUTH_TOKEN` | empty | Demo bearer token when auth is enabled |
 | `ASKOC_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, or `error` |
-| `ASKOC_WORKFLOW_URL` | empty | Future workflow webhook URL |
-| `ASKOC_WORKFLOW_TIMEOUT_SECONDS` | `5` | Tool client timeout; P8 reuses this for external workflow calls |
+| `ASKOC_WORKFLOW_URL` | empty | Optional workflow webhook URL; empty uses the in-process client; redacted from config output |
+| `ASKOC_WORKFLOW_TIMEOUT_SECONDS` | `5` | Tool and workflow webhook client timeout |
+| `ASKOC_WORKFLOW_SIGNATURE` | empty | Optional workflow webhook signature/header value; redacted from config output |
+| `ASKOC_WORKFLOW_SIGNATURE_HEADER` | `X-AskOC-Workflow-Signature` | Header name used when `ASKOC_WORKFLOW_SIGNATURE` is set |
+| `ASKOC_WORKFLOW_MAX_RETRIES` | `1` | Retry count for transient workflow webhook `5xx` responses |
 | `ASKOC_BANNER_URL` | `http://localhost:8081` | Mock Banner base URL used by P4 orchestration |
 | `ASKOC_PAYMENT_URL` | `http://localhost:8082` | Mock payment base URL used by P4 orchestration |
 | `ASKOC_CRM_URL` | `http://localhost:8083` | Mock CRM base URL used by P4 orchestration |
@@ -210,11 +215,12 @@ Readiness: http://localhost:8080/readyz
 Mock Banner:  http://localhost:8081/api/v1/students/S100002
 Mock Payment: http://localhost:8082/api/v1/students/S100002/payment-status
 Mock CRM:     http://localhost:8083/api/v1/crm/cases
+Workflow Sim: http://localhost:8084/api/v1/automation/payment-reminder
 Mock LMS:     http://localhost:8085/api/v1/students/S100001/lms-access?course_id=DEMO-LMS-101
 ```
 
 The chat API validates JSON requests, rejects empty or oversized messages, accepts synthetic student IDs in the `S` plus six digits format, includes trace IDs in responses and action results, routes transcript/payment decisions through the orchestrator, and uses P5 retrieval plus P6 source guardrails for transcript-request answers.
-P3 tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors. P4 adds deterministic classifier/orchestrator tests and an in-process workflow port that returns idempotent synthetic workflow IDs until the P8 simulator exists. P5 adds allowlist parsing, deterministic ingestion, chunking, local retrieval, and stale/high-risk source fallback tests. P6 adds the optional tested LLM gateway, strict JSON parser, prompt golden tests, classification fixtures, and low-confidence/source guardrails. P7 adds shared redaction for logs, sessions, audit payloads, and CRM summaries; audit events for orchestrator actions, workflow outcomes, guardrails, and escalations; protected aggregate admin metrics; redacted review queue items; and demo audit retention/export/reset controls.
+P3 tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors. P4 adds deterministic classifier/orchestrator tests and an in-process workflow port that returns idempotent synthetic workflow IDs. P5 adds allowlist parsing, deterministic ingestion, chunking, local retrieval, and stale/high-risk source fallback tests. P6 adds the optional tested LLM gateway, strict JSON parser, prompt golden tests, classification fixtures, and low-confidence/source guardrails. P7 adds shared redaction for logs, sessions, audit payloads, and CRM summaries; audit events for orchestrator actions, workflow outcomes, guardrails, and escalations; protected aggregate admin metrics; redacted review queue items; and demo audit retention/export/reset controls. P8 adds `cmd/workflow-sim`, a Power Automate-compatible HTTP client, idempotency-key hashing in workflow audit metadata, and retry attempt counts for webhook responses.
 
 ## Demo data policy
 
@@ -251,6 +257,7 @@ The same fixture now includes synthetic LMS account status and demo course-acces
 - mock Go student/payment/CRM/LMS APIs,
 - synthetic student records,
 - transcript/payment workflow,
+- local workflow simulator and optional webhook path,
 - admin analytics dashboard,
 - privacy and audit documentation.
 

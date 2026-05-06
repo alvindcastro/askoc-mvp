@@ -24,8 +24,11 @@ type AuthConfig struct {
 }
 
 type WorkflowConfig struct {
-	URL     string
-	Timeout time.Duration
+	URL             string
+	Timeout         time.Duration
+	Signature       string
+	SignatureHeader string
+	MaxRetries      int
 }
 
 type ProviderConfig struct {
@@ -59,8 +62,11 @@ func LoadFromEnv(env map[string]string) (Config, error) {
 			Token:   value(env, "ASKOC_AUTH_TOKEN", ""),
 		},
 		Workflow: WorkflowConfig{
-			URL:     value(env, "ASKOC_WORKFLOW_URL", ""),
-			Timeout: 5 * time.Second,
+			URL:             value(env, "ASKOC_WORKFLOW_URL", ""),
+			Timeout:         5 * time.Second,
+			Signature:       value(env, "ASKOC_WORKFLOW_SIGNATURE", ""),
+			SignatureHeader: value(env, "ASKOC_WORKFLOW_SIGNATURE_HEADER", "X-AskOC-Workflow-Signature"),
+			MaxRetries:      1,
 		},
 		Provider: ProviderConfig{
 			Mode:     value(env, "ASKOC_PROVIDER", "stub"),
@@ -94,6 +100,14 @@ func LoadFromEnv(env map[string]string) (Config, error) {
 		return Config{}, err
 	}
 	cfg.Workflow.Timeout = timeout
+	maxRetries, err := parseNonNegativeInt(env, "ASKOC_WORKFLOW_MAX_RETRIES", 1)
+	if err != nil {
+		return Config{}, err
+	}
+	cfg.Workflow.MaxRetries = maxRetries
+	if strings.TrimSpace(cfg.Workflow.SignatureHeader) == "" {
+		return Config{}, fmt.Errorf("ASKOC_WORKFLOW_SIGNATURE_HEADER must not be empty")
+	}
 
 	if !validLogLevel(cfg.LogLevel) {
 		return Config{}, fmt.Errorf("ASKOC_LOG_LEVEL must be one of debug, info, warn, error")
@@ -131,13 +145,16 @@ func (c Config) String() string {
 		providerKey = "REDACTED"
 	}
 	return fmt.Sprintf(
-		"http_addr:%s log_level:%s auth_enabled:%t auth_token:%s workflow_url:%s workflow_timeout:%s banner_url:%s payment_url:%s crm_url:%s rag_chunks_path:%s provider:%s provider_model:%s provider_endpoint:%s provider_timeout:%s provider_api_key:%s",
+		"http_addr:%s log_level:%s auth_enabled:%t auth_token:%s workflow_url:%s workflow_timeout:%s workflow_signature:%s workflow_signature_header:%s workflow_max_retries:%d banner_url:%s payment_url:%s crm_url:%s rag_chunks_path:%s provider:%s provider_model:%s provider_endpoint:%s provider_timeout:%s provider_api_key:%s",
 		c.HTTPAddr,
 		c.LogLevel,
 		c.Auth.Enabled,
 		authToken,
-		c.Workflow.URL,
+		redactIfPresent(c.Workflow.URL),
 		c.Workflow.Timeout,
+		redactIfPresent(c.Workflow.Signature),
+		c.Workflow.SignatureHeader,
+		c.Workflow.MaxRetries,
 		c.Integrations.BannerURL,
 		c.Integrations.PaymentURL,
 		c.Integrations.CRMURL,
@@ -193,6 +210,28 @@ func parsePositiveSeconds(env map[string]string, key string, fallback int) (time
 		return 0, fmt.Errorf("%s must be greater than zero", key)
 	}
 	return time.Duration(seconds) * time.Second, nil
+}
+
+func parseNonNegativeInt(env map[string]string, key string, fallback int) (int, error) {
+	raw, ok := env[key]
+	if !ok || strings.TrimSpace(raw) == "" {
+		return fallback, nil
+	}
+	got, err := strconv.Atoi(raw)
+	if err != nil {
+		return 0, fmt.Errorf("%s must be a whole number: %w", key, err)
+	}
+	if got < 0 {
+		return 0, fmt.Errorf("%s must not be negative", key)
+	}
+	return got, nil
+}
+
+func redactIfPresent(value string) string {
+	if value == "" {
+		return ""
+	}
+	return "REDACTED"
 }
 
 func validLogLevel(level string) bool {

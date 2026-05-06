@@ -33,7 +33,7 @@ cmd/api or internal/workflow
 
 ### Option B: Local Go workflow simulator
 
-For a fully local P8 demo, `cmd/workflow-sim` simulates the Power Automate flow. P4 currently uses the same request/response shape through an in-process idempotent workflow port so transcript orchestration can be tested before the standalone simulator exists.
+For a fully local P8 demo, `cmd/workflow-sim` simulates the Power Automate flow. The API still defaults to the in-process idempotent workflow client when `ASKOC_WORKFLOW_URL` is empty, and can call either `cmd/workflow-sim` or a Power Automate HTTP trigger by setting `ASKOC_WORKFLOW_URL`.
 
 ```text
 cmd/api
@@ -42,7 +42,7 @@ cmd/api
 → workflow-sim returns workflow ID
 ```
 
-Recommended approach: build Option B first, then add Option A as a webhook-compatible extension.
+The implemented approach keeps Option B as the reliable offline demo path and Option A as a webhook-compatible extension behind the same `PaymentReminderSender` interface.
 
 ## Trigger payload
 
@@ -66,7 +66,9 @@ Recommended approach: build Option B first, then add Option A as a webhook-compa
   "workflow_id": "WF-2026-000789",
   "status": "accepted",
   "message": "Payment reminder workflow accepted.",
-  "created_at": "2026-05-06T12:06:00Z"
+  "idempotency_key": "payment-reminder:trace_01JABC456:S100002:official_transcript",
+  "synthetic": true,
+  "attempt_count": 1
 }
 ```
 
@@ -94,6 +96,7 @@ type PaymentReminderResponse struct {
     Message        string `json:"message,omitempty"`
     IdempotencyKey string `json:"idempotency_key,omitempty"`
     Synthetic      bool   `json:"synthetic"`
+    AttemptCount   int    `json:"attempt_count,omitempty"`
 }
 ```
 
@@ -104,6 +107,8 @@ The Go client should:
 - use a short timeout,
 - include `X-Trace-ID`,
 - include an idempotency key,
+- include `Idempotency-Key`,
+- include `X-AskOC-Workflow-Signature` when `ASKOC_WORKFLOW_SIGNATURE` is configured,
 - retry at most once for transient failures,
 - never include sensitive raw conversation text,
 - return a safe error to the orchestrator if the workflow fails.
@@ -120,6 +125,16 @@ if err != nil {
 }
 ```
 
+Implemented runtime settings:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `ASKOC_WORKFLOW_URL` | empty | Empty uses the in-process client; set to `http://localhost:8084/api/v1/automation/payment-reminder` for `cmd/workflow-sim` or to a Power Automate trigger URL for webhook mode; redacted from config output |
+| `ASKOC_WORKFLOW_TIMEOUT_SECONDS` | `5` | HTTP client timeout |
+| `ASKOC_WORKFLOW_SIGNATURE` | empty | Optional shared signature/header value; redacted from config output and never logged |
+| `ASKOC_WORKFLOW_SIGNATURE_HEADER` | `X-AskOC-Workflow-Signature` | Header name used with the signature value |
+| `ASKOC_WORKFLOW_MAX_RETRIES` | `1` | Number of retries for transient `5xx` webhook responses |
+
 ## Workflow decision table
 
 | Transcript status | Payment status | Hold | Sentiment | Workflow action |
@@ -135,15 +150,15 @@ if err != nil {
 
 ### `POST /api/v1/automation/payment-reminder`
 
-Accepts the trigger payload and returns a workflow ID.
-
-### `GET /api/v1/workflows/{workflow_id}`
-
-Returns status for demo dashboard.
+Accepts the trigger payload and returns `202 Accepted` with a deterministic workflow ID, status, idempotency key, `synthetic: true`, and `attempt_count: 1`. Invalid JSON, missing idempotency keys, missing student IDs, and missing items return safe `400` errors. Duplicate idempotency keys return the same workflow ID.
 
 ### `GET /healthz`
 
 Service health check.
+
+### `GET /api/v1/admin/metrics`
+
+Protected with `Authorization: Bearer demo-admin-token`. Shows workflow event counts from the simulator's in-memory audit store.
 
 ## Power Automate flow outline
 
@@ -152,8 +167,8 @@ Service health check.
 3. Check idempotency key against storage or mock list.
 4. Compose learner notification text.
 5. Send email/Teams-style notification.
-6. POST workflow event back to Go audit endpoint.
-7. Return workflow result.
+6. Return workflow result with the original idempotency key and a workflow ID.
+7. Keep any callback/audit endpoint optional for future hardening; the current Go API audits workflow attempts around the client call.
 
 ## Example learner notification
 
@@ -170,13 +185,18 @@ Reference: WF-2026-000789
 
 ```json
 {
-  "event_type": "workflow.payment_reminder.accepted",
   "trace_id": "trace_01JABC456",
   "conversation_id": "conv_01JABC123",
   "student_id": "S100002",
-  "workflow_id": "WF-2026-000789",
-  "idempotency_key": "payment-reminder:trace_01JABC456:S100002:official_transcript",
-  "created_at": "2026-05-06T12:06:00Z"
+  "type": "workflow",
+  "action": "workflow_payment_reminder",
+  "status": "completed",
+  "reference_id": "WF-2026-000789",
+  "metadata": {
+    "idempotency_key_hash": "sha256-hex-value",
+    "attempt_count": "1"
+  },
+  "recorded_at": "2026-05-06T12:06:00Z"
 }
 ```
 
@@ -187,6 +207,9 @@ Reference: WF-2026-000789
 - Use synthetic student IDs only in the demo.
 - Keep notification content generic.
 - Record workflow IDs for audit and troubleshooting.
+- Store webhook URLs and signatures in environment variables or a secret manager, never in committed files.
+- Treat Power Automate trigger URLs as secrets because they often contain query-string tokens.
+- Use idempotency keys and signature headers for replay protection; reject duplicate keys rather than sending duplicate reminders.
 
 ## Failure handling
 

@@ -5,9 +5,9 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 ## Roadmap rules
 
 - [x] Freeze the MVP around transcript/payment support, source-grounded answers, workflow automation, escalation, and dashboard evidence.
-- [ ] Use Go for backend services, mock integrations, workflow simulator, ingestion, evaluation, and dashboards unless a task explicitly says otherwise.
+- [x] Use Go for backend services, mock integrations, workflow simulator, ingestion, and dashboards unless a task explicitly says otherwise.
 - [x] Use synthetic learner records only.
-- [ ] Enforce [Strict TDD Policy](tdd-policy.md) on every code task.
+- [x] Enforce [Strict TDD Policy](tdd-policy.md) on every completed code task.
 - [x] Do not connect to real Banner, CRM, LMS, payment, authentication, or private portal systems.
 - [x] Defer nice-to-have workflows and real integrations until after the MVP.
 
@@ -23,7 +23,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 | [x] | P5 — RAG ingestion and source-grounded answers | Approved-source ingestion and retrieval produce grounded responses. | [Task list](phases-and-tasks.md#p5-rag-ingestion-and-source-grounded-answers) |
 | [x] | P6 — LLM gateway and structured classification | LLM gateway, strict JSON classification, prompts, and guardrails are testable. | [Task list](phases-and-tasks.md#p6-llm-gateway-and-structured-classification) |
 | [x] | P7 — Privacy, audit, and dashboard | Privacy redaction, audit events, and dashboard metrics are in place. | [Task list](phases-and-tasks.md#p7-privacy-audit-and-dashboard) |
-| [ ] | P8 — Workflow automation and Power Automate option | Workflow simulator and optional Power Automate webhook path are ready. | [Task list](phases-and-tasks.md#p8-workflow-automation-and-power-automate-option) |
+| [x] | P8 — Workflow automation and Power Automate option | Workflow simulator and optional Power Automate webhook path are ready. | [Task list](phases-and-tasks.md#p8-workflow-automation-and-power-automate-option) |
 | [ ] | P9 — Evaluation runner and quality gates | Evaluation runner produces quality reports and fails critical regressions. | [Task list](phases-and-tasks.md#p9-evaluation-runner-and-quality-gates) |
 | [ ] | P10 — Docker, CI, and local developer experience | Docker, CI, env safety, and smoke test support repeatable demos. | [Task list](phases-and-tasks.md#p10-docker-ci-and-local-developer-experience) |
 | [ ] | P11 — Portfolio polish and interview readiness | Portfolio materials are polished for interview presentation. | [Task list](phases-and-tasks.md#p11-portfolio-polish-and-interview-readiness) |
@@ -98,11 +98,11 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 ### P8 — Workflow automation and Power Automate option
 
-- [ ] Local workflow simulator is tested.
-- [ ] Idempotency prevents duplicate reminders.
-- [ ] Optional Power Automate client uses same interface as simulator.
-- [ ] Workflow success/failure events are audited.
-- [ ] Webhook schema and security notes are documented.
+- [x] Local workflow simulator is tested.
+- [x] Idempotency prevents duplicate reminders.
+- [x] Optional Power Automate client uses same interface as simulator.
+- [x] Workflow success/failure events are audited.
+- [x] Webhook schema and security notes are documented.
 
 ### P9 — Evaluation runner and quality gates
 
@@ -145,16 +145,16 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 - [x] P5 local RAG over curated source snippets.
 - [x] P6 fallback classifier plus optional LLM client.
 - [x] P7 redaction, audit store, and dashboard endpoint.
-- [ ] P8 local workflow simulator.
+- [x] P8 local workflow simulator and optional webhook client.
 - [ ] `go test ./...` and `make smoke` pass.
 
 ### 2-week version
 
-- [ ] P1-P8 complete.
+- [x] P1-P8 complete.
 - [ ] P9 evaluation runner and quality gates.
 - [ ] P10 Docker Compose and CI.
 - [ ] P11 polished portfolio docs and demo assets.
-- [ ] Optional Power Automate webhook integration.
+- [x] Optional Power Automate webhook integration.
 
 ## Recommended build order
 
@@ -166,6 +166,6 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 6. P5-T01 to P5-T05: add grounded retrieval.
 7. P6-T01 to P6-T05: add LLM capability behind tests and guardrails.
 8. P7-T01 to P7-T06: add redaction, audit storage, dashboard metrics, and retention controls.
-9. P8-T01 to P8-T04: complete automation story.
+9. P8-T01 to P8-T05: complete automation story and document webhook setup.
 10. P9 and P10: prove quality and repeatability.
 11. P11: polish the portfolio.

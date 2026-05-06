@@ -2,7 +2,9 @@ package orchestrator
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"askoc-mvp/internal/audit"
@@ -94,10 +96,11 @@ func (o *Orchestrator) handleUnpaidTranscript(ctx context.Context, req domain.Ch
 		TraceID:        traceID(ctx),
 		ConversationID: resp.ConversationID,
 		StudentID:      req.StudentID,
-		Type:           "workflow",
-		Action:         "workflow_payment_reminder",
-		Status:         "attempted",
+		Type:           audit.EventTypeWorkflow,
+		Action:         audit.ActionPaymentReminder,
+		Status:         audit.StatusAttempted,
 		Message:        "payment reminder workflow attempted",
+		Metadata:       workflowAuditMetadata(key, 0),
 	})
 
 	workflowResp, err := o.workflow.SendPaymentReminder(ctx, reminder)
@@ -106,10 +109,11 @@ func (o *Orchestrator) handleUnpaidTranscript(ctx context.Context, req domain.Ch
 			TraceID:        traceID(ctx),
 			ConversationID: resp.ConversationID,
 			StudentID:      req.StudentID,
-			Type:           "workflow",
-			Action:         "workflow_payment_reminder",
-			Status:         "failed",
+			Type:           audit.EventTypeWorkflow,
+			Action:         audit.ActionPaymentReminder,
+			Status:         audit.StatusFailed,
 			Message:        "payment reminder workflow failed",
+			Metadata:       workflowAuditMetadata(key, workflowAttemptCount(err)),
 		})
 		resp.Answer = "Your synthetic transcript request is blocked by an unpaid demo balance, but I could not confirm the reminder workflow. No duplicate reminder was created."
 		resp.Actions = append(resp.Actions, withIdempotency(o.action(ctx, "payment_reminder_triggered", domain.ActionStatusPending, "Payment reminder workflow could not be confirmed.", ""), key))
@@ -120,11 +124,12 @@ func (o *Orchestrator) handleUnpaidTranscript(ctx context.Context, req domain.Ch
 		TraceID:        traceID(ctx),
 		ConversationID: resp.ConversationID,
 		StudentID:      req.StudentID,
-		Type:           "workflow",
-		Action:         "workflow_payment_reminder",
-		Status:         "completed",
+		Type:           audit.EventTypeWorkflow,
+		Action:         audit.ActionPaymentReminder,
+		Status:         audit.StatusCompleted,
 		ReferenceID:    workflowResp.WorkflowID,
 		Message:        "payment reminder workflow accepted",
+		Metadata:       workflowAuditMetadata(key, workflowResp.AttemptCount),
 	})
 
 	resp.Answer = fmt.Sprintf("Your synthetic transcript request %s is blocked by an unpaid demo balance of %.2f %s. I triggered a synthetic payment reminder workflow.", status.TranscriptRequestID, payment.AmountDue, payment.Currency)
@@ -134,6 +139,24 @@ func (o *Orchestrator) handleUnpaidTranscript(ctx context.Context, req domain.Ch
 
 func (o *Orchestrator) recordAudit(ctx context.Context, event audit.Event) {
 	_ = o.audit.Record(ctx, event)
+}
+
+func workflowAuditMetadata(idempotencyKey string, attemptCount int) map[string]string {
+	metadata := map[string]string{
+		"idempotency_key_hash": workflow.IdempotencyKeyHash(idempotencyKey),
+	}
+	if attemptCount > 0 {
+		metadata["attempt_count"] = strconv.Itoa(attemptCount)
+	}
+	return metadata
+}
+
+func workflowAttemptCount(err error) int {
+	var statusErr *workflow.StatusError
+	if errors.As(err, &statusErr) {
+		return statusErr.AttemptCount
+	}
+	return 0
 }
 
 func studentIDFrom(req domain.ChatRequest) string {
