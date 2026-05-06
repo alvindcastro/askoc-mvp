@@ -235,7 +235,7 @@ Each ingested document should store:
 }
 ```
 
-For the P0 allowlist, seed records also include `allowlisted`, `private_portal`, `knowledge_domains`, `requires_freshness_check`, `stale_after_days`, and `verification_basis`.
+For the P5 allowlist, seed records also include `allowlisted`, `private_portal`, `knowledge_domains`, `requires_freshness_check`, `stale_after_days`, `retrieved_at`, `freshness_status`, and `verification_basis`. `cmd/ingest` writes approved local chunks to `data/rag-chunks.json` with source ID, chunk ID, content hash, risk level, and freshness status.
 
 ## Source freshness rule
 

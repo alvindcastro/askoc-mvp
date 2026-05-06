@@ -16,6 +16,7 @@ import (
 	"askoc-mvp/internal/handlers"
 	"askoc-mvp/internal/middleware"
 	"askoc-mvp/internal/orchestrator"
+	"askoc-mvp/internal/rag"
 	"askoc-mvp/internal/tools"
 	"askoc-mvp/internal/workflow"
 )
@@ -33,9 +34,10 @@ func main() {
 
 	mux := http.NewServeMux()
 	toolHTTPClient := &http.Client{Timeout: cfg.Workflow.Timeout}
+	retriever := buildRetriever(context.Background(), cfg.RAG.ChunksPath, logger)
 	chatService, err := orchestrator.New(orchestrator.Dependencies{
 		Classifier: classifier.Fallback{},
-		Retriever:  orchestrator.DisabledRetriever{},
+		Retriever:  retriever,
 		LLM:        orchestrator.DisabledLLM{},
 		Banner:     tools.NewBannerClient(cfg.Integrations.BannerURL, toolHTTPClient),
 		Payment:    tools.NewPaymentClient(cfg.Integrations.PaymentURL, toolHTTPClient),
@@ -86,6 +88,19 @@ func main() {
 		logger.Error("api shutdown failed", "error", err)
 		os.Exit(1)
 	}
+}
+
+func buildRetriever(ctx context.Context, chunksPath string, logger *slog.Logger) orchestrator.Retriever {
+	chunks, err := rag.LoadChunks(ctx, chunksPath)
+	if err != nil {
+		logger.Warn("local RAG chunks unavailable; source-grounded answers will use safe fallback", "path", chunksPath, "error", err)
+		return orchestrator.DisabledRetriever{}
+	}
+	if len(chunks) == 0 {
+		logger.Warn("local RAG chunks file is empty; source-grounded answers will use safe fallback", "path", chunksPath)
+		return orchestrator.DisabledRetriever{}
+	}
+	return rag.NewLocalRetriever(chunks)
 }
 
 func logLevel(level string) slog.Level {

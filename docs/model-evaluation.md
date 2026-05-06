@@ -84,6 +84,8 @@ Example:
 
 ## RAG evaluation rubric
 
+P5 provides the first deterministic local RAG baseline: `internal/rag` tests validate allowlist parsing, ingestion boundaries, chunk metadata, local ranking, and freshness/risk handling; `internal/orchestrator` tests validate grounded answer packaging and safe fallback. P9 will turn these checks into a broader dataset runner.
+
 | Score | Meaning |
 |---:|---|
 | 5 | Correct answer, correct source, concise, no unsupported claims |

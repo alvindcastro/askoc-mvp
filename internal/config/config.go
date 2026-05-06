@@ -15,6 +15,7 @@ type Config struct {
 	Workflow     WorkflowConfig
 	Provider     ProviderConfig
 	Integrations IntegrationConfig
+	RAG          RAGConfig
 }
 
 type AuthConfig struct {
@@ -37,6 +38,10 @@ type IntegrationConfig struct {
 	BannerURL  string
 	PaymentURL string
 	CRMURL     string
+}
+
+type RAGConfig struct {
+	ChunksPath string
 }
 
 func Load() (Config, error) {
@@ -65,6 +70,9 @@ func LoadFromEnv(env map[string]string) (Config, error) {
 			PaymentURL: value(env, "ASKOC_PAYMENT_URL", "http://localhost:8082"),
 			CRMURL:     value(env, "ASKOC_CRM_URL", "http://localhost:8083"),
 		},
+		RAG: RAGConfig{
+			ChunksPath: value(env, "ASKOC_RAG_CHUNKS_PATH", "data/rag-chunks.json"),
+		},
 	}
 
 	if strings.TrimSpace(cfg.HTTPAddr) == "" {
@@ -86,6 +94,9 @@ func LoadFromEnv(env map[string]string) (Config, error) {
 	if !validLogLevel(cfg.LogLevel) {
 		return Config{}, fmt.Errorf("ASKOC_LOG_LEVEL must be one of debug, info, warn, error")
 	}
+	if strings.TrimSpace(cfg.RAG.ChunksPath) == "" {
+		return Config{}, fmt.Errorf("ASKOC_RAG_CHUNKS_PATH must not be empty")
+	}
 
 	return cfg, nil
 }
@@ -100,7 +111,7 @@ func (c Config) String() string {
 		providerKey = "REDACTED"
 	}
 	return fmt.Sprintf(
-		"http_addr:%s log_level:%s auth_enabled:%t auth_token:%s workflow_url:%s workflow_timeout:%s banner_url:%s payment_url:%s crm_url:%s provider:%s provider_model:%s provider_api_key:%s",
+		"http_addr:%s log_level:%s auth_enabled:%t auth_token:%s workflow_url:%s workflow_timeout:%s banner_url:%s payment_url:%s crm_url:%s rag_chunks_path:%s provider:%s provider_model:%s provider_api_key:%s",
 		c.HTTPAddr,
 		c.LogLevel,
 		c.Auth.Enabled,
@@ -110,6 +121,7 @@ func (c Config) String() string {
 		c.Integrations.BannerURL,
 		c.Integrations.PaymentURL,
 		c.Integrations.CRMURL,
+		c.RAG.ChunksPath,
 		c.Provider.Mode,
 		c.Provider.Model,
 		providerKey,

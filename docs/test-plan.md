@@ -8,7 +8,7 @@ All Go code tasks are governed by [TDD Policy](tdd-policy.md). For each code tas
 
 ## Purpose
 
-This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, and protect privacy in a Go-based demo environment. P4 currently covers deterministic classifier, transcript/payment orchestration, in-process workflow idempotency, mock CRM handoff, and safe action traces; RAG, durable audit/dashboard, and the standalone workflow simulator remain later-phase coverage.
+This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, and protect privacy in a Go-based demo environment. P5 currently covers deterministic classifier, local approved-source RAG retrieval, transcript/payment orchestration, in-process workflow idempotency, mock CRM handoff, source fallback, and safe action traces; durable audit/dashboard and the standalone workflow simulator remain later-phase coverage.
 
 ## Test objectives
 
@@ -26,7 +26,7 @@ This test plan verifies that AskOC AI Concierge can answer learner-service quest
 |---|---|
 | Frontend | Go server-rendered web chat or optional React UI |
 | Backend | Go `cmd/api` local container |
-| Knowledge base | P4 transcript source placeholder; P5 adds approved public-page indexing |
+| Knowledge base | P5 local JSON chunks from approved public sources in `data/rag-chunks.json` |
 | Mock Banner API | Go service with synthetic student records |
 | Mock Payment API | Go service with synthetic payment records |
 | Mock CRM API | Go service with synthetic case creation |
@@ -38,12 +38,13 @@ This test plan verifies that AskOC AI Concierge can answer learner-service quest
 ```bash
 go test ./...
 go test ./internal/classifier ./internal/workflow ./internal/orchestrator
+go test ./internal/rag ./internal/orchestrator
 go test ./internal/domain ./internal/validation ./internal/handlers ./internal/session
 go test -race ./internal/session
 go test ./internal/orchestrator -run 'TestTranscriptStatus|TestUrgent|TestLowConfidence'
 ```
 
-P4 verification uses the package-specific classifier, workflow, and orchestrator tests plus `go test ./...`. Privacy, evaluation, dashboard, and broad race coverage remain later-phase checks unless those packages exist.
+P5 verification uses the package-specific RAG, classifier, workflow, and orchestrator tests plus `go test ./...`. Privacy, evaluation, dashboard, and broad race coverage remain later-phase checks unless those packages exist.
 
 ## Test data
 
@@ -206,6 +207,7 @@ func TestRedact(t *testing.T) {
 | Source required | No policy answer without source |
 | No unsupported claims | Answer facts map to retrieved chunks |
 | Freshness metadata | Source date/indexed date available |
+| Stale/high-risk source handling | Assistant asks for staff confirmation instead of presenting the answer as authoritative |
 | Conflicting content | Assistant escalates or asks for clarification |
 
 ## Automation tests

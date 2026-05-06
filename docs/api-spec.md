@@ -10,7 +10,7 @@ This document defines a simple REST API surface for the AskOC AI Concierge MVP. 
 http://localhost:8080/api/v1
 ```
 
-The implemented P4 chat route is `POST http://localhost:8080/api/v1/chat`. The web chat UI is served at `GET http://localhost:8080/chat`.
+The implemented P5 chat route is `POST http://localhost:8080/api/v1/chat`. The web chat UI is served at `GET http://localhost:8080/chat`.
 
 ## Authentication
 
@@ -88,9 +88,13 @@ Sends a learner message to the Go AI orchestrator.
   "sentiment": "neutral",
   "sources": [
     {
-      "title": "Transcript Request - 2005 Onwards",
+      "id": "oc-transcript-request-2005-onwards",
+      "title": "Transcript Request Guidance",
       "url": "https://www.okanagancollege.ca/ask-oc/transcript-request-2005-onwards",
-      "chunk_id": "p4-deterministic-transcript-source"
+      "chunk_id": "oc-transcript-request-2005-onwards-seed-001",
+      "confidence": 0.91,
+      "risk_level": "high",
+      "freshness_status": "fresh"
     }
   ],
   "actions": [
@@ -127,14 +131,16 @@ Sends a learner message to the Go AI orchestrator.
 }
 ```
 
-P4 validation and orchestration rules:
+P5 validation and orchestration rules:
 
 - `message` is required after trimming whitespace.
 - `message` must be 2000 characters or fewer.
 - `student_id` is optional, but when present it must use the synthetic demo shape `S` plus six digits, such as `S100002`.
 - transcript-status messages can also include a synthetic ID in the message body, such as `My student ID is S100002`.
 - invalid JSON, validation failures, and service failures return the common safe error shape and never echo raw request bodies.
-- P4 does not call live AI or retrieval. It uses deterministic classifier logic, typed mock Banner/payment/CRM clients, and an in-process idempotent workflow port.
+- P5 does not call live AI. It uses deterministic classifier logic, local retrieval over approved source chunks, typed mock Banner/payment/CRM clients, and an in-process idempotent workflow port.
+- policy/procedure answers include approved source metadata or return a safe fallback when retrieval confidence is low.
+- stale sources or high-risk sources below the confidence threshold include caution metadata and ask for staff confirmation.
 - paid records skip workflow reminders, unpaid records trigger one reminder attempt, financial holds create mock Registrar/Student Accounts cases, unresolved synthetic records create normal handoff cases, and urgent/negative messages create priority staff handoffs.
 
 ### Go request model
@@ -164,6 +170,7 @@ type ChatResponse struct {
 ```
 
 `Action` records may include `trace_id`, `reference_id`, and `idempotency_key` so the learner-facing response can show a safe decision trace without opening logs.
+`Source` records may include `id`, `confidence`, `risk_level`, `freshness_status`, and `caution` so clients can display retrieval grounding and stale/high-risk warnings without exposing raw source text.
 
 ---
 
@@ -561,11 +568,22 @@ components:
           items:
             type: object
             properties:
+              id:
+                type: string
               title:
                 type: string
               url:
                 type: string
               chunk_id:
+                type: string
+              confidence:
+                type: number
+                format: float
+              risk_level:
+                type: string
+              freshness_status:
+                type: string
+              caution:
                 type: string
         actions:
           type: array

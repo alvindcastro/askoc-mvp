@@ -2,6 +2,64 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-06 - P5 RAG Ingestion And Source-Grounded Answers
+
+### P5-T01 - Define source allowlist schema
+
+- What: added the typed source allowlist schema with URL, title, department, risk, retrieved date, freshness, allowlist, and private-portal validation.
+- Where: `internal/rag/source.go`, `internal/rag/source_test.go`, `data/seed-sources.json`, `docs/source-references.md`.
+- When: 2026-05-06.
+- Why: ensure only approved public learner-service sources can be used for retrieval and source-grounded policy/procedure answers.
+- How: wrote failing allowlist parsing tests first, confirmed missing `internal/rag` schema failures, then implemented context-aware JSON loading, HTTPS/private-marker validation, source lookup maps, and per-source freshness metadata in the seed fixture.
+
+### P5-T02 - Implement ingestion fetcher with allowlist and cleaning boundaries
+
+- What: added deterministic approved-source fetching, safe HTML cleaning, content hashing, typed RAG errors, and the `cmd/ingest` local chunk writer.
+- Where: `internal/rag/ingest.go`, `internal/rag/ingest_test.go`, `cmd/ingest/main.go`.
+- When: 2026-05-06.
+- Why: fetch only allowlisted public content and prevent private or unlisted pages from entering the demo knowledge base.
+- How: wrote `httptest.Server` tests for unallowlisted URL rejection, script/style/nav removal, content hash creation, and network failure typing before implementing the fetcher, cleaner, and CLI.
+
+### P5-T03 - Implement chunking with metadata preservation
+
+- What: added configurable word chunking with stable chunk IDs, overlap support, no-empty-chunk behavior, and copied source metadata.
+- Where: `internal/rag/chunk.go`, `internal/rag/chunk_test.go`.
+- When: 2026-05-06.
+- Why: make retrieved public content citeable by chunk while preserving the source URL, title, risk level, and freshness status.
+- How: wrote short-content, long-content, stable-ID, and metadata-copy tests first, confirmed missing chunking symbols, then implemented deterministic chunk generation and ID hashing.
+
+### P5-T04 - Create local retrieval implementation
+
+- What: added a swappable local retriever, chunk loading from JSON, confidence scoring, top-k limiting, source metadata projection, and pre-seeded local demo chunks.
+- Where: `internal/rag/retrieve.go`, `internal/rag/local_retriever.go`, `internal/rag/retrieve_test.go`, `data/rag-chunks.json`, `internal/config/config.go`, `internal/config/config_test.go`, `cmd/api/main.go`, `README.md`.
+- When: 2026-05-06.
+- Why: provide offline demo-safe retrieval before Azure AI Search, pgvector, or live embedding services exist.
+- How: wrote retrieval ranking, unrelated-query, limit, and metadata tests first, then implemented token scoring, confidence thresholds, `ASKOC_RAG_CHUNKS_PATH`, and API startup wiring with a safe disabled fallback if chunks are unavailable.
+
+### P5-T05 - Add grounded answer source packaging
+
+- What: added retrieval-backed transcript-request answers and transcript-status source attachment with de-duplicated citations, source confidence/risk/freshness metadata, low-confidence fallback, and source-grounding action traces.
+- Where: `internal/orchestrator/grounded_answer.go`, `internal/orchestrator/grounded_answer_test.go`, `internal/orchestrator/orchestrator.go`, `internal/domain/chat.go`, `web/static/app.js`, `docs/api-spec.md`, `docs/demo-script.md`.
+- When: 2026-05-06.
+- Why: replace the P4 hard-coded transcript source placeholder with approved-source retrieval and prevent unsupported policy answers.
+- How: wrote orchestrator tests for sufficient sources, duplicate citations, low-confidence fallback, transcript-status citation attachment, and source metadata before implementing grounded source packaging and deterministic safe answer text.
+
+### P5-T06 - Flag stale or high-risk sources
+
+- What: added stale-source and high-risk source confidence decisions, plus staff-confirmation behavior for risky source matches.
+- Where: `internal/rag/freshness.go`, `internal/rag/freshness_test.go`, `internal/orchestrator/grounded_answer.go`, `docs/privacy-impact-lite.md`, `docs/model-evaluation.md`, `docs/test-plan.md`.
+- When: 2026-05-06.
+- Why: avoid authoritative answers from outdated or sensitive public content, especially for policy, fee, deadline, or eligibility-adjacent questions.
+- How: wrote stale, high-risk confidence, and fresh-source tests first, then implemented threshold decisions and orchestrator caution metadata/action handling.
+
+### P5 review evidence
+
+- What: completed P5 status and documentation sync.
+- Where: `docs/phases-and-tasks.md`, `docs/implementation-roadmap.md`, `README.md`, `docs/api-spec.md`, `docs/architecture.md`, `docs/golang-implementation.md`, `docs/test-plan.md`, `docs/model-evaluation.md`, `docs/demo-script.md`, `docs/source-references.md`, `docs/privacy-impact-lite.md`, `CHANGELOG.md`.
+- When: 2026-05-06.
+- Why: keep the task board, roadmap, API contract, architecture, demo script, source rules, privacy notes, and verification expectations aligned with implemented local RAG behavior.
+- How: marked P5 tasks and gates complete after confirming the red test state, then verified `go test ./internal/rag ./internal/orchestrator ./internal/config ./cmd/api ./cmd/ingest`, `go test ./...`, `go vet ./...`, `make test`, and `git diff --check` pass.
+
 ## 2026-05-06 - P4 Deterministic Orchestration Before AI
 
 ### P4-T01 - Define orchestrator ports and dependency injection

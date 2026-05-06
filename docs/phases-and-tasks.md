@@ -320,7 +320,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ## P5 — RAG ingestion and source-grounded answers
 **Phase outcome:** Approved-source ingestion and retrieval produce grounded responses.
-- [ ] **P5-T01 — Define source allowlist schema**  
+- [x] **P5-T01 — Define source allowlist schema**
   **Type:** Code  
   **Goal:** Represent approved public learner-service sources with freshness and risk metadata.  
   **Primary files:** `data/seed-sources.json`, `internal/rag/source.go`, `internal/rag/source_test.go`  
@@ -328,7 +328,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Valid source config parses.; Non-HTTPS URL fails.; Missing title/department fails.; Private-domain marker fails.  
   **Done when:** Sources include URL, title, department, risk level, retrieved date, and freshness flag.; No source is ingested unless allowlisted.
-- [ ] **P5-T02 — Implement ingestion fetcher with allowlist and cleaning boundaries**  
+- [x] **P5-T02 — Implement ingestion fetcher with allowlist and cleaning boundaries**
   **Type:** Code  
   **Goal:** Fetch only approved public content and prepare text for chunking.  
   **Primary files:** `cmd/ingest/main.go`, `internal/rag/ingest.go`, `internal/rag/ingest_test.go`  
@@ -336,7 +336,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Fetcher rejects URL not in allowlist.; HTML cleaner removes nav/script/style.; Network failure returns typed error.; Test uses `httptest.Server`, not live internet.  
   **Done when:** Ingestion is deterministic in tests.; Content hash is stored.; Private pages cannot be fetched accidentally.
-- [ ] **P5-T03 — Implement chunking with metadata preservation**  
+- [x] **P5-T03 — Implement chunking with metadata preservation**
   **Type:** Code  
   **Goal:** Split retrieved content into searchable chunks while preserving source URL and title.  
   **Primary files:** `internal/rag/chunk.go`, `internal/rag/chunk_test.go`  
@@ -344,7 +344,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Short content produces one chunk.; Long content produces bounded chunks.; Chunk IDs are stable for same input.; Metadata is copied to every chunk.  
   **Done when:** Chunk size is configurable.; No empty chunks are stored.; Chunk IDs can be cited in responses.
-- [ ] **P5-T04 — Create local retrieval implementation**  
+- [x] **P5-T04 — Create local retrieval implementation**
   **Type:** Code  
   **Goal:** Provide a demo-safe retrieval path before wiring Azure AI Search or pgvector.  
   **Primary files:** `internal/rag/retrieve.go`, `internal/rag/local_retriever.go`, `internal/rag/retrieve_test.go`  
@@ -352,7 +352,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Transcript query ranks transcript chunks first.; Unrelated query returns low confidence.; Retrieval limit is respected.; Source metadata is returned.  
   **Done when:** Retriever interface can be swapped later.; No hallucinated source links are created.
-- [ ] **P5-T05 — Add grounded answer source packaging**  
+- [x] **P5-T05 — Add grounded answer source packaging**
   **Type:** Code  
   **Goal:** Attach source citations and confidence to chat responses regardless of LLM provider.  
   **Primary files:** `internal/orchestrator/grounded_answer.go`, `internal/orchestrator/grounded_answer_test.go`  
@@ -360,7 +360,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Answer with sufficient chunks includes citations.; Low retrieval confidence returns safe fallback.; Duplicate sources are de-duplicated.; Source risk level is included for internal response.  
   **Done when:** Every policy/procedure answer includes at least one source or a fallback.; Unsupported claims are not invented.
-- [ ] **P5-T06 — Flag stale or high-risk sources**  
+- [x] **P5-T06 — Flag stale or high-risk sources**
   **Type:** Code  
   **Goal:** Avoid confidently answering from outdated or sensitive content.  
   **Primary files:** `internal/rag/freshness.go`, `internal/rag/freshness_test.go`  
@@ -371,10 +371,10 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ### P5 phase gate
 
-- [ ] All P5 tasks above are complete or explicitly deferred with a reason.
-- [ ] All code tasks in P5 have failing-test evidence before implementation.
-- [ ] `go test ./...` passes after P5 code tasks.
-- [ ] Relevant docs are updated with any changed behavior or assumptions.
+- [x] All P5 tasks above are complete or explicitly deferred with a reason.
+- [x] All code tasks in P5 have failing-test evidence before implementation.
+- [x] `go test ./...` passes after P5 code tasks.
+- [x] Relevant docs are updated with any changed behavior or assumptions.
 
 ---
 

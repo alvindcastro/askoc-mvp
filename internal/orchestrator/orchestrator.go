@@ -18,8 +18,6 @@ import (
 	"askoc-mvp/internal/workflow"
 )
 
-const transcriptSourceURL = "https://www.okanagancollege.ca/ask-oc/transcript-request-2005-onwards"
-
 var syntheticIDPattern = regexp.MustCompile(`\bS[0-9]{6}\b`)
 
 type IntentClassifier interface {
@@ -137,7 +135,6 @@ func (o *Orchestrator) HandleChat(ctx context.Context, req domain.ChatRequest) (
 			Confidence: result.Confidence,
 		},
 		Sentiment: result.Sentiment,
-		Sources:   transcriptSources(result.Intent),
 		Actions: []domain.Action{
 			o.action(ctx, "intent_classified", domain.ActionStatusCompleted, "Message classified by deterministic fallback logic.", ""),
 		},
@@ -145,10 +142,10 @@ func (o *Orchestrator) HandleChat(ctx context.Context, req domain.ChatRequest) (
 
 	switch {
 	case result.Intent == domain.IntentTranscriptStatus || result.Intent == domain.IntentFeePayment:
+		resp = o.attachGroundingIfAvailable(ctx, req, resp)
 		return o.handleTranscriptStatus(ctx, req, result, resp)
 	case result.Intent == domain.IntentTranscriptRequest:
-		resp.Answer = "You can use the official transcript request guidance linked below. This P4 deterministic path does not call live AI or private systems."
-		return resp, nil
+		return o.handleGroundedAnswer(ctx, req, resp), nil
 	case needsEscalation(result):
 		return o.createHandoff(ctx, req, result, resp, handoffRequest{
 			queue:    queueForResult(result),
@@ -194,19 +191,6 @@ func traceID(ctx context.Context) string {
 		return got
 	}
 	return "trace-unset"
-}
-
-func transcriptSources(intent domain.Intent) []domain.Source {
-	if intent != domain.IntentTranscriptRequest && intent != domain.IntentTranscriptStatus && intent != domain.IntentFeePayment && intent != domain.IntentEscalationRequest {
-		return nil
-	}
-	return []domain.Source{
-		{
-			Title:   "Transcript Request - 2005 Onwards",
-			URL:     transcriptSourceURL,
-			ChunkID: "p4-deterministic-transcript-source",
-		},
-	}
 }
 
 func (o *Orchestrator) action(ctx context.Context, actionType string, status domain.ActionStatus, message, referenceID string) domain.Action {

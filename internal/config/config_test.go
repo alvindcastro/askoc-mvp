@@ -45,6 +45,9 @@ func TestLoadFromEnvUsesSafeDefaults(t *testing.T) {
 	if cfg.Provider.Model != "demo-placeholder" {
 		t.Fatalf("Provider.Model = %q, want demo-placeholder", cfg.Provider.Model)
 	}
+	if cfg.RAG.ChunksPath != "data/rag-chunks.json" {
+		t.Fatalf("RAG.ChunksPath = %q, want data/rag-chunks.json", cfg.RAG.ChunksPath)
+	}
 }
 
 func TestLoadFromEnvUsesOverrides(t *testing.T) {
@@ -58,6 +61,7 @@ func TestLoadFromEnvUsesOverrides(t *testing.T) {
 		"ASKOC_BANNER_URL":               "http://banner.local",
 		"ASKOC_PAYMENT_URL":              "http://payment.local",
 		"ASKOC_CRM_URL":                  "http://crm.local",
+		"ASKOC_RAG_CHUNKS_PATH":          "tmp/test-rag-chunks.json",
 		"ASKOC_PROVIDER":                 "openai-compatible",
 		"ASKOC_PROVIDER_MODEL":           "gpt-demo",
 		"ASKOC_PROVIDER_API_KEY":         "sk-demo-secret",
@@ -90,6 +94,9 @@ func TestLoadFromEnvUsesOverrides(t *testing.T) {
 	if cfg.Provider.APIKey != "sk-demo-secret" {
 		t.Fatalf("Provider.APIKey was not loaded")
 	}
+	if cfg.RAG.ChunksPath != "tmp/test-rag-chunks.json" {
+		t.Fatalf("RAG.ChunksPath = %q", cfg.RAG.ChunksPath)
+	}
 }
 
 func TestLoadFromEnvRejectsInvalidValues(t *testing.T) {
@@ -117,6 +124,11 @@ func TestLoadFromEnvRejectsInvalidValues(t *testing.T) {
 			name:    "unsupported log level",
 			env:     map[string]string{"ASKOC_LOG_LEVEL": "verbose"},
 			wantErr: "ASKOC_LOG_LEVEL",
+		},
+		{
+			name:    "empty RAG chunks path",
+			env:     map[string]string{"ASKOC_RAG_CHUNKS_PATH": " "},
+			wantErr: "ASKOC_RAG_CHUNKS_PATH",
 		},
 	}
 

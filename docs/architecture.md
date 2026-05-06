@@ -49,9 +49,9 @@ flowchart TD
 
 | Service | Go package/command | Responsibility |
 |---|---|---|
-| Public API | `cmd/api` | Serves chat UI, REST API, and P4 chat orchestration |
-| Orchestrator | `internal/orchestrator` | Coordinates deterministic P4 intent, tools, workflow, and escalation ports |
-| RAG ingestor | `cmd/ingest` + `internal/rag` | Later phase: fetches approved public pages, chunks content, writes index |
+| Public API | `cmd/api` | Serves chat UI, REST API, P5 local retrieval wiring, and chat orchestration |
+| Orchestrator | `internal/orchestrator` | Coordinates deterministic intent, local RAG source packaging, tools, workflow, and escalation ports |
+| RAG ingestor | `cmd/ingest` + `internal/rag` | Fetches approved public pages, cleans HTML, chunks content, and writes local JSON chunks |
 | LLM gateway | `internal/llm` | Later phase: wraps Azure OpenAI/OpenAI-compatible REST calls |
 | Classifier | `internal/classifier` | P4 deterministic fallback intent/sentiment; later LLM/parser path plugs in behind the port |
 | Tool clients | `internal/tools` | Typed clients for Banner, payment, CRM, LMS, notification |
@@ -94,6 +94,7 @@ web/
   static/
 data/
   seed-sources.json
+  rag-chunks.json
   synthetic-students.json
   eval-questions.jsonl
 ```
@@ -130,7 +131,7 @@ type ChatResponse struct {
 }
 ```
 
-P4 implements these models in `internal/domain` with provider-neutral request/response structs, source citations, learner-safe action traces, idempotency key metadata, and handoff metadata. Request validation lives in `internal/validation`; the deterministic orchestrator lives in `internal/orchestrator`.
+P5 implements these models in `internal/domain` with provider-neutral request/response structs, source citations, source confidence/risk/freshness metadata, learner-safe action traces, idempotency key metadata, and handoff metadata. Request validation lives in `internal/validation`; the deterministic orchestrator lives in `internal/orchestrator`.
 
 ## Component responsibilities
 
@@ -167,13 +168,14 @@ Responsibilities:
 
 ### 3. Go AI orchestrator
 
-The P4 orchestrator coordinates the deterministic transcript/payment interaction before live AI is introduced.
+The P5 orchestrator coordinates source-grounded transcript answers and the deterministic transcript/payment interaction before live AI is introduced.
 
 Responsibilities:
 
 - classify intent,
 - classify sentiment and urgency,
-- attach the current transcript source placeholder,
+- retrieve approved local source chunks for transcript-request answers,
+- return safe fallback or staff-confirmation wording for low-confidence, stale, or high-risk source matches,
 - call mock enterprise APIs,
 - generate deterministic responses,
 - trigger the in-process P4 workflow port,
@@ -197,6 +199,9 @@ The knowledge index stores chunks from approved public pages. Each chunk should 
 - chunk ID,
 - content hash,
 - last indexed date,
+- retrieval confidence,
+- risk level,
+- freshness status,
 - embedding vector or search key,
 - access level,
 - effective date if known.

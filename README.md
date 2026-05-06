@@ -116,7 +116,7 @@ A task is not done until the relevant package test and `go test ./...` pass. AI,
 3. Assistant summarizes the case.
 4. Mock CRM case is created with transcript context, payment status, conversation summary, and priority flag.
 
-## Current P4 repository structure
+## Current P5 repository structure
 
 ```text
 askoc-ai-concierge/
@@ -125,6 +125,7 @@ askoc-ai-concierge/
   Makefile
   cmd/
     api/                  # API server with health/readiness, chat API, and chat UI routes
+    ingest/               # Approved-source ingestion to local RAG chunks
     mock-banner/          # Synthetic student profile, transcript status, and hold API
     mock-payment/         # Synthetic transcript payment status API
     mock-crm/             # Synthetic CRM case creation API
@@ -136,6 +137,7 @@ askoc-ai-concierge/
     handlers/
     middleware/
     mock/
+    rag/
     session/
     tools/
     validation/
@@ -146,13 +148,14 @@ askoc-ai-concierge/
   data/
     synthetic-students.json
     seed-sources.json
+    rag-chunks.json
   docs/
     ...
 ```
 
-The current chat API uses deterministic P4 orchestration: fallback intent/sentiment classification, typed mock Banner/payment/CRM clients, an in-process idempotent payment-reminder workflow port, a safe action trace, and CRM handoff routing for holds, urgent sentiment, low confidence, or explicit human handoff. Later phases add RAG ingestion, live LLM gateway behavior, the durable audit store/dashboard, the standalone workflow simulator, evaluation, and Docker.
+The current chat API uses deterministic P5 orchestration: fallback intent/sentiment classification, local RAG retrieval over approved public source chunks, grounded transcript-request answers with confidence/risk/freshness metadata, typed mock Banner/payment/CRM clients, an in-process idempotent payment-reminder workflow port, a safe action trace, and CRM handoff routing for holds, urgent sentiment, low confidence, or explicit human handoff. Later phases add live LLM gateway behavior, the durable audit store/dashboard, the standalone workflow simulator, evaluation, and Docker.
 
-## Current P4 commands
+## Current P5 commands
 
 ```bash
 make dev
@@ -160,13 +163,14 @@ make test
 make test-race
 go test ./...
 go vet ./...
+go run ./cmd/ingest -sources data/seed-sources.json -out data/rag-chunks.json
 go run ./cmd/mock-banner
 go run ./cmd/mock-payment
 go run ./cmd/mock-crm
 go run ./cmd/mock-lms
 ```
 
-For the full P4 transcript-status demo, start the mock Banner, payment, and CRM services in separate terminals before `make dev`. The API talks to those typed mock services through configurable local URLs. Auth is disabled by default for local demo use. Set `ASKOC_AUTH_ENABLED=true` and `ASKOC_AUTH_TOKEN=<demo-token>` to require a mock bearer token.
+For the full P5 transcript-status demo, start the mock Banner, payment, and CRM services in separate terminals before `make dev`. The API loads local RAG chunks from `data/rag-chunks.json` at startup and talks to typed mock services through configurable local URLs. Auth is disabled by default for local demo use. Set `ASKOC_AUTH_ENABLED=true` and `ASKOC_AUTH_TOKEN=<demo-token>` to require a mock bearer token.
 
 Current environment settings:
 
@@ -181,6 +185,7 @@ Current environment settings:
 | `ASKOC_BANNER_URL` | `http://localhost:8081` | Mock Banner base URL used by P4 orchestration |
 | `ASKOC_PAYMENT_URL` | `http://localhost:8082` | Mock payment base URL used by P4 orchestration |
 | `ASKOC_CRM_URL` | `http://localhost:8083` | Mock CRM base URL used by P4 orchestration |
+| `ASKOC_RAG_CHUNKS_PATH` | `data/rag-chunks.json` | Local approved-source chunks used by P5 retrieval |
 | `ASKOC_PROVIDER` | `stub` | Future AI provider mode |
 | `ASKOC_PROVIDER_MODEL` | `demo-placeholder` | Future provider model name |
 | `ASKOC_PROVIDER_API_KEY` | empty | Future provider API key, never printed by config |
@@ -199,8 +204,8 @@ Mock CRM:     http://localhost:8083/api/v1/crm/cases
 Mock LMS:     http://localhost:8085/api/v1/students/S100001/lms-access?course_id=DEMO-LMS-101
 ```
 
-The chat API validates JSON requests, rejects empty or oversized messages, accepts synthetic student IDs in the `S` plus six digits format, includes trace IDs in responses and action results, and routes transcript/payment decisions through the P4 orchestrator.
-P3 tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors. P4 adds deterministic classifier/orchestrator tests and an in-process workflow port that returns idempotent synthetic workflow IDs until the P8 simulator exists.
+The chat API validates JSON requests, rejects empty or oversized messages, accepts synthetic student IDs in the `S` plus six digits format, includes trace IDs in responses and action results, routes transcript/payment decisions through the orchestrator, and uses P5 retrieval for source-grounded transcript-request answers.
+P3 tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors. P4 adds deterministic classifier/orchestrator tests and an in-process workflow port that returns idempotent synthetic workflow IDs until the P8 simulator exists. P5 adds allowlist parsing, deterministic ingestion, chunking, local retrieval, and stale/high-risk source fallback tests.
 
 ## Demo data policy
 

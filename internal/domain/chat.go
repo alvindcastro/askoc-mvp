@@ -59,9 +59,14 @@ type IntentResult struct {
 }
 
 type Source struct {
-	Title   string `json:"title"`
-	URL     string `json:"url"`
-	ChunkID string `json:"chunk_id"`
+	ID              string  `json:"id,omitempty"`
+	Title           string  `json:"title"`
+	URL             string  `json:"url"`
+	ChunkID         string  `json:"chunk_id"`
+	Confidence      float64 `json:"confidence,omitempty"`
+	RiskLevel       string  `json:"risk_level,omitempty"`
+	FreshnessStatus string  `json:"freshness_status,omitempty"`
+	Caution         string  `json:"caution,omitempty"`
 }
 
 type Action struct {
