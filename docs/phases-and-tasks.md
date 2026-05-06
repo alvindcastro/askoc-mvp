@@ -43,7 +43,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ## P0 — Product framing and applicant strategy
 **Phase outcome:** Applicant story, scope, privacy boundary, source limits, and demo matrix are frozen.
-- [ ] **P0-T01 — Write the applicant story and MVP thesis**  
+- [x] **P0-T01 — Write the applicant story and MVP thesis**
   **Type:** Documentation  
   **Goal:** State why the project exists, what learner pain point it addresses, and how it maps to the AI/Automation Solutions Developer role.  
   **Primary files:** `README.md`, `docs/mvp-scope.md`  
@@ -51,7 +51,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Review-gated documentation task.  
   **Tests/review:** Peer-read the one-sentence pitch and confirm it mentions Go, RAG, workflow automation, mock enterprise integrations, and privacy.  
   **Done when:** README contains a one-sentence pitch.; MVP scope states the primary transcript/payment workflow.; The story avoids claiming access to real OC systems.
-- [ ] **P0-T02 — Define synthetic data and privacy boundary**  
+- [x] **P0-T02 — Define synthetic data and privacy boundary**
   **Type:** Documentation  
   **Goal:** Make it explicit that the MVP uses synthetic learners, synthetic IDs, mock payments, and mock CRM cases only.  
   **Primary files:** `docs/privacy-impact-lite.md`, `data/synthetic-students.json`  
@@ -59,7 +59,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Review-gated documentation task.  
   **Tests/review:** Review all examples for real names, real student IDs, private portal data, or secrets.  
   **Done when:** Synthetic data policy is visible.; PII boundary is documented.; Demo records are clearly marked as fake.
-- [ ] **P0-T03 — Confirm source allowlist and knowledge-domain limits**  
+- [x] **P0-T03 — Confirm source allowlist and knowledge-domain limits**
   **Type:** Documentation  
   **Goal:** Define which public pages or manually curated content can be ingested and which content must never be ingested.  
   **Primary files:** `data/seed-sources.json`, `docs/source-references.md`, `docs/privacy-impact-lite.md`  
@@ -67,7 +67,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Review-gated documentation task.  
   **Tests/review:** Manually verify every seed source is public and relevant to learner services.  
   **Done when:** Allowlist exists.; Private portal scraping is explicitly out of scope.; Stale-source handling is documented.
-- [ ] **P0-T04 — Create demo acceptance matrix**  
+- [x] **P0-T04 — Create demo acceptance matrix**
   **Type:** Documentation  
   **Goal:** Turn the interview demo into measurable scenarios before implementation starts.  
   **Primary files:** `docs/demo-script.md`, `docs/model-evaluation.md`  
@@ -75,7 +75,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Review-gated documentation task.  
   **Tests/review:** Walk through the golden path and confirm each expected action has an observable output.  
   **Done when:** Golden path includes transcript answer, unpaid payment workflow, financial-hold escalation, and urgent sentiment escalation.; Each scenario has expected intent, source, action, and handoff behavior.
-- [ ] **P0-T05 — Freeze MVP scope and defer nice-to-haves**  
+- [x] **P0-T05 — Freeze MVP scope and defer nice-to-haves**
   **Type:** Documentation  
   **Goal:** Prevent overbuilding by separating must-have demo features from optional stretch work.  
   **Primary files:** `docs/mvp-scope.md`, `docs/implementation-roadmap.md`  
@@ -86,10 +86,10 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ### P0 phase gate
 
-- [ ] All P0 tasks above are complete or explicitly deferred with a reason.
-- [ ] All code tasks in P0 have failing-test evidence before implementation.
-- [ ] `go test ./...` passes after P0 code tasks.
-- [ ] Relevant docs are updated with any changed behavior or assumptions.
+- [x] All P0 tasks above are complete or explicitly deferred with a reason.
+- [x] No code tasks exist in P0; failing-test evidence is not applicable.
+- [x] `go test ./...` is not required for P0 because no Go code was added or changed.
+- [x] Relevant docs and fixtures are updated with changed behavior and assumptions.
 
 ---
 

@@ -1,0 +1,119 @@
+{
+  "fixture_name": "askoc-demo-public-source-allowlist",
+  "fixture_version": "P0-T03",
+  "public_sources_only": true,
+  "data_notice": "This allowlist contains public URLs already listed in repo documentation and spot-checked as accessible public web pages on 2026-05-06.",
+  "source_reviewed_at": "2026-05-06",
+  "ingestion_policy": {
+    "allow_private_portal_scraping": false,
+    "allow_authenticated_pages": false,
+    "allow_personal_account_pages": false,
+    "allow_unlisted_urls": false,
+    "allowed_content_types": [
+      "public_web_page",
+      "manually_curated_public_snippet"
+    ],
+    "stale_source_default_action": "fallback_or_staff_handoff",
+    "stale_after_days_default": 30
+  },
+  "knowledge_domain_limits": {
+    "allowed": [
+      "transcript_request_guidance",
+      "registrar_service_context",
+      "myokanagan_and_online_resources_guidance",
+      "lms_access_guidance",
+      "information_security_guidance"
+    ],
+    "out_of_scope": [
+      "private_portal_content",
+      "authenticated_student_account_data",
+      "real_learner_records",
+      "real_payment_records",
+      "real_crm_cases",
+      "production_banner_lms_crm_integrations",
+      "legal_financial_medical_or_immigration_advice"
+    ]
+  },
+  "sources": [
+    {
+      "id": "oc-registrar-office",
+      "title": "Office of the Registrar",
+      "url": "https://www.okanagancollege.ca/office-of-the-registrar",
+      "department": "Registrar",
+      "content_type": "public_web_page",
+      "allowlisted": true,
+      "risk_level": "medium",
+      "requires_freshness_check": true,
+      "stale_after_days": 30,
+      "knowledge_domains": [
+        "registrar_service_context"
+      ],
+      "verification_basis": "Public URL already present in docs/source-references.md and opened as a public HTML page on 2026-05-06.",
+      "private_portal": false
+    },
+    {
+      "id": "oc-transcript-request-2005-onwards",
+      "title": "Transcript Request Guidance",
+      "url": "https://www.okanagancollege.ca/ask-oc/transcript-request-2005-onwards",
+      "department": "Registrar",
+      "content_type": "public_web_page",
+      "allowlisted": true,
+      "risk_level": "high",
+      "requires_freshness_check": true,
+      "stale_after_days": 14,
+      "knowledge_domains": [
+        "transcript_request_guidance"
+      ],
+      "verification_basis": "Public URL already present in docs/source-references.md and opened as a public HTML page on 2026-05-06.",
+      "private_portal": false
+    },
+    {
+      "id": "oc-online-resources",
+      "title": "Online Resources / myOkanagan / LMS Guidance",
+      "url": "https://www.okanagancollege.ca/student-handbook/online-resources",
+      "department": "Student Services",
+      "content_type": "public_web_page",
+      "allowlisted": true,
+      "risk_level": "medium",
+      "requires_freshness_check": true,
+      "stale_after_days": 30,
+      "knowledge_domains": [
+        "myokanagan_and_online_resources_guidance"
+      ],
+      "verification_basis": "Public URL already present in docs/source-references.md and opened as a public HTML page on 2026-05-06.",
+      "private_portal": false
+    },
+    {
+      "id": "oc-lms-information",
+      "title": "LMS Information",
+      "url": "https://www.okanagancollege.ca/teaching-and-learning-innovations/lms",
+      "department": "Teaching and Learning Innovations",
+      "content_type": "public_web_page",
+      "allowlisted": true,
+      "risk_level": "medium",
+      "requires_freshness_check": true,
+      "stale_after_days": 14,
+      "knowledge_domains": [
+        "lms_access_guidance"
+      ],
+      "verification_basis": "Public URL already present in docs/source-references.md and opened as a public HTML page on 2026-05-06.",
+      "private_portal": false
+    },
+    {
+      "id": "oc-information-security-guide",
+      "title": "Information Security Guide",
+      "url": "https://www.okanagancollege.ca/it-services/it-security/information-security-guide",
+      "department": "IT Services",
+      "content_type": "public_web_page",
+      "allowlisted": true,
+      "risk_level": "medium",
+      "requires_freshness_check": true,
+      "stale_after_days": 90,
+      "knowledge_domains": [
+        "information_security_guidance"
+      ],
+      "verification_basis": "Public URL already present in docs/source-references.md and opened as a public HTML page on 2026-05-06.",
+      "private_portal": false
+    }
+  ]
+}

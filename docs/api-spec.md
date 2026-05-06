@@ -147,9 +147,9 @@ Authorization: Bearer demo-token
 ```json
 {
   "student_id": "S100002",
-  "preferred_name": "Jordan Patel",
+  "preferred_name": "Demo Learner Two",
   "status": "active",
-  "program": "Business Administration",
+  "program": "Business Administration Demo Program",
   "holds": [],
   "synthetic": true
 }

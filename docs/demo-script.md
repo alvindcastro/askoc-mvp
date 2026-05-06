@@ -186,13 +186,29 @@ Talking point:
 
 ## Expected demo path
 
-| Step | Input | Expected output |
-|---|---|---|
-| 1 | “How do I order my official transcript?” | Grounded answer with source |
-| 2 | `S100002` transcript status | Payment unpaid |
-| 3 | Workflow trigger | Payment reminder accepted |
-| 4 | Frustrated/urgent message | Priority CRM case |
-| 5 | Dashboard | Metrics updated |
+All demo records are synthetic. Student IDs, payment states, holds, workflow IDs, and CRM cases must come from local Go services or fixtures only.
+
+| Step | Scenario | Input | Expected output | Observable proof |
+|---:|---|---|---|---|
+| 1 | Transcript answer | “How do I order my official transcript?” | Grounded answer with source citation | Chat response shows `transcript_request`, source ID/link, confidence, and no unsupported claims |
+| 2 | Unpaid payment workflow | “I ordered my transcript but it has not been processed. My student ID is S100002.” | Payment status is unpaid and reminder workflow is accepted | Chat response shows `transcript_status`, `payment_status_checked`, `payment_reminder_triggered`, workflow ID, and no CRM handoff |
+| 3 | Financial-hold escalation | “My transcript still is not moving. My student ID is S100003.” | Financial hold is detected and staff handoff is created | Chat response shows `transcript_status`, `financial_hold_detected`, CRM case ID, and Registrar/Student Accounts handoff |
+| 4 | Urgent sentiment escalation | “This is really frustrating. I need this transcript for a job application.” | Urgent/negative sentiment creates a priority CRM case using existing conversation context | Chat response shows urgent sentiment, `crm_case_created`, priority flag, case ID, and privacy-aware summary |
+| 5 | Dashboard evidence | Open `/admin` after steps 1-4 | Metrics reflect the demo events | Dashboard shows conversation count, top intents, workflow success, escalation count, and audit events |
+
+## Demo acceptance matrix
+
+Each row must be verifiable from the Go API response, local mock service logs, workflow simulator, CRM simulator, audit events, or dashboard. Source references are approved public/curated learner-service content; synthetic records are the only data used for student/payment/hold state.
+
+| ID | Scenario | Synthetic input | Expected intent | Expected source | Expected action | Expected handoff behavior | Pass evidence |
+|---|---|---|---|---|---|---|---|
+| D01 | Transcript answer | “How do I order my official transcript?” | `transcript_request` | Transcript ordering source chunk, such as `oc-transcript-request-2005-onwards` | Return concise grounded answer with citation | No handoff; keep learner in chat | Response includes cited source, answer confidence, and zero critical unsupported claims |
+| D02 | Unpaid payment workflow | `S100002` transcript status prompt | `transcript_status` | Transcript/payment guidance source chunk plus synthetic payment record `S100002` | Check mock Banner, check mock Payment, trigger `payment_reminder_triggered` | No CRM handoff unless workflow fails or confidence is low | Response includes unpaid status, workflow ID, idempotency key, and audit event |
+| D03 | Financial-hold escalation | `S100003` transcript status prompt | `transcript_status` | Transcript/hold guidance source chunk plus synthetic Banner record `S100003` | Check mock Banner, detect `financial_hold`, create CRM case | Handoff to Registrar/Student Accounts queue with minimal summary and case ID | Response includes hold-safe wording, CRM case ID, queue/priority, and no payment reminder |
+| D04 | Urgent sentiment escalation | Frustrated urgent follow-up in an unresolved transcript conversation | `escalation_request` or transcript follow-up intent with urgent sentiment | Prior transcript source and active synthetic conversation context | Classify sentiment as urgent/negative and create priority CRM case | Priority handoff to staff; assistant does not promise a deadline or outcome | Response includes priority flag, CRM case ID, redacted summary, and safe expectation-setting |
+| D05 | Low-confidence source fallback | Transcript-adjacent question with no approved source | `unknown` or low-confidence transcript intent | No acceptable source above threshold | Do not answer from model memory; ask clarifying question or route to staff | Low-confidence handoff if learner needs account-specific help | Response shows no citation used for unsupported claim and logs low-confidence review item |
+
+Golden-path pass condition: D01-D04 pass in order during the 5-7 minute demo, and each expected action has at least one observable output. D05 is a safety check used when discussing fallback behavior.
 
 ## Backup plan
 

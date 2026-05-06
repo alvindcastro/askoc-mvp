@@ -40,9 +40,18 @@ go run ./cmd/eval \
 Each line in `data/eval-questions.jsonl` should be one test case.
 
 ```json
-{"id":"T001","prompt":"How do I order my official transcript?","expected_intent":"transcript_request","must_include_source":true,"expected_source_contains":"transcript-request","critical":true}
+{"id":"T001","prompt":"How do I order my official transcript?","expected_intent":"transcript_request","must_include_source":true,"expected_source_contains":"oc-transcript-request-2005-onwards","critical":true}
 {"id":"T002","prompt":"I ordered my transcript but it has not been processed. My student ID is S100002.","expected_intent":"transcript_status","expected_actions":["payment_status_checked","payment_reminder_triggered"],"critical":true}
 {"id":"T003","prompt":"This is extremely frustrating. I need this transcript for a job application.","expected_sentiment":"negative","expected_escalation":true,"critical":true}
+```
+
+Acceptance-oriented cases should include the expected source, action, and handoff behavior so the Go runner can compare the full demo outcome, not just the final text.
+
+```json
+{"id":"D01","prompt":"How do I order my official transcript?","expected_intent":"transcript_request","expected_source_contains":"oc-transcript-request-2005-onwards","expected_actions":["grounded_answer_returned"],"expected_handoff":"none","critical":true}
+{"id":"D02","prompt":"I ordered my transcript but it has not been processed. My student ID is S100002.","expected_intent":"transcript_status","expected_source_contains":"transcript","expected_actions":["banner_status_checked","payment_status_checked","payment_reminder_triggered"],"expected_handoff":"none","critical":true}
+{"id":"D03","prompt":"My transcript still is not moving. My student ID is S100003.","expected_intent":"transcript_status","expected_source_contains":"transcript","expected_actions":["banner_status_checked","financial_hold_detected","crm_case_created"],"expected_handoff":"registrar_student_accounts","critical":true}
+{"id":"D04","prompt":"This is really frustrating. I need this transcript for a job application.","expected_intent":"escalation_request","expected_sentiment":"urgent_negative","expected_source_contains":"transcript","expected_actions":["sentiment_classified","crm_case_created"],"expected_handoff":"priority_staff_queue","critical":true}
 ```
 
 ## Metrics
@@ -86,14 +95,28 @@ Example:
 
 ## Automation evaluation cases
 
-| Case | Synthetic data | Expected action |
-|---|---|---|
-| Paid transcript | `S100001`, paid, no hold | No reminder; status response |
-| Unpaid transcript | `S100002`, unpaid, no hold | Payment reminder workflow |
-| Financial hold | `S100003`, paid, financial hold | CRM escalation |
-| Unknown status | `S100004`, unknown | Low-confidence handoff |
-| Not found | `S999999` | Safe not-found response |
-| Urgent learner | Any unresolved transcript case + urgent sentiment | Priority CRM case |
+| Case | Synthetic data | Expected intent | Expected source | Expected action | Expected handoff behavior |
+|---|---|---|---|---|---|
+| Transcript answer | No student record needed | `transcript_request` | Transcript ordering source, such as `oc-transcript-request-2005-onwards` | Return grounded answer with citation | None; contain in chat |
+| Paid transcript | `S100001`, paid, no hold | `transcript_status` | Transcript/payment guidance plus synthetic record | Check Banner and Payment; no reminder | None unless confidence is low |
+| Unpaid transcript | `S100002`, unpaid, no hold | `transcript_status` | Transcript/payment guidance plus synthetic payment record | Trigger `payment_reminder_triggered` with workflow ID and idempotency key | None unless workflow fails |
+| Financial hold | `S100003`, paid, financial hold | `transcript_status` | Transcript/hold guidance plus synthetic Banner record | Detect hold and create CRM case | Registrar/Student Accounts handoff with minimal privacy-aware summary |
+| Unknown status | `S100004`, unknown | `transcript_status` or `unknown` | Synthetic record exists but status is unresolved | Avoid unsupported status claim; create review item or ask clarifying question | Low-confidence human handoff when account-specific help is needed |
+| Not found | `S999999` | `transcript_status` or `unknown` | No synthetic record | Safe not-found response; no real-system lookup implied | No account-specific handoff unless learner provides valid synthetic demo ID |
+| Urgent learner | Any unresolved transcript case + urgent sentiment | `escalation_request` or active transcript follow-up | Prior transcript source and active synthetic conversation context | Classify urgent/negative sentiment and create priority CRM case | Priority staff queue with case ID; no promised deadline or outcome |
+
+## Demo acceptance matrix
+
+These P0 acceptance cases define the measurable interview demo. They should be represented in `data/eval-questions.jsonl` once `cmd/eval` exists, and they should remain synthetic-data-only.
+
+| ID | Scenario | Expected intent | Expected source check | Expected action check | Expected handoff check | Pass criteria |
+|---|---|---|---|---|---|---|
+| D01 | Transcript answer | `transcript_request` | Correct transcript-ordering source appears in citations or retrieved top 3 | `grounded_answer_returned`; no unsupported policy/fee/deadline claim | `none` | Intent, source, and grounded answer checks pass |
+| D02 | Unpaid payment workflow | `transcript_status` | Transcript/payment guidance plus synthetic `S100002` payment state | `banner_status_checked`, `payment_status_checked`, `payment_reminder_triggered` | `none` | Workflow ID/idempotency key is present and no CRM case is created |
+| D03 | Financial-hold escalation | `transcript_status` | Transcript/hold guidance plus synthetic `S100003` hold state | `banner_status_checked`, `financial_hold_detected`, `crm_case_created` | `registrar_student_accounts` | CRM case ID is present and no payment reminder is triggered |
+| D04 | Urgent sentiment escalation | `escalation_request` or active transcript follow-up | Prior transcript context is retained; no new unsupported source claim | `sentiment_classified`, `crm_case_created` | `priority_staff_queue` | Urgent/negative sentiment and priority case are present; response avoids guaranteed turnaround |
+
+Golden-path gate: D01-D04 must all pass with zero critical hallucinations, 100% expected action match, and 100% expected handoff match before the demo is considered ready.
 
 ## Safety evaluation
 

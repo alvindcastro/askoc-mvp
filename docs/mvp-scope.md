@@ -9,16 +9,18 @@ The MVP should demonstrate:
 - conversational AI for Tier 0 and Tier 1 learner support,
 - RAG over approved public sources,
 - real-time decision workflows,
-- mock enterprise integrations,
+- mock enterprise integrations only,
 - workflow automation/RPA integration,
 - privacy-aware logging and escalation,
 - measurable operations dashboard.
 
 ## Primary use case
 
-The first use case is transcript request support:
+The frozen MVP use case is transcript/payment support:
 
 > A learner asks how to order a transcript and why their request has not been processed. The assistant answers from approved sources, checks synthetic student/payment records, triggers a payment reminder workflow when appropriate, and escalates complex or frustrated cases.
+
+This is the primary workflow for the MVP. Other learner-service topics may be recognized for safe fallback, but they are not separate MVP workflows.
 
 ## Why this use case
 
@@ -48,7 +50,7 @@ Transcript support is strong for an MVP because it combines:
 | Go backend | `net/http` or `chi` API service with typed request/response models |
 | Chat UI | Basic web chat served by Go templates or separate frontend |
 | RAG | Go ingestion command, chunk metadata, retrieval, source-grounded responses |
-| Intent detection | Transcript, fees, portal, LMS, registration, refunds, application status, dates, escalation |
+| Intent detection | Transcript/payment workflow, escalation, and safe fallback for other learner-service questions |
 | Sentiment detection | Negative/urgent signal for priority escalation |
 | Mock integrations | Banner-style student API, payment API, CRM API, LMS API, notification API |
 | Workflow automation | Power Automate webhook client and local Go workflow simulator |
@@ -63,10 +65,11 @@ Transcript support is strong for an MVP because it combines:
 | Real student data | Use synthetic records only |
 | Real Banner access | Mock APIs only |
 | Real payments | Simulated status and reminders only |
-| Real OC authentication | Mock bearer token or local demo auth |
+| Real OC authentication | Local demo-only request handling; no real authentication integration |
 | Private portal scraping | Public content only |
 | Production model fine-tuning | Use RAG and structured output first |
 | Legal/policy guarantee | Escalate uncertain policy decisions |
+| Nice-to-have workflows | Defer non-transcript/payment workflows until after the MVP |
 
 ## Supported intents
 
@@ -75,12 +78,12 @@ Transcript support is strong for an MVP because it combines:
 | `transcript_request` | “How do I order my transcript?” | Grounded answer with source |
 | `transcript_status` | “Why has my transcript not been processed?” | Check synthetic status and payment |
 | `fee_payment` | “I paid but still see a balance.” | Route to payment workflow/escalation |
-| `myokanagan_login` | “I cannot log into myOkanagan.” | Provide source-grounded support guidance |
-| `lms_access` | “Where is my online course?” | Answer from LMS/online resources source |
-| `registration_help` | “How do I register?” | Provide source-grounded next steps |
-| `refund_request` | “Can I get a refund?” | Answer carefully and escalate deadline-sensitive cases |
-| `application_status` | “Has my application been received?” | Mock status flow or handoff |
-| `key_dates` | “When is the withdrawal deadline?” | Retrieve source; avoid guessing |
+| `myokanagan_login` | “I cannot log into myOkanagan.” | Safe fallback or handoff; no auth workflow |
+| `lms_access` | “Where is my online course?” | Safe fallback or handoff; no LMS workflow |
+| `registration_help` | “How do I register?” | Safe fallback or handoff; no registration workflow |
+| `refund_request` | “Can I get a refund?” | Safe fallback or handoff; no refund/payment processing |
+| `application_status` | “Has my application been received?” | Safe fallback or handoff; no Banner status workflow |
+| `key_dates` | “When is the withdrawal deadline?” | Retrieve public source if available; avoid guessing |
 | `human_handoff` | “I need a person.” | Create mock CRM case |
 | `unknown` | “Can you write my essay?” | Redirect or decline unrelated request |
 

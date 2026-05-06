@@ -5,6 +5,7 @@ This folder contains the Go/Golang-focused, strict-TDD Markdown documentation pa
 ## Files
 
 - [README.md](README.md) — main project overview, Go-first stack, MVP pitch, repository structure, demo data, and TDD quality statement.
+- [CHANGELOG.md](CHANGELOG.md) — dated task log describing what changed, where, when, why, and how.
 - [docs/mvp-scope.md](docs/mvp-scope.md) — product scope, user journeys, boundaries, success metrics, and demo deliverables.
 - [docs/brainstorm.md](docs/brainstorm.md) — MVP brainstorming notes, architecture decisions, phase strategy, and TDD priorities.
 - [docs/phases-and-tasks.md](docs/phases-and-tasks.md) — phase-by-phase tickable task board with acceptance criteria and quality gates.
@@ -20,6 +21,8 @@ This folder contains the Go/Golang-focused, strict-TDD Markdown documentation pa
 - [docs/demo-script.md](docs/demo-script.md) — 5-7 minute interview demo script.
 - [docs/implementation-roadmap.md](docs/implementation-roadmap.md) — high-level phased Go implementation plan with tickable phase gates.
 - [docs/source-references.md](docs/source-references.md) — content-grounding and technical reference links.
+- [data/synthetic-students.json](data/synthetic-students.json) — synthetic-only learner, transcript, payment, and mock CRM fixture.
+- [data/seed-sources.json](data/seed-sources.json) — public-only source allowlist and knowledge-domain boundary.
 
 ## Recommended applicant positioning
 
