@@ -46,9 +46,10 @@ Every demo fixture should be visibly fake through fields such as `synthetic: tru
 
 | Control | Go package or pattern |
 |---|---|
-| Redaction before logging | `internal/privacy` |
+| Shared redaction before logging, audit, sessions, and CRM summaries | `internal/privacy` |
 | Trace IDs | `internal/middleware` |
-| Minimal audit events | `internal/audit` |
+| Redacted audit events, metrics, export, reset, and retention pruning | `internal/audit` |
+| Protected dashboard metrics and review queue | `internal/handlers`, `web/templates/admin.html`, `web/static/admin.js` |
 | Typed tool calls | `internal/tools` |
 | Context timeouts | `context.WithTimeout` for downstream calls |
 | Safe errors | Handler-level error mapping |
@@ -59,15 +60,14 @@ Every demo fixture should be visibly fake through fields such as `synthetic: tru
 
 ## Redaction requirements
 
-Before writing logs, audit events, or CRM summaries, redact:
+Before writing logs, audit events, session messages, or CRM summaries, P7 uses `privacy.Redact` to redact:
 
 - email addresses,
-- phone numbers,
-- passwords or password-like phrases,
-- payment card-like numbers,
-- government ID-like patterns,
-- access tokens,
-- long free-form sensitive text where not needed.
+- separated or compact 10-digit phone numbers,
+- likely password, passcode, token, or API-key assignments,
+- real-looking numeric identifiers with seven or more digits.
+
+Synthetic `S100001`-style student IDs are preserved for demo traceability. Raw messages are not written to request logs; audit review items use redacted question text.
 
 Example redacted audit message:
 
@@ -138,6 +138,8 @@ If a future demo needs a new scenario, add a new clearly fake record rather than
 | Tool-call logs | Tool name, synthetic ID, status, duration | Full downstream payloads with sensitive values |
 | Dashboard metrics | Aggregates and review queue | Direct personal identifiers unless needed for demo |
 
+The P7 dashboard is aggregate-first. It shows total conversations, containment, escalations, workflows, top intents, low-confidence review items, stale-source warning counts, and redacted review text. It does not show raw learner messages. Admin metrics, audit export, audit purge, and audit reset require a bearer token; the local demo default is `demo-admin-token`.
+
 ## Prompt and retrieval safety
 
 Policy/procedure answers must be source-grounded.
@@ -192,15 +194,17 @@ Disallowed MVP tool actions:
 | Stale content | Show indexed date and review stale sources |
 | Unclear source | Require source links for policy answer |
 
-## Retention recommendation for MVP
+## Implemented demo retention controls
 
 | Data | Demo retention |
 |---|---:|
 | Synthetic records | Keep in repo |
-| Redacted conversation logs | 7–30 days for demo |
-| Audit events | 30–90 days for demo |
+| Redacted session messages | Session TTL only |
+| Audit events | 7 days by default in P7 retention policy |
 | Evaluation outputs | Keep as non-sensitive artifacts |
 | Secrets/tokens | Never commit |
+
+P7 stores audit events in memory for the local demo. The admin API can export redacted audit events with message content omitted, purge expired events using the seven-day default policy, and reset all in-memory audit data. A future PostgreSQL-backed audit store should keep the same redaction, export, purge, and reset contracts while adding role-based access control.
 
 ## Production notes
 

@@ -33,8 +33,14 @@ func TestHandlerCreatesCaseWithRedactedSummary(t *testing.T) {
 	if !strings.HasPrefix(got.CaseID, "MOCK-CRM-") || got.Queue != "registrar_student_accounts" || got.Priority != "normal" {
 		t.Fatalf("case response = %+v", got)
 	}
-	if strings.Contains(got.Summary, "S100003") || strings.Contains(got.Summary, "demo.learner@example.test") {
+	if !strings.Contains(got.Summary, "S100003") {
+		t.Fatalf("summary removed synthetic demo ID: %q", got.Summary)
+	}
+	if strings.Contains(got.Summary, "demo.learner@example.test") {
 		t.Fatalf("summary was not redacted: %q", got.Summary)
+	}
+	if !strings.Contains(got.Summary, "[REDACTED_EMAIL]") {
+		t.Fatalf("summary missing shared redaction marker: %q", got.Summary)
 	}
 }
 

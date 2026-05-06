@@ -3,8 +3,8 @@ package middleware
 import (
 	"log/slog"
 	"net/http"
-	"regexp"
-	"strings"
+
+	"askoc-mvp/internal/privacy"
 )
 
 type statusRecorder struct {
@@ -42,11 +42,5 @@ func RequestLogger(logger *slog.Logger, redact func(string) string) func(http.Ha
 }
 
 func BasicRedactor(value string) string {
-	email := regexp.MustCompile(`[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}`)
-	studentID := regexp.MustCompile(`S[0-9]{6}`)
-
-	value = email.ReplaceAllString(value, "[redacted-email]")
-	value = studentID.ReplaceAllString(value, "[redacted-student-id]")
-	value = strings.ReplaceAll(value, "Authorization", "[redacted-header]")
-	return value
+	return privacy.Redact(value)
 }

@@ -6,7 +6,7 @@ Show a 5–7 minute Go-based MVP that maps directly to the AI/Automation Solutio
 
 ## Opening pitch
 
-> “This is AskOC AI Concierge, a Go-based learner-service automation MVP. The current P6 build retrieves approved public source chunks for transcript answers, classifies transcript/payment messages with deterministic fallback or guarded LLM JSON, checks synthetic Banner/payment records, triggers an idempotent synthetic payment reminder, and escalates complex cases into a mock CRM without relying on live AI by default.”
+> “This is AskOC AI Concierge, a Go-based learner-service automation MVP. The current P7 build retrieves approved public source chunks for transcript answers, classifies transcript/payment messages with deterministic fallback or guarded LLM JSON, checks synthetic Banner/payment records, triggers an idempotent synthetic payment reminder, escalates complex cases into a mock CRM, and summarizes redacted audit events in an admin dashboard without relying on live AI by default.”
 
 ## Demo setup
 
@@ -31,11 +31,12 @@ Services:
 
 ```text
 API/UI:       http://localhost:8080
+Admin UI:     http://localhost:8080/admin
 Mock Banner:  http://localhost:8081
 Mock Payment: http://localhost:8082
 Mock CRM:     http://localhost:8083
 Workflow:     in-process P4 idempotent workflow port
-Dashboard:    deferred to P7
+Dashboard:    protected P7 admin metrics and redacted review queue
 ```
 
 ## Minute 1: Grounded Tier 0 answer
@@ -118,11 +119,32 @@ Talking point:
 
 > “Sentiment does not make final decisions alone. It increases routing priority when combined with unresolved context and safe business rules.”
 
-## Minute 5: P6 source and action trace
+## Minute 5: P7 audit dashboard and redaction
 
 Talking point:
 
-> “The current response body shows the safe decision trace directly: retrieval result, classifier result, Banner check, payment check, workflow attempt, and CRM case creation when applicable. P7 will turn these audit events into a staff dashboard.”
+> “The response body still shows the safe decision trace directly, and P7 also records redacted audit events for orchestrator actions, workflow outcomes, guardrails, and escalations. The admin dashboard summarizes top intents, containment, escalations, workflows, low-confidence review items, and stale-source warnings without displaying raw PII.”
+
+Open:
+
+```text
+http://localhost:8080/admin
+```
+
+Use the default local admin token:
+
+```text
+demo-admin-token
+```
+
+Show:
+
+- total conversations and containment rate,
+- top intents,
+- workflow success/failure counts,
+- low-confidence review items with redacted question text,
+- stale-source warning count,
+- audit export/reset/purge controls.
 
 ## Minute 6: Go architecture walkthrough
 
@@ -151,6 +173,7 @@ Run:
 
 ```bash
 go test ./...
+go test ./internal/privacy ./internal/audit ./internal/handlers
 go test ./internal/llm ./internal/classifier ./internal/orchestrator
 go test ./internal/rag ./internal/orchestrator
 go test ./internal/classifier ./internal/workflow ./internal/orchestrator
@@ -162,11 +185,11 @@ Show:
 - source retrieval and stale/high-risk fallback,
 - workflow decision accuracy,
 - safe action traces,
-- CRM summary redaction in P4 orchestrator tests.
+- CRM summary redaction and P7 audit/dashboard redaction tests.
 
 Talking point:
 
-> “I treat this as a maintained automation product. P6 has deterministic unit coverage for RAG allowlisting, ingestion, chunking, retrieval, source fallback, classification, LLM gateway behavior, prompt guardrails, workflow idempotency, transcript decisions, action traces, and CRM escalation; P9 will add the broader evaluation runner.”
+> “I treat this as a maintained automation product. P7 has deterministic unit coverage for RAG allowlisting, ingestion, chunking, retrieval, source fallback, classification, LLM gateway behavior, prompt guardrails, workflow idempotency, transcript decisions, action traces, CRM escalation, shared redaction, audit storage, admin metrics, dashboard rendering, and retention controls; P9 will add the broader evaluation runner.”
 > “P6 adds the guarded LLM layer: OpenAI-compatible calls are optional, strict JSON is validated before use, prompt templates are versioned, and low-confidence or ungrounded model output falls back instead of triggering tools.”
 
 ## Expected demo path
@@ -179,16 +202,16 @@ All demo records are synthetic. Student IDs, payment states, holds, workflow IDs
 | 2 | Unpaid payment workflow | “I ordered my transcript but it has not been processed. My student ID is S100002.” | Payment status is unpaid and reminder workflow is accepted | Chat response shows `transcript_status`, `payment_status_checked`, `payment_reminder_triggered`, workflow ID, and no CRM handoff |
 | 3 | Financial-hold escalation | “My transcript still is not moving. My student ID is S100003.” | Financial hold is detected and staff handoff is created | Chat response shows `transcript_status`, `financial_hold_detected`, CRM case ID, and Registrar/Student Accounts handoff |
 | 4 | Urgent sentiment escalation | “This is really frustrating. I need this transcript for a job application.” | Urgent/negative sentiment creates a priority CRM case | Chat response shows urgent sentiment, `crm_case_created`, priority flag, case ID, and privacy-aware summary |
-| 5 | P6 TDD evidence | Run P6 package tests | Tests prove LLM gateway behavior, strict classification, prompt guardrails, source grounding, deterministic decisions, and redaction | `go test ./internal/llm ./internal/classifier ./internal/orchestrator` and `go test ./internal/rag ./internal/workflow ./internal/orchestrator` pass |
+| 5 | P7 TDD evidence | Run P7 package tests | Tests prove LLM gateway behavior, strict classification, prompt guardrails, source grounding, deterministic decisions, redaction, audit metrics, and dashboard controls | `go test ./internal/privacy ./internal/audit ./internal/handlers`, `go test ./internal/llm ./internal/classifier ./internal/orchestrator`, and `go test ./...` pass |
 
 ## Demo acceptance matrix
 
-Each P6 row must be verifiable from the Go API response, local RAG chunks, local mock service logs, the in-process workflow response, CRM simulator output, or unit-test audit fakes. Source references are approved public/curated learner-service content; synthetic records are the only data used for student/payment/hold state.
+Each P7 row must be verifiable from the Go API response, local RAG chunks, local mock service logs, the in-process workflow response, CRM simulator output, protected admin metrics, or redacted audit-store tests. Source references are approved public/curated learner-service content; synthetic records are the only data used for student/payment/hold state.
 
 | ID | Scenario | Synthetic input | Expected intent | Expected source | Expected action | Expected handoff behavior | Pass evidence |
 |---|---|---|---|---|---|---|---|
 | D01 | Transcript answer | “How do I order my official transcript?” | `transcript_request` | P5 local chunk `oc-transcript-request-2005-onwards-seed-001` or refreshed chunk from the same allowlisted source | Return concise grounded answer with source link | No handoff; keep learner in chat | Response includes source, retrieval confidence, risk/freshness metadata, and zero critical unsupported claims |
-| D02 | Unpaid payment workflow | `S100002` transcript status prompt | `transcript_status` | Transcript/payment guidance source chunk plus synthetic payment record `S100002` | Check mock Banner, check mock Payment, trigger `payment_reminder_triggered` | No CRM handoff unless workflow fails or confidence is low | Response includes unpaid status, workflow ID, idempotency key, and audit event |
+| D02 | Unpaid payment workflow | `S100002` transcript status prompt | `transcript_status` | Transcript/payment guidance source chunk plus synthetic payment record `S100002` | Check mock Banner, check mock Payment, trigger `payment_reminder_triggered` | No CRM handoff unless workflow fails or confidence is low | Response includes unpaid status, workflow ID, idempotency key, and redacted workflow audit events |
 | D03 | Financial-hold escalation | `S100003` transcript status prompt | `transcript_status` | Transcript/hold guidance source chunk plus synthetic Banner record `S100003` | Check mock Banner, detect `financial_hold`, create CRM case | Handoff to Registrar/Student Accounts queue with minimal summary and case ID | Response includes hold-safe wording, CRM case ID, queue/priority, and no payment reminder |
 | D04 | Urgent sentiment escalation | Frustrated urgent transcript message | `escalation_request` or human handoff intent with urgent sentiment | Transcript source chunk when transcript context is present | Classify sentiment as urgent/negative and create priority CRM case | Priority handoff to staff; assistant does not promise a deadline or outcome | Response includes priority flag, CRM case ID, redacted summary, and safe expectation-setting |
 | D05 | Low-confidence source fallback | Transcript-adjacent question with no approved source | `unknown` or low-confidence transcript intent | No acceptable source above threshold | Do not answer from model memory; ask clarifying question or route to staff | Low-confidence handoff if learner needs account-specific help | Response shows no citation used for unsupported claim and logs low-confidence review item |

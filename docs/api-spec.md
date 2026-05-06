@@ -10,14 +10,18 @@ This document defines a simple REST API surface for the AskOC AI Concierge MVP. 
 http://localhost:8080/api/v1
 ```
 
-The implemented P6 chat route is `POST http://localhost:8080/api/v1/chat`. The web chat UI is served at `GET http://localhost:8080/chat`.
+The implemented P7 chat route is `POST http://localhost:8080/api/v1/chat`. The web chat UI is served at `GET http://localhost:8080/chat`, and the admin dashboard shell is served at `GET http://localhost:8080/admin`.
 
 ## Authentication
 
-For the MVP, use a mock bearer token.
+For the MVP, use a mock bearer token. Learner chat auth is disabled by default in local demo mode. P7 admin metrics, audit export, audit purge, and audit reset require `Authorization: Bearer demo-admin-token` unless `ASKOC_AUTH_TOKEN` is configured.
 
 ```http
 Authorization: Bearer demo-token
+```
+
+```http
+Authorization: Bearer demo-admin-token
 ```
 
 A production version should use institutional SSO and role-based access control.
@@ -52,7 +56,10 @@ X-Trace-ID: optional-client-generated-trace-id
 | `POST` | `/crm/cases` | Create mock CRM case | `cmd/mock-crm` |
 | `GET` | `/students/{student_id}/lms-access` | Check synthetic LMS access status | `cmd/mock-lms` |
 | `POST` | `/automation/payment-reminder` | Trigger mock payment reminder workflow | `cmd/workflow-sim` or Power Automate |
-| `GET` | `/analytics/summary` | Get dashboard summary metrics | `cmd/api` |
+| `GET` | `/admin/metrics` | Get protected dashboard summary metrics | `cmd/api` |
+| `GET` | `/admin/audit/export` | Export redacted audit events with message content omitted | `cmd/api` |
+| `POST` | `/admin/audit/purge` | Purge expired in-memory demo audit events | `cmd/api` |
+| `POST` | `/admin/audit/reset` | Reset in-memory demo audit events | `cmd/api` |
 | `POST` | `/feedback` | Submit answer quality feedback | `cmd/api` |
 | `GET` | `/healthz` | Health check | all services |
 | `GET` | `/readyz` | Readiness check with dependency status | all services |
@@ -397,18 +404,25 @@ This endpoint can be implemented by:
 
 ---
 
-## `GET /analytics/summary`
+## `GET /api/v1/admin/metrics`
 
-Returns dashboard summary metrics.
+Returns protected dashboard summary metrics from redacted in-memory audit events. Requires a mock admin bearer token. Empty stores return zero counts and empty lists safely.
+
+### Request headers
+
+```http
+Authorization: Bearer demo-admin-token
+```
 
 ### Response
 
 ```json
 {
+  "total_events": 24,
   "total_conversations": 48,
   "containment_rate": 0.67,
   "escalation_rate": 0.18,
-  "average_response_ms": 1840,
+  "escalations": 9,
   "top_intents": [
     { "intent": "transcript_request", "count": 15 },
     { "intent": "transcript_status", "count": 11 },
@@ -416,12 +430,79 @@ Returns dashboard summary metrics.
   ],
   "automation": {
     "payment_reminders_sent": 6,
-    "workflow_failures": 0
+    "workflow_failures": 0,
+    "workflow_events": 12
   },
   "review_queue": {
     "low_confidence_answers": 3,
-    "stale_source_questions": 1
-  }
+    "stale_source_questions": 1,
+    "items": [
+      {
+        "trace_id": "trace_01JABC456",
+        "conversation_id": "conv_01JABC123",
+        "reason": "low_confidence",
+        "question": "Email [REDACTED_EMAIL] about [REDACTED_ID]"
+      }
+    ]
+  },
+  "by_type": { "intent": 8, "workflow": 12, "escalation": 3, "guardrail": 1 },
+  "by_action": { "intent_classified": 8, "workflow_payment_reminder": 6 },
+  "by_status": { "completed": 18, "failed": 1, "pending": 2 }
+}
+```
+
+Metrics are aggregate and redacted. Review queue items contain redacted question text only.
+
+---
+
+## `GET /api/v1/admin/audit/export`
+
+Exports audit events for demo troubleshooting. Requires a mock admin bearer token. The export omits `message` content and includes only redacted metadata.
+
+### Response
+
+```json
+{
+  "events": [
+    {
+      "trace_id": "trace_01JABC456",
+      "conversation_id": "conv_01JABC123",
+      "type": "workflow",
+      "action": "workflow_payment_reminder",
+      "status": "completed",
+      "reference_id": "WF-ACCEPTED-1",
+      "metadata": { "intent": "transcript_status" },
+      "recorded_at": "2026-05-06T12:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+## `POST /api/v1/admin/audit/purge`
+
+Purges in-memory audit events older than the P7 default seven-day demo retention policy.
+
+### Response
+
+```json
+{
+  "pruned": 2
+}
+```
+
+---
+
+## `POST /api/v1/admin/audit/reset`
+
+Resets all in-memory audit events for a clean local demo.
+
+### Response
+
+```json
+{
+  "status": "reset"
 }
 ```
 
@@ -611,4 +692,4 @@ components:
 - Set HTTP client timeouts for LLM, retrieval, and tool calls.
 - Return safe user-facing errors; log internal errors separately.
 - Include `trace_id` in every response and audit event.
-- Redact sensitive values before writing logs or CRM summaries.
+- Redact sensitive values before writing logs, audit events, session messages, or CRM summaries.

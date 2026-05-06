@@ -2,10 +2,11 @@ package session
 
 import (
 	"errors"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
+
+	"askoc-mvp/internal/privacy"
 )
 
 type Role string
@@ -64,7 +65,7 @@ func NewStore(ttl time.Duration, opts ...Option) *Store {
 	store := &Store{
 		ttl:      ttl,
 		now:      time.Now,
-		redactor: DefaultRedactor,
+		redactor: privacy.Redact,
 		sessions: make(map[string]Session),
 	}
 	for _, opt := range opts {
@@ -154,18 +155,6 @@ func (s *Store) prepareMessage(message Message, now time.Time) Message {
 	return message
 }
 
-var (
-	emailPattern  = regexp.MustCompile(`[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}`)
-	phonePattern  = regexp.MustCompile(`\b(?:\+?1[-.\s]?)?(?:\(?[0-9]{3}\)?[-.\s]?)?[0-9]{3}[-.\s]?[0-9]{4}\b`)
-	secretPattern = regexp.MustCompile(`(?i)\bpassword\s+is\s+\S+`)
-	realIDPattern = regexp.MustCompile(`\b[0-9]{7,}\b`)
-	spacePattern  = regexp.MustCompile(`[ \t]{2,}`)
-)
-
 func DefaultRedactor(value string) string {
-	value = emailPattern.ReplaceAllString(value, "[REDACTED_EMAIL]")
-	value = phonePattern.ReplaceAllString(value, "[REDACTED_PHONE]")
-	value = secretPattern.ReplaceAllString(value, "[REDACTED_SECRET]")
-	value = realIDPattern.ReplaceAllString(value, "[REDACTED_ID]")
-	return strings.TrimSpace(spacePattern.ReplaceAllString(value, " "))
+	return privacy.Redact(value)
 }

@@ -8,7 +8,7 @@ All Go code tasks are governed by [TDD Policy](tdd-policy.md). For each code tas
 
 ## Purpose
 
-This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, and protect privacy in a Go-based demo environment. P6 currently covers deterministic fallback classification, optional OpenAI-compatible LLM gateway behavior behind strict JSON parsing, local approved-source RAG retrieval, transcript/payment orchestration, in-process workflow idempotency, mock CRM handoff, source fallback, source-only LLM answer guardrails, and safe action traces; durable audit/dashboard and the standalone workflow simulator remain later-phase coverage.
+This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, and protect privacy in a Go-based demo environment. P7 currently covers deterministic fallback classification, optional OpenAI-compatible LLM gateway behavior behind strict JSON parsing, local approved-source RAG retrieval, transcript/payment orchestration, in-process workflow idempotency, mock CRM handoff, source fallback, source-only LLM answer guardrails, safe action traces, shared redaction, redacted audit storage, protected admin metrics, dashboard rendering, and audit retention/export/reset controls. The standalone workflow simulator and evaluation runner remain later-phase coverage.
 
 ## Test objectives
 
@@ -32,12 +32,13 @@ This test plan verifies that AskOC AI Concierge can answer learner-service quest
 | Mock Payment API | Go service with synthetic payment records |
 | Mock CRM API | Go service with synthetic case creation |
 | Automation workflow | P4 in-process idempotent workflow port; P8 adds Go workflow simulator or Power Automate demo flow |
-| Dashboard | Deferred to P7 Go dashboard endpoints reading audit/event store |
+| Dashboard | P7 Go admin dashboard at `/admin` reading the in-memory audit event store through protected admin APIs |
 
 ## Go test commands
 
 ```bash
 go test ./...
+go test ./internal/privacy ./internal/audit ./internal/handlers
 go test ./internal/llm ./internal/classifier ./internal/orchestrator
 go test ./internal/classifier ./internal/workflow ./internal/orchestrator
 go test ./internal/rag ./internal/orchestrator
@@ -46,7 +47,7 @@ go test -race ./internal/session
 go test ./internal/orchestrator -run 'TestTranscriptStatus|TestUrgent|TestLowConfidence'
 ```
 
-P6 verification uses package-specific LLM, classifier, RAG, workflow, and orchestrator tests plus `go test ./...`. Privacy, evaluation runner, dashboard, and broad race coverage remain later-phase checks unless those packages exist.
+P7 verification uses package-specific privacy, audit, handler, LLM, classifier, RAG, workflow, and orchestrator tests plus `go test ./...`. The evaluation runner and broad race coverage remain later-phase checks unless those packages exist.
 
 ## Test data
 
@@ -161,7 +162,7 @@ Can you guarantee my transfer credit will be approved?
 
 | Package | Test focus |
 |---|---|
-| `internal/privacy` | PII redaction, password warnings, safe summaries |
+| `internal/privacy` | PII redaction, likely password/token redaction, false positives, synthetic ID preservation, and safe log inputs |
 | `internal/domain` | chat request/response JSON models, intent/source/action/escalation fields |
 | `internal/validation` | empty, whitespace-only, oversized message, and synthetic student ID validation |
 | `internal/fixtures` | synthetic fixture loading, duplicate rejection, required fields, synthetic ID enforcement |
@@ -176,7 +177,8 @@ Can you guarantee my transfer credit will be approved?
 | `internal/tools` | trace header forwarding, timeout handling, not-found/retryable/parse error mapping, response parsing, safe errors |
 | `internal/workflow` | idempotency, retry behavior, duplicate prevention |
 | `internal/orchestrator` | decision table for transcript/payment/escalation |
-| `internal/handlers` | request validation, status codes, trace IDs |
+| `internal/audit` | redacted memory store, trace queries, metrics, export, reset, prune, and retention policy |
+| `internal/handlers` | request validation, status codes, trace IDs, protected admin metrics, dashboard shell, audit export/reset/purge |
 
 ## P6 classification fixture gate
 
@@ -192,7 +194,7 @@ func TestRedact(t *testing.T) {
         want string
     }{
         {"email", "Email me at student@example.com", "Email me at [REDACTED_EMAIL]"},
-        {"password", "my password is Hunter2", "my [REDACTED_SECRET]"},
+        {"password", "my password is Hunter2", "my password is [REDACTED_SECRET]"},
     }
 
     for _, tt := range tests {
@@ -262,17 +264,16 @@ Run contract tests between `cmd/api` and mock services:
 
 ## Dashboard validation
 
-After running test conversations, verify that the dashboard shows:
+After running test conversations, verify that the dashboard at `/admin` shows:
 
 - total conversations,
 - top intents,
 - containment rate,
 - escalation rate,
 - automation success/failure,
-- average response time,
 - low-confidence answer count,
-- unresolved questions,
-- sentiment distribution.
+- stale-source warning count,
+- redacted review queue items.
 
 ## Exit criteria
 
