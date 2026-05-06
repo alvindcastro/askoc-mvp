@@ -1,0 +1,396 @@
+# Architecture
+
+## Purpose
+
+This document describes the proposed Go-based architecture for the AskOC AI Concierge MVP. The goal is to demonstrate how an AI/automation developer can design, build, deploy, and maintain a learner-service automation solution that supports instant answers, real-time decisioning, workflow automation, and escalation.
+
+## Design principles
+
+1. **Grounded by default**: The assistant should answer policy and procedure questions only from approved sources.
+2. **Go-first services**: Core API, orchestration, mock integrations, ingestion, workflow simulation, and evaluation should be implemented in Go.
+3. **Transaction-aware**: The assistant should not only answer questions; it should initiate safe, auditable workflows.
+4. **Human handoff when needed**: Low-confidence, sensitive, or frustrated interactions should route to staff.
+5. **Privacy by design**: Use synthetic data in the demo and avoid exposing unnecessary personal information.
+6. **Observable and measurable**: Every answer, retrieval, tool call, escalation, and workflow should be logged.
+7. **Composable architecture**: AI, APIs, automation, and dashboard components should be replaceable.
+
+## High-level architecture
+
+```mermaid
+flowchart TD
+    U[Learner] --> UI[Go Web Chat / Optional React UI]
+    UI --> API[Go API Gateway]
+    API --> ORCH[Go AI Orchestrator]
+
+    ORCH --> INTENT[Intent Classification]
+    ORCH --> SENT[Sentiment Analysis]
+    ORCH --> RAG[RAG Retrieval]
+    ORCH --> TOOLS[Typed Tool Calling Layer]
+
+    RAG --> INDEX[Knowledge Index]
+    INDEX --> CONTENT[Approved Public Content]
+
+    TOOLS --> BANNER[Go Mock Banner Student API]
+    TOOLS --> PAY[Go Mock Payment API]
+    TOOLS --> CRM[Go Mock CRM API]
+    TOOLS --> LMS[Go Mock LMS API]
+    TOOLS --> NOTIFY[Go Notification Service]
+
+    CRM --> AUTO[Power Automate or Go Workflow Simulator]
+    PAY --> AUTO
+    AUTO --> AUDIT[Audit Log]
+    ORCH --> AUDIT
+
+    AUDIT --> DASH[Admin Dashboard]
+    ORCH --> DASH
+```
+
+## Core services
+
+| Service | Go package/command | Responsibility |
+|---|---|---|
+| Public API | `cmd/api` | Serves chat UI, REST API, dashboard endpoints |
+| Orchestrator | `internal/orchestrator` | Coordinates intent, retrieval, LLM, tools, workflow, escalation |
+| RAG ingestor | `cmd/ingest` + `internal/rag` | Fetches approved public pages, chunks content, writes index |
+| LLM gateway | `internal/llm` | Wraps Azure OpenAI/OpenAI-compatible REST calls |
+| Classifier | `internal/classifier` | Intent/sentiment via structured LLM output or Azure AI Language REST |
+| Tool clients | `internal/tools` | Typed clients for Banner, payment, CRM, LMS, notification |
+| Privacy | `internal/privacy` | Redaction, safe logging, prompt-injection checks |
+| Audit | `internal/audit` | Interaction, source, tool-call, workflow, and feedback events |
+| Workflow | `internal/workflow` | Power Automate webhook client and local workflow simulator |
+| Mock Banner | `cmd/mock-banner` | Synthetic student records and holds |
+| Mock payment | `cmd/mock-payment` | Synthetic transcript payment status |
+| Mock CRM | `cmd/mock-crm` | Case creation and queue routing |
+| Mock LMS | `cmd/mock-lms` | LMS account/course access simulation |
+| Evaluation | `cmd/eval` | Runs JSONL test set and reports metrics |
+
+## Recommended Go project layout
+
+```text
+cmd/
+  api/
+  mock-banner/
+  mock-payment/
+  mock-crm/
+  mock-lms/
+  workflow-sim/
+  ingest/
+  eval/
+internal/
+  audit/
+  classifier/
+  config/
+  domain/
+  handlers/
+  llm/
+  middleware/
+  orchestrator/
+  privacy/
+  rag/
+  tools/
+  workflow/
+web/
+  templates/
+  static/
+data/
+  seed-sources.json
+  synthetic-students.json
+  eval-questions.jsonl
+```
+
+## Core domain models
+
+```go
+type Intent string
+
+const (
+    IntentTranscriptRequest Intent = "transcript_request"
+    IntentTranscriptStatus  Intent = "transcript_status"
+    IntentFeePayment       Intent = "fee_payment"
+    IntentHumanHandoff     Intent = "human_handoff"
+    IntentUnknown          Intent = "unknown"
+)
+
+type ChatRequest struct {
+    ConversationID string `json:"conversation_id,omitempty"`
+    Channel        string `json:"channel"`
+    Message        string `json:"message"`
+    StudentID      string `json:"student_id,omitempty"`
+}
+
+type ChatResponse struct {
+    ConversationID string       `json:"conversation_id"`
+    TraceID        string       `json:"trace_id"`
+    Answer         string       `json:"answer"`
+    Intent         IntentResult `json:"intent"`
+    Sentiment      string       `json:"sentiment"`
+    Sources        []Source     `json:"sources"`
+    Actions        []Action     `json:"actions"`
+    Escalation     *Escalation  `json:"escalation,omitempty"`
+}
+```
+
+## Component responsibilities
+
+### 1. Go learner chat UI
+
+The UI can be implemented as simple server-rendered Go templates for a fast portfolio build.
+
+Recommended capabilities:
+
+- message history,
+- source display,
+- confidence indicator,
+- escalation status,
+- optional transcript download,
+- accessibility-friendly layout.
+
+Optional alternative: React/Next.js frontend calling the Go API.
+
+### 2. Go API gateway
+
+The API gateway receives requests, validates input, applies rate limits, and forwards messages to the orchestrator.
+
+Responsibilities:
+
+- validate JSON payloads,
+- generate trace IDs,
+- enforce mock bearer token,
+- sanitize user input,
+- return structured assistant responses,
+- log interaction metadata,
+- expose health checks and dashboard metrics.
+
+### 3. Go AI orchestrator
+
+The orchestrator coordinates the full interaction.
+
+Responsibilities:
+
+- classify intent,
+- classify sentiment and urgency,
+- decide whether retrieval is needed,
+- retrieve relevant content,
+- call mock enterprise APIs,
+- generate grounded responses,
+- trigger workflow automation,
+- decide when to escalate,
+- record audit events.
+
+Recommended orchestrator interface:
+
+```go
+type Orchestrator interface {
+    HandleChat(ctx context.Context, req ChatRequest) (ChatResponse, error)
+}
+```
+
+### 4. Knowledge index
+
+The knowledge index stores chunks from approved public pages. Each chunk should include:
+
+- source URL,
+- source title,
+- chunk ID,
+- content hash,
+- last indexed date,
+- embedding vector or search key,
+- access level,
+- effective date if known.
+
+### 5. Mock enterprise APIs
+
+The MVP uses Go services to simulate enterprise integrations.
+
+| Service | Purpose |
+|---|---|
+| Mock Banner API | Student profile, program, holds, transcript eligibility |
+| Mock Payment API | Transcript fee payment status and confirmation |
+| Mock CRM API | Case creation, queue routing, case status |
+| Mock LMS API | LMS account or course-access status |
+| Notification API | Email/SMS-style confirmation messages |
+
+### 6. Automation workflow
+
+The automation layer represents Power Automate or an equivalent workflow engine.
+
+Example workflow:
+
+```text
+CRM case created
+→ classify queue
+→ assign priority
+→ notify learner
+→ notify service team
+→ update case status
+→ write audit event
+```
+
+For local demos, `cmd/workflow-sim` exposes an HTTP endpoint that behaves like a Power Automate cloud flow.
+
+### 7. Admin dashboard
+
+The dashboard helps staff monitor adoption, performance, and risk.
+
+Recommended views:
+
+- total conversations,
+- containment rate,
+- escalation rate,
+- top intents,
+- unresolved questions,
+- low-confidence responses,
+- sentiment distribution,
+- average response time,
+- automation success/failure,
+- retraining queue.
+
+## Request flow: grounded answer
+
+```mermaid
+sequenceDiagram
+    participant Learner
+    participant UI as Go Web UI
+    participant API as Go API Gateway
+    participant Orchestrator as Go Orchestrator
+    participant Search as Knowledge Index
+    participant LLM as LLM Gateway
+    participant Audit as Audit Store
+
+    Learner->>UI: How do I order my transcript?
+    UI->>API: POST /api/v1/chat
+    API->>Orchestrator: normalized message + trace ID
+    Orchestrator->>Search: retrieve relevant chunks
+    Search-->>Orchestrator: transcript policy chunks + source URLs
+    Orchestrator->>LLM: generate grounded answer with citations
+    LLM-->>Orchestrator: answer JSON
+    Orchestrator->>Audit: log intent, confidence, sources
+    Orchestrator-->>API: response
+    API-->>UI: answer + sources + next steps
+    UI-->>Learner: displayed response
+```
+
+## Request flow: transcript status automation
+
+```mermaid
+sequenceDiagram
+    participant Learner
+    participant API as Go API
+    participant Orchestrator as Go Orchestrator
+    participant Banner as Go Mock Banner API
+    participant Payment as Go Mock Payment API
+    participant Workflow as Power Automate / Go Workflow Sim
+    participant CRM as Go Mock CRM API
+    participant Audit as Audit Store
+
+    Learner->>API: My transcript has not been processed
+    API->>Orchestrator: message
+    Orchestrator->>Banner: check student status and holds
+    Banner-->>Orchestrator: active student, no hold
+    Orchestrator->>Payment: check transcript payment
+    Payment-->>Orchestrator: unpaid
+    Orchestrator->>Workflow: trigger payment reminder
+    Workflow-->>Orchestrator: reminder accepted
+    Workflow->>Audit: workflow event
+    Orchestrator-->>API: explain payment requirement and next step
+
+    Learner->>API: This is frustrating and urgent
+    API->>Orchestrator: message
+    Orchestrator->>CRM: create priority case
+    CRM-->>Orchestrator: case ID
+    Orchestrator->>Audit: escalation event
+    Orchestrator-->>API: case created with summary
+```
+
+## Data stores
+
+### Conversation table
+
+| Field | Type | Notes |
+|---|---|---|
+| `conversation_id` | UUID/text | Primary identifier |
+| `created_at` | timestamp | UTC |
+| `channel` | string | Web, Teams, voice, etc. |
+| `synthetic_student_id` | string/null | Demo only |
+| `intent` | string | Latest predicted intent |
+| `sentiment` | string | neutral, positive, negative, urgent |
+| `status` | string | open, resolved, escalated |
+
+### Message table
+
+| Field | Type | Notes |
+|---|---|---|
+| `message_id` | UUID/text | Primary identifier |
+| `conversation_id` | UUID/text | Foreign key |
+| `role` | string | learner, assistant, system |
+| `content_redacted` | text | Redacted content only |
+| `created_at` | timestamp | UTC |
+
+### Retrieval event table
+
+| Field | Type | Notes |
+|---|---|---|
+| `trace_id` | string | Request trace |
+| `query` | text | Redacted query |
+| `source_ids` | JSON | Retrieved source IDs |
+| `top_score` | float | Retrieval confidence |
+| `created_at` | timestamp | UTC |
+
+### Tool call table
+
+| Field | Type | Notes |
+|---|---|---|
+| `trace_id` | string | Request trace |
+| `tool_name` | string | banner, payment, crm, workflow |
+| `request_summary` | JSON | No secrets or sensitive raw values |
+| `response_summary` | JSON | Minimal result summary |
+| `duration_ms` | integer | Tool latency |
+| `status` | string | success, failed, timeout |
+
+## API ports for local demo
+
+| Service | Port |
+|---|---:|
+| `cmd/api` | 8080 |
+| `cmd/mock-banner` | 8081 |
+| `cmd/mock-payment` | 8082 |
+| `cmd/mock-crm` | 8083 |
+| `cmd/workflow-sim` | 8084 |
+| PostgreSQL | 5432 |
+
+## Deployment options
+
+### Local demo
+
+```text
+Docker Compose
+- api
+- mock-banner
+- mock-payment
+- mock-crm
+- workflow-sim
+- postgres
+```
+
+### Cloud path
+
+```text
+Azure Container Apps or Kubernetes
+Azure OpenAI or equivalent LLM service
+Azure AI Search or managed vector search
+Azure Key Vault for secrets
+PostgreSQL or managed database
+Power Automate for workflow automation
+```
+
+## Risk controls
+
+| Risk | Control |
+|---|---|
+| Hallucinated policy answer | Require source-grounded generation and confidence threshold |
+| Stale deadline or fee information | Show source/indexed date and escalate stale content |
+| Prompt injection | System instruction isolation, retrieved-content treatment, allowlisted tools |
+| Privacy leak | Redaction before logging, synthetic records only, minimal CRM summaries |
+| Tool misuse | Typed tool inputs, allowlisted actions, audit logging |
+| Duplicate reminders | Idempotency key per student/workflow/window |
+| Workflow outage | Retry once, log failure, create CRM case if needed |

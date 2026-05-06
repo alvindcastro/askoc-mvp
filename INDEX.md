@@ -1,0 +1,32 @@
+# Markdown Pack Index
+
+This folder contains the Go/Golang-focused, strict-TDD Markdown documentation pack for the **AskOC AI Concierge** MVP.
+
+## Files
+
+- [README.md](README.md) — main project overview, Go-first stack, MVP pitch, repository structure, demo data, and TDD quality statement.
+- [docs/mvp-scope.md](docs/mvp-scope.md) — product scope, user journeys, boundaries, success metrics, and demo deliverables.
+- [docs/brainstorm.md](docs/brainstorm.md) — MVP brainstorming notes, architecture decisions, phase strategy, and TDD priorities.
+- [docs/phases-and-tasks.md](docs/phases-and-tasks.md) — phase-by-phase tickable task board with acceptance criteria and quality gates.
+- [docs/task-prompts.md](docs/task-prompts.md) — detailed copy/paste prompts for each task, including strict TDD prompts for code work.
+- [docs/tdd-policy.md](docs/tdd-policy.md) — strict Go TDD policy, required evidence, test categories, and anti-patterns.
+- [docs/architecture.md](docs/architecture.md) — Go-based solution architecture, service boundaries, data flow, and deployment notes.
+- [docs/golang-implementation.md](docs/golang-implementation.md) — Go project layout, packages, handler patterns, interfaces, testing strategy, and local commands.
+- [docs/api-spec.md](docs/api-spec.md) — REST API endpoints, example payloads, OpenAPI starter spec, and Go implementation notes.
+- [docs/power-automate-flow.md](docs/power-automate-flow.md) — webhook-compatible workflow design using Power Automate or a local Go workflow simulator.
+- [docs/privacy-impact-lite.md](docs/privacy-impact-lite.md) — privacy-by-design, responsible-AI controls, logging, redaction, and retention.
+- [docs/test-plan.md](docs/test-plan.md) — functional, RAG, automation, privacy, performance, and Go-specific tests.
+- [docs/model-evaluation.md](docs/model-evaluation.md) — evaluation metrics, rubrics, JSONL test sets, and Go evaluation runner design.
+- [docs/demo-script.md](docs/demo-script.md) — 5-7 minute interview demo script.
+- [docs/implementation-roadmap.md](docs/implementation-roadmap.md) — high-level phased Go implementation plan with tickable phase gates.
+- [docs/source-references.md](docs/source-references.md) — content-grounding and technical reference links.
+
+## Recommended applicant positioning
+
+Present the MVP as a **Go microservices + AI automation portfolio project**:
+
+> “I built a Go-based AI learner-service concierge that combines RAG, structured LLM output, mock Banner/CRM/payment integrations, webhook automation, strict TDD, and privacy-aware audit logging to automate Tier 0 and Tier 1 student inquiries.”
+
+## Recommended build entry point
+
+Start with [docs/phases-and-tasks.md](docs/phases-and-tasks.md), use [docs/task-prompts.md](docs/task-prompts.md) for each task, and enforce [docs/tdd-policy.md](docs/tdd-policy.md) on every Go code change.
