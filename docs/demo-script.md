@@ -6,21 +6,22 @@ Show a 5–7 minute Go-based MVP that maps directly to the AI/Automation Solutio
 
 ## Opening pitch
 
-> “This is AskOC AI Concierge, a Go-based learner-service automation MVP. The current P9 build retrieves approved public source chunks for transcript answers, classifies transcript/payment messages with deterministic fallback or guarded LLM JSON, checks synthetic Banner/payment records, triggers an idempotent synthetic payment reminder through either the local workflow simulator or optional webhook client, escalates complex cases into a mock CRM, summarizes redacted audit events in an admin dashboard, and runs a deterministic JSONL evaluation gate without relying on live AI by default.”
+> “This is AskOC AI Concierge, a Go-based learner-service automation MVP. The current P10 build retrieves approved public source chunks for transcript answers, classifies transcript/payment messages with deterministic fallback or guarded LLM JSON, checks synthetic Banner/payment records, triggers an idempotent synthetic payment reminder through either the local workflow simulator or optional webhook client, escalates complex cases into a mock CRM, summarizes redacted audit events in an admin dashboard, runs a deterministic JSONL evaluation gate, and proves the demo with Docker Compose plus a one-command smoke test without relying on live AI by default.”
 
 ## Demo setup
 
 Run locally:
 
 ```bash
-make dev
-go run ./cmd/mock-banner
-go run ./cmd/mock-payment
-go run ./cmd/mock-crm
-go run ./cmd/workflow-sim
+make smoke
+make compose-up
 # Optional refresh if public pages are reachable:
 go run ./cmd/ingest -sources data/seed-sources.json -out data/rag-chunks.json
 ```
+
+For manual non-container development, start `cmd/mock-banner`, `cmd/mock-payment`, `cmd/mock-crm`, and `cmd/workflow-sim` in separate terminals before `make dev`.
+
+If port `8080` is already in use during prep, run `ASKOC_API_PORT=18080 make smoke` and open `http://localhost:18080`.
 
 Open:
 
@@ -37,6 +38,7 @@ Mock Banner:  http://localhost:8081
 Mock Payment: http://localhost:8082
 Mock CRM:     http://localhost:8083
 Workflow:     http://localhost:8084/api/v1/automation/payment-reminder or in-process fallback
+Mock LMS:     http://localhost:8085
 Dashboard:    protected admin metrics and redacted review queue
 ```
 
@@ -120,11 +122,11 @@ Talking point:
 
 > “Sentiment does not make final decisions alone. It increases routing priority when combined with unresolved context and safe business rules.”
 
-## Minute 5: P9 audit dashboard, redaction, and evaluation
+## Minute 5: P10 audit dashboard, redaction, and evaluation
 
 Talking point:
 
-> “The response body still shows the safe decision trace directly, and P9 records redacted audit events for orchestrator actions, workflow outcomes, guardrails, and escalations. Workflow audit metadata stores a hashed idempotency key rather than the raw key. The admin dashboard summarizes top intents, containment, escalations, workflows, low-confidence review items, stale-source warnings, and unresolved eval review items without displaying raw PII.”
+> “The response body still shows the safe decision trace directly, and the system records redacted audit events for orchestrator actions, workflow outcomes, guardrails, and escalations. Workflow audit metadata stores a hashed idempotency key rather than the raw key. The admin dashboard summarizes top intents, containment, escalations, workflows, low-confidence review items, stale-source warnings, and unresolved eval review items without displaying raw PII.”
 
 Open:
 
@@ -178,6 +180,10 @@ go test ./internal/privacy ./internal/audit ./internal/handlers
 go test ./internal/llm ./internal/classifier ./internal/orchestrator
 go test ./internal/rag ./internal/orchestrator
 go test ./internal/classifier ./internal/workflow ./internal/orchestrator
+go test ./internal/build -run TestP10
+make eval
+make secret-check
+make smoke
 ```
 
 Show:
@@ -190,7 +196,7 @@ Show:
 
 Talking point:
 
-> “I treat this as a maintained automation product. P9 has deterministic unit coverage for RAG allowlisting, ingestion, chunking, retrieval, source fallback, classification, LLM gateway behavior, prompt guardrails, workflow idempotency, simulator contracts, webhook retries, transcript decisions, action traces, CRM escalation, shared redaction, audit storage, admin metrics, dashboard rendering, retention controls, and a broader JSONL evaluation runner that fails critical regressions.”
+> “I treat this as a maintained automation product. P10 has deterministic unit coverage for RAG allowlisting, ingestion, chunking, retrieval, source fallback, classification, LLM gateway behavior, prompt guardrails, workflow idempotency, simulator contracts, webhook retries, transcript decisions, action traces, CRM escalation, shared redaction, audit storage, admin metrics, dashboard rendering, retention controls, repo-level Docker and CI contracts, and a broader JSONL evaluation runner that fails critical regressions.”
 > “P6 adds the guarded LLM layer: OpenAI-compatible calls are optional, strict JSON is validated before use, prompt templates are versioned, and low-confidence or ungrounded model output falls back instead of triggering tools.”
 
 ## Expected demo path
@@ -203,11 +209,11 @@ All demo records are synthetic. Student IDs, payment states, holds, workflow IDs
 | 2 | Unpaid payment workflow | “I ordered my transcript but it has not been processed. My student ID is S100002.” | Payment status is unpaid and reminder workflow is accepted | Chat response shows `transcript_status`, `payment_status_checked`, `payment_reminder_triggered`, workflow ID, and no CRM handoff |
 | 3 | Financial-hold escalation | “My transcript still is not moving. My student ID is S100003.” | Financial hold is detected and staff handoff is created | Chat response shows `transcript_status`, `financial_hold_detected`, CRM case ID, and Registrar/Student Accounts handoff |
 | 4 | Urgent sentiment escalation | “This is really frustrating. I need this transcript for a job application.” | Urgent/negative sentiment creates a priority CRM case | Chat response shows urgent sentiment, `crm_case_created`, priority flag, case ID, and privacy-aware summary |
-| 5 | P9 TDD/eval evidence | Run P9 package tests and eval gate | Tests prove LLM gateway behavior, strict classification, prompt guardrails, source grounding, deterministic decisions, workflow simulator/webhook behavior, redaction, audit metrics, dashboard controls, and eval quality gates | `go test ./internal/eval ./cmd/eval`, `go test ./internal/workflow ./internal/orchestrator ./cmd/api ./internal/config`, `go test ./internal/privacy ./internal/audit ./internal/handlers`, `go test ./...`, and `make eval` pass |
+| 5 | P10 TDD/eval/smoke evidence | Run package tests, eval gate, secret check, and smoke gate | Tests prove LLM gateway behavior, strict classification, prompt guardrails, source grounding, deterministic decisions, workflow simulator/webhook behavior, redaction, audit metrics, dashboard controls, Docker/CI contracts, env safety, and eval quality gates | `go test ./internal/eval ./cmd/eval`, `go test ./internal/build -run TestP10`, `go test ./...`, `make eval`, `make secret-check`, and `make smoke` pass |
 
 ## Demo acceptance matrix
 
-Each P9 row must be verifiable from the Go API response, local RAG chunks, local mock service logs, the workflow simulator or in-process workflow response, CRM simulator output, protected admin metrics, redacted audit-store tests, or `reports/eval-summary.md`. Source references are approved public/curated learner-service content; synthetic records are the only data used for student/payment/hold state.
+Each P10 row must be verifiable from the Go API response, local RAG chunks, local mock service logs, the workflow simulator or in-process workflow response, CRM simulator output, protected admin metrics, redacted audit-store tests, Docker/CI artifact tests, smoke-script output, or `reports/eval-summary.md`. Source references are approved public/curated learner-service content; synthetic records are the only data used for student/payment/hold state.
 
 | ID | Scenario | Synthetic input | Expected intent | Expected source | Expected action | Expected handoff behavior | Pass evidence |
 |---|---|---|---|---|---|---|---|

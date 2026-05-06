@@ -66,6 +66,8 @@ flowchart TD
 | Mock LMS | `cmd/mock-lms` | LMS account/course access simulation |
 | Workflow simulator | `cmd/workflow-sim` | Local Power Automate-style payment reminder endpoint plus protected workflow metrics/export |
 | Evaluation | `cmd/eval` + `internal/eval` | Runs the JSONL test set against deterministic in-process fakes or a local chat API, scores quality, writes reports, and fails critical gates |
+| Local packaging | `Dockerfile` + `docker-compose.yml` | Builds API/mock-service images and starts the synthetic local demo stack with deterministic defaults |
+| Developer checks | `scripts/smoke.sh` + `scripts/check-secrets.sh` | Verifies `/healthz`, transcript workflow, CRM handoff, and secret-safe repo inputs |
 
 ## Recommended Go project layout
 
@@ -383,8 +385,16 @@ Docker Compose
 - mock-banner
 - mock-payment
 - mock-crm
+- mock-lms
 - workflow-sim
-- postgres
+```
+
+The P10 Compose stack uses `ASKOC_PROVIDER=stub`, synthetic fixtures, service-DNS URLs for mock integrations, and `workflow-sim` for payment reminder automation. Host ports default to `8080`-`8085` and can be overridden with `ASKOC_API_PORT`, `ASKOC_BANNER_PORT`, `ASKOC_PAYMENT_PORT`, `ASKOC_CRM_PORT`, `ASKOC_WORKFLOW_PORT`, and `ASKOC_LMS_PORT`. PostgreSQL remains a later deployment option; the current P10 demo stack is fully deterministic without a database.
+
+```bash
+make smoke
+make compose-up
+make compose-test
 ```
 
 ### Cloud path

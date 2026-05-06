@@ -2,6 +2,56 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-06 - P10 Docker, CI, And Local Developer Experience
+
+### P10-T01 - Create Dockerfiles for Go services
+
+- What: added a multi-stage Dockerfile that builds any Go service under `cmd/*` with an `APP` build argument, copies only runtime assets needed for the demo, and runs as a non-root user, plus Docker ignore rules for local secrets and build outputs.
+- Where: `Dockerfile`, `.dockerignore`, `internal/build/p10_artifacts_test.go`.
+- When: 2026-05-06.
+- Why: make the API and mock services reproducible as small local containers without copying `.env` or source-control metadata into images.
+- How: added failing P10 artifact tests first for Dockerfile and `.dockerignore` requirements, confirmed the missing-file red state, then implemented the minimal image build contract and ignore list.
+
+### P10-T02 - Create Docker Compose local stack
+
+- What: added a Docker Compose stack for `api`, `mock-banner`, `mock-payment`, `mock-crm`, `mock-lms`, and `workflow-sim` with deterministic stub-provider defaults, service-DNS integration URLs, exposed local ports, and health checks.
+- Where: `docker-compose.yml`, `Makefile`, `README.md`, `docs/architecture.md`, `docs/golang-implementation.md`, `docs/demo-script.md`, `docs/test-plan.md`, `internal/build/p10_artifacts_test.go`.
+- When: 2026-05-06.
+- Why: replace multi-terminal demo startup with a repeatable synthetic local stack.
+- How: started from failing artifact tests for compose services, provider defaults, service URLs, health checks, and Makefile targets, then added the Compose stack and documented the port/service contract.
+
+### P10-T03 - Add CI workflow for Go tests and evaluation gates
+
+- What: added a GitHub Actions workflow that checks out the repo, installs Go 1.22, runs `go test ./...`, runs `go vet ./...`, and runs `make eval` with `ASKOC_PROVIDER=stub`.
+- Where: `.github/workflows/ci.yml`, `internal/build/p10_artifacts_test.go`, `README.md`, `docs/test-plan.md`, `docs/implementation-roadmap.md`.
+- When: 2026-05-06.
+- Why: make the deterministic responsible-AI quality gate part of pull-request delivery without requiring live model credentials.
+- How: wrote the failing CI artifact contract first, confirmed the workflow file was missing, then added the offline CI job and docs.
+
+### P10-T04 - Add environment sample and secret-safety checks
+
+- What: added a placeholder-only `.env.example`, a `.gitignore` that keeps `.env` and local override files out of git, and a `make secret-check` target backed by a grep-style scanner for known live-token patterns.
+- Where: `.env.example`, `.gitignore`, `scripts/check-secrets.sh`, `Makefile`, `internal/build/p10_artifacts_test.go`, `README.md`, `docs/test-plan.md`.
+- When: 2026-05-06.
+- Why: keep deterministic demo mode usable without secrets and reduce the risk of committing real webhook URLs or API keys.
+- How: extended the failing P10 environment test to require secret-check coverage, confirmed the missing target failure, then added the sample env file, ignore rules, scanner script, and Make target.
+
+### P10-T05 - Add one-command smoke test
+
+- What: added `scripts/smoke.sh` and Makefile targets for `make smoke`, `make compose-up`, `make compose-test`, and `make compose-down`; the smoke script can start Compose, wait for `/healthz`, and verify `S100002` payment workflow plus `S100003` CRM handoff response markers.
+- Where: `scripts/smoke.sh`, `Makefile`, `docs/test-plan.md`, `docs/demo-script.md`, `README.md`, `internal/build/p10_artifacts_test.go`.
+- When: 2026-05-06.
+- Why: give interview prep and local review one clear pass/fail command for the golden synthetic demo path.
+- How: wrote the failing smoke-script and Makefile artifact tests first, then implemented actionable shell checks for health, chat workflow, and CRM action traces.
+
+### P10 review evidence
+
+- What: completed P10 status and documentation sync.
+- Where: `docs/phases-and-tasks.md`, `docs/implementation-roadmap.md`, `README.md`, `docs/architecture.md`, `docs/golang-implementation.md`, `docs/test-plan.md`, `docs/demo-script.md`, `CHANGELOG.md`.
+- When: 2026-05-06.
+- Why: keep the task board, roadmap, README, architecture notes, implementation guide, test plan, demo script, and changelog aligned with the implemented Docker, CI, env-safety, and smoke-test workflow.
+- How: confirmed the red state with `go test ./internal/build -run TestP10`, implemented the smallest passing P10 artifacts, then verified with `go test ./internal/build -run TestP10`, `make secret-check`, `go test ./...`, `go vet ./...`, `make eval`, `make docker-build`, `ASKOC_API_PORT=18080 make smoke`, and `git diff --check`.
+
 ## 2026-05-06 - P9 Evaluation Runner And Quality Gates
 
 ### P9-T01 - Create JSONL evaluation dataset

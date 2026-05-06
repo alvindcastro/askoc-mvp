@@ -32,6 +32,8 @@ cmd/eval           # P9 JSONL evaluation runner and quality gate
 
 Each command should have a small `main.go` that loads configuration, creates dependencies, registers routes, and starts an HTTP server.
 
+P10 packages these commands with a multi-service `Dockerfile` using the `APP` build arg and a `docker-compose.yml` local stack for the API, mock services, and workflow simulator.
+
 ## Core packages
 
 | Package | Responsibility |
@@ -372,7 +374,11 @@ go test ./...
 go test ./internal/classifier ./internal/workflow ./internal/orchestrator
 go test ./internal/rag ./internal/orchestrator
 go test ./internal/eval ./cmd/eval
+go test ./internal/build -run TestP10
 go test -race ./internal/session
+make secret-check
+make docker-build
+make smoke
 go run ./cmd/api
 go run ./cmd/ingest -sources data/seed-sources.json -out data/rag-chunks.json
 go run ./cmd/eval -input data/eval-questions.jsonl -output reports/eval-summary.json -markdown-output reports/eval-summary.md
@@ -383,12 +389,12 @@ go run ./cmd/mock-lms
 go run ./cmd/workflow-sim
 ```
 
-`cmd/workflow-sim` is the P8 local workflow target. `cmd/eval` is the P9 deterministic evaluation command and can also target a running local chat API with `-base-url`.
+`cmd/workflow-sim` is the P8 local workflow target. `cmd/eval` is the P9 deterministic evaluation command and can also target a running local chat API with `-base-url`. P10 adds Docker Compose for the API, mock Banner, mock payment, mock CRM, mock LMS, and workflow simulator services; `make smoke` is the one-command local proof.
 
 ## Makefile targets
 
 ```makefile
-.PHONY: dev test test-race eval
+.PHONY: dev test test-race eval secret-check docker-build compose-up compose-down compose-test smoke
 
 dev:
 	go run ./cmd/api
@@ -401,6 +407,24 @@ test-race:
 
 eval:
 	go run ./cmd/eval -input data/eval-questions.jsonl -output reports/eval-summary.json -markdown-output reports/eval-summary.md -fail-on-critical
+
+secret-check:
+	scripts/check-secrets.sh
+
+docker-build:
+	docker build --build-arg APP=api -t askoc-api:local .
+
+compose-up:
+	docker compose up --build
+
+compose-down:
+	docker compose down --remove-orphans
+
+compose-test:
+	scripts/smoke.sh --base-url http://localhost:8080
+
+smoke:
+	scripts/smoke.sh --compose
 ```
 
 ## What to show in GitHub

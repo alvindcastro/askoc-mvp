@@ -1,0 +1,13 @@
+.git
+.github
+.idea
+.agents
+.codex
+.env
+.env.*
+!.env.example
+coverage
+coverage.out
+coverage-*.out
+*.test
+reports/*.tmp

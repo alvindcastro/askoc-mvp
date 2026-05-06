@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+
+coverage.out
+coverage-*.out
+*.test
+
+.DS_Store
+.idea/
+dist/
+tmp/

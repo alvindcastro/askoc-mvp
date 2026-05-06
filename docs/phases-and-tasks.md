@@ -612,7 +612,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ## P10 — Docker, CI, and local developer experience
 **Phase outcome:** Docker, CI, env safety, and smoke test support repeatable demos.
-- [ ] **P10-T01 — Create Dockerfiles for Go services**  
+- [x] **P10-T01 — Create Dockerfiles for Go services**
   **Type:** Code  
   **Goal:** Package API and mock services as small reproducible containers.  
   **Primary files:** `Dockerfile`, `cmd/*`, `.dockerignore`  
@@ -620,7 +620,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Add a shell or Makefile smoke test that builds the API image.; Unit tests still pass before image build.; Container starts and responds to `/healthz` in local smoke script.  
   **Done when:** Image does not include source secrets.; Non-root runtime user is used where practical.; Build is documented.
-- [ ] **P10-T02 — Create Docker Compose local stack**  
+- [x] **P10-T02 — Create Docker Compose local stack**
   **Type:** Code  
   **Goal:** Start API, mock services, workflow simulator, and optional database with one command.  
   **Primary files:** `docker-compose.yml`, `.env.example`, `Makefile`  
@@ -628,7 +628,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** `make compose-test` or smoke script waits for health endpoints.; Missing optional LLM config still allows deterministic demo mode.; Service URLs match README.  
   **Done when:** `make dev` or `docker compose up` starts the full demo.; Ports are documented.; Synthetic mode is default.
-- [ ] **P10-T03 — Add CI workflow for Go tests and evaluation gates**  
+- [x] **P10-T03 — Add CI workflow for Go tests and evaluation gates**
   **Type:** Code  
   **Goal:** Demonstrate professional delivery discipline.  
   **Primary files:** `.github/workflows/ci.yml`, `Makefile`  
@@ -636,7 +636,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** CI runs `go test ./...`.; CI runs `go vet ./...`.; CI runs `make eval` with deterministic/fake providers.; CI fails on critical eval failure.  
   **Done when:** Pull requests cannot pass with failing tests.; CI avoids live model/API dependencies.
-- [ ] **P10-T04 — Add environment sample and secret-safety checks**  
+- [x] **P10-T04 — Add environment sample and secret-safety checks**
   **Type:** Code  
   **Goal:** Prevent accidental commit of real keys or private data.  
   **Primary files:** `.env.example`, `.gitignore`, `internal/config/config_test.go`  
@@ -644,7 +644,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Config tests prove secrets are optional for deterministic mode.; Secret scanner or grep script rejects known key patterns in repo.; `.env` is ignored.  
   **Done when:** Only placeholders appear in docs.; No real webhook URL or API key is committed.
-- [ ] **P10-T05 — Add one-command smoke test**  
+- [x] **P10-T05 — Add one-command smoke test**
   **Type:** Code  
   **Goal:** Make the project easy to verify during interview prep.  
   **Primary files:** `scripts/smoke.sh`, `Makefile`, `docs/test-plan.md`  
@@ -655,10 +655,10 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ### P10 phase gate
 
-- [ ] All P10 tasks above are complete or explicitly deferred with a reason.
-- [ ] All code tasks in P10 have failing-test evidence before implementation.
-- [ ] `go test ./...` passes after P10 code tasks.
-- [ ] Relevant docs are updated with any changed behavior or assumptions.
+- [x] All P10 tasks above are complete or explicitly deferred with a reason.
+- [x] All code tasks in P10 have failing-test evidence before implementation.
+- [x] `go test ./...` passes after P10 code tasks.
+- [x] Relevant docs are updated with any changed behavior or assumptions.
 
 ---
 

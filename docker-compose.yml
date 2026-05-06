@@ -1,0 +1,107 @@
+services:
+  api:
+    build:
+      context: .
+      args:
+        APP: api
+    image: askoc-api:local
+    environment:
+      ASKOC_HTTP_ADDR: :8080
+      ASKOC_AUTH_ENABLED: "false"
+      ASKOC_AUTH_TOKEN: demo-admin-token
+      ASKOC_LOG_LEVEL: info
+      ASKOC_PROVIDER: stub
+      ASKOC_PROVIDER_MODEL: demo-placeholder
+      ASKOC_BANNER_URL: http://mock-banner:8081
+      ASKOC_PAYMENT_URL: http://mock-payment:8082
+      ASKOC_CRM_URL: http://mock-crm:8083
+      ASKOC_WORKFLOW_URL: http://workflow-sim:8084/api/v1/automation/payment-reminder
+      ASKOC_WORKFLOW_TIMEOUT_SECONDS: "5"
+      ASKOC_WORKFLOW_MAX_RETRIES: "1"
+      ASKOC_RAG_CHUNKS_PATH: data/rag-chunks.json
+    ports:
+      - "${ASKOC_API_PORT:-8080}:8080"
+    depends_on:
+      mock-banner:
+        condition: service_healthy
+      mock-payment:
+        condition: service_healthy
+      mock-crm:
+        condition: service_healthy
+      workflow-sim:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/healthz >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  mock-banner:
+    build:
+      context: .
+      args:
+        APP: mock-banner
+    image: askoc-mock-banner:local
+    ports:
+      - "${ASKOC_BANNER_PORT:-8081}:8081"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8081/healthz >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  mock-payment:
+    build:
+      context: .
+      args:
+        APP: mock-payment
+    image: askoc-mock-payment:local
+    ports:
+      - "${ASKOC_PAYMENT_PORT:-8082}:8082"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8082/healthz >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  mock-crm:
+    build:
+      context: .
+      args:
+        APP: mock-crm
+    image: askoc-mock-crm:local
+    ports:
+      - "${ASKOC_CRM_PORT:-8083}:8083"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8083/healthz >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  workflow-sim:
+    build:
+      context: .
+      args:
+        APP: workflow-sim
+    image: askoc-workflow-sim:local
+    ports:
+      - "${ASKOC_WORKFLOW_PORT:-8084}:8084"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8084/healthz >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  mock-lms:
+    build:
+      context: .
+      args:
+        APP: mock-lms
+    image: askoc-mock-lms:local
+    ports:
+      - "${ASKOC_LMS_PORT:-8085}:8085"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8085/healthz >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
