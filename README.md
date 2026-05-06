@@ -1,6 +1,6 @@
 # AskOC AI Concierge
 
-**Go/Golang portfolio MVP for an AI/Automation Solutions Developer role**
+**Go/Golang portfolio MVP for an AI/Automation Solution**
 
 AskOC AI Concierge is a privacy-aware learner-service automation MVP designed for a higher-education digital learner experience team. It demonstrates how conversational AI, retrieval-augmented generation, workflow automation, and mock enterprise integrations can reduce Tier 0 and Tier 1 learner-service volume while improving response quality and routing.
 
