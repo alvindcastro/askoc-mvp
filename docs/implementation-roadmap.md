@@ -25,7 +25,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 | [x] | P7 — Privacy, audit, and dashboard | Privacy redaction, audit events, and dashboard metrics are in place. | [Task list](phases-and-tasks.md#p7-privacy-audit-and-dashboard) |
 | [x] | P8 — Workflow automation and Power Automate option | Workflow simulator and optional Power Automate webhook path are ready. | [Task list](phases-and-tasks.md#p8-workflow-automation-and-power-automate-option) |
 | [x] | P9 — Evaluation runner and quality gates | Evaluation runner produces quality reports and fails critical regressions. | [Task list](phases-and-tasks.md#p9-evaluation-runner-and-quality-gates) |
-| [ ] | P10 — Docker, CI, and local developer experience | Docker, CI, env safety, and smoke test support repeatable demos. | [Task list](phases-and-tasks.md#p10-docker-ci-and-local-developer-experience) |
+| [x] | P10 — Docker, CI, and local developer experience | Docker, CI, env safety, and smoke test support repeatable demos. | [Task list](phases-and-tasks.md#p10-docker-ci-and-local-developer-experience) |
 | [ ] | P11 — Portfolio polish and interview readiness | Portfolio materials are polished for interview presentation. | [Task list](phases-and-tasks.md#p11-portfolio-polish-and-interview-readiness) |
 
 
@@ -114,11 +114,11 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 ### P10 — Docker, CI, and local developer experience
 
-- [ ] Docker images build.
-- [ ] Docker Compose starts the local demo stack.
-- [ ] CI runs Go tests, vet, and deterministic evaluation.
-- [ ] `.env.example` is safe and `.env` is ignored.
-- [ ] `make smoke` verifies the golden demo path.
+- [x] Docker images build.
+- [x] Docker Compose starts the local demo stack.
+- [x] CI runs Go tests, vet, and deterministic evaluation.
+- [x] `.env.example` is safe and `.env` is ignored.
+- [x] `make smoke` verifies the golden demo path.
 
 ### P11 — Portfolio polish and interview readiness
 
@@ -147,13 +147,13 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 - [x] P7 redaction, audit store, and dashboard endpoint.
 - [x] P8 local workflow simulator and optional webhook client.
 - [x] P9 deterministic evaluation runner and `make eval`.
-- [ ] `go test ./...` and `make smoke` pass.
+- [x] `go test ./...` and `make smoke` pass.
 
 ### 2-week version
 
 - [x] P1-P9 complete.
 - [x] P9 evaluation runner and quality gates.
-- [ ] P10 Docker Compose and CI.
+- [x] P10 Docker Compose and CI.
 - [ ] P11 polished portfolio docs and demo assets.
 - [x] Optional Power Automate webhook integration.
 
@@ -168,5 +168,6 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 7. P6-T01 to P6-T05: add LLM capability behind tests and guardrails.
 8. P7-T01 to P7-T06: add redaction, audit storage, dashboard metrics, and retention controls.
 9. P8-T01 to P8-T05: complete automation story and document webhook setup.
-10. P10: prove repeatability with Docker and CI.
-11. P11: polish the portfolio.
+10. P9: add deterministic evaluation and critical safety gates.
+11. P10: prove repeatability with Docker and CI.
+12. P11: polish the portfolio.

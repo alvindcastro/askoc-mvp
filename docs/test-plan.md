@@ -8,7 +8,7 @@ All Go code tasks are governed by [TDD Policy](tdd-policy.md). For each code tas
 
 ## Purpose
 
-This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, and protect privacy in a Go-based demo environment. P9 currently covers deterministic fallback classification, optional OpenAI-compatible LLM gateway behavior behind strict JSON parsing, local approved-source RAG retrieval, transcript/payment orchestration, in-process workflow idempotency, the standalone workflow simulator, optional Power Automate-compatible webhook retries/signature headers, mock CRM handoff, source fallback, source-only LLM answer guardrails, safe action traces, shared redaction, redacted audit storage, protected admin metrics, dashboard rendering, audit retention/export/reset controls, a JSONL evaluation runner, JSON/Markdown quality reports, critical safety gates, and unresolved eval review items.
+This test plan verifies that AskOC AI Concierge can answer learner-service questions, automate the transcript/payment workflow, escalate appropriately, protect privacy, and run repeatably in a Go-based demo environment. P10 covers deterministic fallback classification, optional OpenAI-compatible LLM gateway behavior behind strict JSON parsing, local approved-source RAG retrieval, transcript/payment orchestration, in-process workflow idempotency, the standalone workflow simulator, optional Power Automate-compatible webhook retries/signature headers, mock CRM handoff, source fallback, source-only LLM answer guardrails, safe action traces, shared redaction, redacted audit storage, protected admin metrics, dashboard rendering, audit retention/export/reset controls, a JSONL evaluation runner, JSON/Markdown quality reports, critical safety gates, unresolved eval review items, Docker Compose packaging, CI, env safety, and smoke verification.
 
 ## Test objectives
 
@@ -19,6 +19,7 @@ This test plan verifies that AskOC AI Concierge can answer learner-service quest
 5. Validate privacy controls, redaction, and audit logging.
 6. Validate dashboard metrics.
 7. Validate Go services under demo-level load.
+8. Validate Docker, CI, env safety, and smoke-test developer workflows.
 
 ## Test environment
 
@@ -34,6 +35,8 @@ This test plan verifies that AskOC AI Concierge can answer learner-service quest
 | Automation workflow | P8 in-process idempotent workflow client by default; `cmd/workflow-sim` or Power Automate-compatible webhook client when `ASKOC_WORKFLOW_URL` is configured |
 | Dashboard | Go admin dashboard at `/admin` reading the in-memory audit event store through protected admin APIs |
 | Evaluation | P9 `cmd/eval` uses deterministic in-process fakes by default or a live local `/api/v1/chat` endpoint with `-base-url` |
+| Local stack | P10 Docker Compose runs API, mock Banner, mock payment, mock CRM, mock LMS, and workflow simulator containers |
+| CI | P10 GitHub Actions runs offline `go test ./...`, `go vet ./...`, and `make eval` with `ASKOC_PROVIDER=stub` |
 
 ## Go test commands
 
@@ -45,15 +48,37 @@ go test ./internal/classifier ./internal/workflow ./internal/orchestrator
 go test ./internal/workflow -run 'TestSimulator|TestPowerAutomate|TestIdempotency'
 go test ./cmd/workflow-sim ./cmd/api ./internal/config ./internal/orchestrator
 go test ./internal/eval ./cmd/eval
+go test ./internal/build -run TestP10
 go test ./internal/rag ./internal/orchestrator
 go test ./internal/domain ./internal/validation ./internal/handlers ./internal/session
 go test -race ./internal/session
 go test ./internal/orchestrator -run 'TestTranscriptStatus|TestUrgent|TestLowConfidence'
 go run ./cmd/eval -input data/eval-questions.jsonl -output reports/eval-summary.json -markdown-output reports/eval-summary.md -fail-on-critical
+make secret-check
 make eval
+make docker-build
+make smoke
+ASKOC_API_PORT=18080 make smoke
 ```
 
-P9 verification uses package-specific privacy, audit, handler, LLM, classifier, RAG, workflow, config, API, simulator, orchestrator, and eval tests plus `go test ./...`. The deterministic evaluation gate is `make eval`; it must report zero critical failures before demo release.
+P10 verification uses package-specific privacy, audit, handler, LLM, classifier, RAG, workflow, config, API, simulator, orchestrator, eval, and build-artifact tests plus `go test ./...`. The deterministic evaluation gate is `make eval`; it must report zero critical failures before demo release. The local repeatability gate is `make smoke`; it builds and starts the Compose stack, checks `/healthz`, and verifies transcript workflow plus CRM action traces using synthetic IDs.
+
+## P10 smoke checks
+
+`scripts/smoke.sh` can either start Docker Compose itself or test an already running local stack. Compose host ports default to `8080`-`8085`; set `ASKOC_API_PORT`, `ASKOC_BANNER_PORT`, `ASKOC_PAYMENT_PORT`, `ASKOC_CRM_PORT`, `ASKOC_WORKFLOW_PORT`, or `ASKOC_LMS_PORT` when a default port is already in use.
+
+```bash
+make smoke
+make compose-up
+make compose-test
+```
+
+Expected smoke assertions:
+
+- `/healthz` responds before the timeout,
+- `S100002` transcript-status chat returns `payment_reminder_triggered`,
+- `S100003` financial-hold chat returns `financial_hold_detected` and `crm_case_created`,
+- failures print the endpoint or missing response marker that needs attention.
 
 ## Test data
 

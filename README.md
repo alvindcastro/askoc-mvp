@@ -116,13 +116,18 @@ A task is not done until the relevant package test and `go test ./...` pass. AI,
 3. Assistant summarizes the case.
 4. Mock CRM case is created with transcript context, payment status, conversation summary, and priority flag.
 
-## Current P9 repository structure
+## Current P10 repository structure
 
 ```text
 askoc-ai-concierge/
   README.md
   go.mod
   Makefile
+  Dockerfile
+  docker-compose.yml
+  .dockerignore
+  .env.example
+  .github/workflows/ci.yml
   cmd/
     api/                  # API server with health/readiness, chat API, and chat UI routes
     eval/                 # JSONL evaluation runner and quality gate reports
@@ -161,21 +166,30 @@ askoc-ai-concierge/
   reports/
     eval-summary.json
     eval-summary.md
+  scripts/
+    check-secrets.sh
+    smoke.sh
   docs/
     ...
 ```
 
-The current chat API uses P9 guarded orchestration and evaluation: deterministic fallback intent/sentiment classification remains the default, while optional `openai-compatible` provider mode adds a tested REST LLM gateway, strict JSON classification parsing, versioned prompts, source-only answer guardrails, local RAG retrieval over approved public chunks, typed mock Banner/payment/CRM clients, idempotent payment-reminder workflow clients, a standalone local workflow simulator, an optional Power Automate-compatible webhook client with retry and signature headers, a safe action trace, CRM handoff routing for holds, urgent sentiment, low confidence, or explicit human handoff, shared PII redaction, an in-memory audit event store, protected admin metrics, a minimal dashboard, audit export/reset/purge controls, a redacted eval review queue endpoint, and a deterministic JSONL evaluation runner. Later phases add Docker, CI, smoke testing, and portfolio polish.
+The current chat API uses guarded orchestration and evaluation: deterministic fallback intent/sentiment classification remains the default, while optional `openai-compatible` provider mode adds a tested REST LLM gateway, strict JSON classification parsing, versioned prompts, source-only answer guardrails, local RAG retrieval over approved public chunks, typed mock Banner/payment/CRM clients, idempotent payment-reminder workflow clients, a standalone local workflow simulator, an optional Power Automate-compatible webhook client with retry and signature headers, a safe action trace, CRM handoff routing for holds, urgent sentiment, low confidence, or explicit human handoff, shared PII redaction, an in-memory audit event store, protected admin metrics, a minimal dashboard, audit export/reset/purge controls, a redacted eval review queue endpoint, a deterministic JSONL evaluation runner, Docker Compose local stack, offline CI gate, safe env sample, secret check, and one-command smoke test. Later phases focus on portfolio polish.
 
-## Current P9 commands
+## Current P10 commands
 
 ```bash
 make dev
 make test
 make test-race
 make eval
+make secret-check
+make docker-build
+make compose-up
+make compose-test
+make smoke
 go test ./...
 go vet ./...
+go test ./internal/build -run TestP10
 go test ./internal/eval ./cmd/eval
 go run ./cmd/ingest -sources data/seed-sources.json -out data/rag-chunks.json
 go run ./cmd/eval -input data/eval-questions.jsonl -output reports/eval-summary.json -markdown-output reports/eval-summary.md
@@ -186,9 +200,13 @@ go run ./cmd/mock-crm
 go run ./cmd/mock-lms
 ```
 
-For the full P9 transcript-status demo, start the mock Banner, payment, CRM, and optionally workflow simulator services in separate terminals before `make dev`. The API loads local RAG chunks from `data/rag-chunks.json` at startup and talks to typed mock services through configurable local URLs. If `ASKOC_WORKFLOW_URL` is empty, the API uses the in-process idempotent workflow client; set `ASKOC_WORKFLOW_URL=http://localhost:8084/api/v1/automation/payment-reminder` to route reminders through `cmd/workflow-sim`, or point it at a Power Automate HTTP trigger for the optional webhook path. Auth is disabled by default for learner chat. Admin metrics, unresolved eval review items, audit export, purge, and reset routes require a bearer token; by default use `demo-admin-token`, or set `ASKOC_AUTH_TOKEN=<demo-token>` to reuse the configured mock token.
+For the repeatable Docker demo, run `make smoke`. It builds the API and mock-service images with Docker Compose, waits for `/healthz`, posts the unpaid `S100002` transcript-status scenario, and posts the `S100003` financial-hold scenario that creates a mock CRM case. Use `make compose-up` when you want to keep the stack running, then `make compose-test` to smoke-test an already running stack. The Compose stack uses `ASKOC_PROVIDER=stub`, synthetic fixtures, service-DNS URLs such as `http://mock-banner:8081`, and the local workflow simulator URL by default. If a default host port is already in use, override it for Compose, for example `ASKOC_API_PORT=18080 make smoke`.
+
+For manual local development without containers, start the mock Banner, payment, CRM, and optionally workflow simulator services in separate terminals before `make dev`. The API loads local RAG chunks from `data/rag-chunks.json` at startup and talks to typed mock services through configurable local URLs. If `ASKOC_WORKFLOW_URL` is empty, the API uses the in-process idempotent workflow client; set `ASKOC_WORKFLOW_URL=http://localhost:8084/api/v1/automation/payment-reminder` to route reminders through `cmd/workflow-sim`, or point it at a Power Automate HTTP trigger for the optional webhook path. Auth is disabled by default for learner chat. Admin metrics, unresolved eval review items, audit export, purge, and reset routes require a bearer token; by default use `demo-admin-token`, or set `ASKOC_AUTH_TOKEN=<demo-token>` to reuse the configured mock token.
 
 `make eval` is the responsible-AI quality gate. It runs `cmd/eval` against `data/eval-questions.jsonl` using the deterministic in-process evaluator by default, writes `reports/eval-summary.json` and `reports/eval-summary.md`, and exits non-zero for critical safety regressions such as unsupported critical claims or missing required escalation.
+
+`make secret-check` scans tracked and unignored local files for known live-token patterns while allowing `.env.example` placeholders. `.env` and local override files are ignored by default.
 
 Current environment settings:
 
@@ -212,6 +230,12 @@ Current environment settings:
 | `ASKOC_PROVIDER_ENDPOINT` | empty | OpenAI-compatible or Azure chat completions endpoint; required only for `openai-compatible` |
 | `ASKOC_PROVIDER_TIMEOUT_SECONDS` | `5` | LLM request timeout |
 | `ASKOC_PROVIDER_API_KEY` | empty | Provider API key; required only for `openai-compatible` and redacted from config output |
+| `ASKOC_API_PORT` | `8080` | Optional Docker Compose host port override for the API |
+| `ASKOC_BANNER_PORT` | `8081` | Optional Docker Compose host port override for mock Banner |
+| `ASKOC_PAYMENT_PORT` | `8082` | Optional Docker Compose host port override for mock payment |
+| `ASKOC_CRM_PORT` | `8083` | Optional Docker Compose host port override for mock CRM |
+| `ASKOC_WORKFLOW_PORT` | `8084` | Optional Docker Compose host port override for workflow simulator |
+| `ASKOC_LMS_PORT` | `8085` | Optional Docker Compose host port override for mock LMS |
 
 Current service URLs:
 
@@ -232,7 +256,7 @@ Mock LMS:     http://localhost:8085/api/v1/students/S100001/lms-access?course_id
 ```
 
 The chat API validates JSON requests, rejects empty or oversized messages, accepts synthetic student IDs in the `S` plus six digits format, includes trace IDs in responses and action results, routes transcript/payment decisions through the orchestrator, and uses P5 retrieval plus P6 source guardrails for transcript-request answers.
-P3 tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors. P4 adds deterministic classifier/orchestrator tests and an in-process workflow port that returns idempotent synthetic workflow IDs. P5 adds allowlist parsing, deterministic ingestion, chunking, local retrieval, and stale/high-risk source fallback tests. P6 adds the optional tested LLM gateway, strict JSON parser, prompt golden tests, classification fixtures, and low-confidence/source guardrails. P7 adds shared redaction for logs, sessions, audit payloads, and CRM summaries; audit events for orchestrator actions, workflow outcomes, guardrails, and escalations; protected aggregate admin metrics; redacted review queue items; and demo audit retention/export/reset controls. P8 adds `cmd/workflow-sim`, a Power Automate-compatible HTTP client, idempotency-key hashing in workflow audit metadata, and retry attempt counts for webhook responses. P9 adds `data/eval-questions.jsonl`, `cmd/eval`, `internal/eval`, JSON/Markdown reports, critical gate failures, and unresolved eval review queue support.
+P3 tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors. P4 adds deterministic classifier/orchestrator tests and an in-process workflow port that returns idempotent synthetic workflow IDs. P5 adds allowlist parsing, deterministic ingestion, chunking, local retrieval, and stale/high-risk source fallback tests. P6 adds the optional tested LLM gateway, strict JSON parser, prompt golden tests, classification fixtures, and low-confidence/source guardrails. P7 adds shared redaction for logs, sessions, audit payloads, and CRM summaries; audit events for orchestrator actions, workflow outcomes, guardrails, and escalations; protected aggregate admin metrics; redacted review queue items; and demo audit retention/export/reset controls. P8 adds `cmd/workflow-sim`, a Power Automate-compatible HTTP client, idempotency-key hashing in workflow audit metadata, and retry attempt counts for webhook responses. P9 adds `data/eval-questions.jsonl`, `cmd/eval`, `internal/eval`, JSON/Markdown reports, critical gate failures, and unresolved eval review queue support. P10 adds multi-service Docker packaging, local Compose orchestration, CI, env safety, and smoke verification.
 
 ## Demo data policy
 
