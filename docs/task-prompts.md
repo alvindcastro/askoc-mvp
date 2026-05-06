@@ -499,6 +499,7 @@ Primary files to create or update:
 - `internal/middleware/trace.go`
 - `internal/middleware/recover.go`
 - `internal/middleware/auth.go`
+- `internal/middleware/logging.go`
 - `internal/middleware/*_test.go`
 
 Required tests or review checks:

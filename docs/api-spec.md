@@ -52,6 +52,7 @@ X-Trace-Id: optional-client-generated-trace-id
 | `GET` | `/analytics/summary` | Get dashboard summary metrics | `cmd/api` |
 | `POST` | `/feedback` | Submit answer quality feedback | `cmd/api` |
 | `GET` | `/healthz` | Health check | all services |
+| `GET` | `/readyz` | Readiness check with dependency status | all services |
 
 ---
 
@@ -364,8 +365,37 @@ Response:
 ```json
 {
   "status": "ok",
-  "service": "api",
-  "version": "dev"
+  "trace_id": "trace-demo"
+}
+```
+
+The API echoes an inbound `X-Trace-ID` header or generates one when it is missing. `/healthz` has no external dependencies.
+
+## Readiness check
+
+```http
+GET /readyz
+```
+
+Response when all registered dependencies are available:
+
+```json
+{
+  "status": "ready",
+  "trace_id": "trace-demo",
+  "dependencies": {}
+}
+```
+
+Response when a dependency is unavailable:
+
+```json
+{
+  "status": "not_ready",
+  "trace_id": "trace-demo",
+  "dependencies": {
+    "workflow": "unavailable"
+  }
 }
 ```
 

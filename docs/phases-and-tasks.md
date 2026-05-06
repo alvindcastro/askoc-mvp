@@ -95,7 +95,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ## P1 — Go project foundation
 **Phase outcome:** Go project compiles, serves health endpoints, and has API hygiene.
-- [ ] **P1-T01 — Initialize Go module, repository layout, and developer commands**  
+- [x] **P1-T01 — Initialize Go module, repository layout, and developer commands**  
   **Type:** Code  
   **Goal:** Create a compilable Go workspace with predictable local commands before adding business logic.  
   **Primary files:** `go.mod`, `Makefile`, `cmd/api/main.go`, `internal/config`  
@@ -103,7 +103,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Add a failing smoke test that runs `go test ./...` and proves the module compiles once minimal code exists.; Add a Makefile test target that executes `go test ./...`.  
   **Done when:** `go test ./...` passes.; `make test` passes.; `make dev` has a documented target, even if it only runs the API skeleton.
-- [ ] **P1-T02 — Build typed configuration loader**  
+- [x] **P1-T02 — Build typed configuration loader**  
   **Type:** Code  
   **Goal:** Load HTTP addresses, auth mode, log level, workflow URL, and provider settings from environment variables with safe defaults.  
   **Primary files:** `internal/config/config.go`, `internal/config/config_test.go`  
@@ -111,7 +111,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Table-driven tests for defaults.; Table-driven tests for overridden env vars.; Test invalid numeric/boolean values return clear errors.  
   **Done when:** Config has no global mutable state.; Secrets are not printed.; Invalid config fails fast with actionable error messages.
-- [ ] **P1-T03 — Implement health and readiness endpoints**  
+- [x] **P1-T03 — Implement health and readiness endpoints**  
   **Type:** Code  
   **Goal:** Expose simple operational endpoints for local demo, Docker health checks, and future deployment.  
   **Primary files:** `internal/handlers/health.go`, `internal/handlers/health_test.go`  
@@ -119,15 +119,15 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** `httptest` verifies `GET /healthz` returns 200 JSON.; `httptest` verifies `GET /readyz` returns dependency status.; Invalid methods return 405.  
   **Done when:** Health response includes status and trace ID when middleware is enabled.; No external dependencies are required for `/healthz`.
-- [ ] **P1-T04 — Add middleware for trace ID, panic recovery, request logging, and mock auth**  
+- [x] **P1-T04 — Add middleware for trace ID, panic recovery, request logging, and mock auth**  
   **Type:** Code  
   **Goal:** Create enterprise-style API hygiene before feature work begins.  
-  **Primary files:** `internal/middleware/trace.go`, `internal/middleware/recover.go`, `internal/middleware/auth.go`, `internal/middleware/*_test.go`  
+  **Primary files:** `internal/middleware/trace.go`, `internal/middleware/recover.go`, `internal/middleware/auth.go`, `internal/middleware/logging.go`, `internal/middleware/*_test.go`  
   **Prompt:** [`P1-T04` in task-prompts.md](task-prompts.md#p1-t04-add-middleware-for-trace-id-panic-recovery-request-logging-and-mock-auth)  
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Trace middleware adds or preserves trace ID.; Recovery middleware converts panic to 500 without exposing internals.; Mock auth rejects missing token when auth is enabled.; Logging test verifies redaction hooks are used.  
   **Done when:** All handlers receive context with trace ID.; Panic stack traces are not returned to clients.; Auth can be disabled for local demo.
-- [ ] **P1-T05 — Create JSON response and error helpers**  
+- [x] **P1-T05 — Create JSON response and error helpers**  
   **Type:** Code  
   **Goal:** Standardize API responses so later handlers are easy to test and document.  
   **Primary files:** `internal/handlers/respond.go`, `internal/handlers/respond_test.go`  
@@ -138,10 +138,11 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ### P1 phase gate
 
-- [ ] All P1 tasks above are complete or explicitly deferred with a reason.
-- [ ] All code tasks in P1 have failing-test evidence before implementation.
-- [ ] `go test ./...` passes after P1 code tasks.
-- [ ] Relevant docs are updated with any changed behavior or assumptions.
+- [x] All P1 tasks above are complete or explicitly deferred with a reason.
+- [x] All code tasks in P1 have failing-test evidence before implementation.
+- [x] `go test ./...` passes after P1 code tasks.
+- [x] `go vet ./...` passes after P1 code tasks.
+- [x] Relevant docs are updated with any changed behavior or assumptions.
 
 ---
 
