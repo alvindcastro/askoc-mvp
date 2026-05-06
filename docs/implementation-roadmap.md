@@ -24,7 +24,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 | [x] | P6 — LLM gateway and structured classification | LLM gateway, strict JSON classification, prompts, and guardrails are testable. | [Task list](phases-and-tasks.md#p6-llm-gateway-and-structured-classification) |
 | [x] | P7 — Privacy, audit, and dashboard | Privacy redaction, audit events, and dashboard metrics are in place. | [Task list](phases-and-tasks.md#p7-privacy-audit-and-dashboard) |
 | [x] | P8 — Workflow automation and Power Automate option | Workflow simulator and optional Power Automate webhook path are ready. | [Task list](phases-and-tasks.md#p8-workflow-automation-and-power-automate-option) |
-| [ ] | P9 — Evaluation runner and quality gates | Evaluation runner produces quality reports and fails critical regressions. | [Task list](phases-and-tasks.md#p9-evaluation-runner-and-quality-gates) |
+| [x] | P9 — Evaluation runner and quality gates | Evaluation runner produces quality reports and fails critical regressions. | [Task list](phases-and-tasks.md#p9-evaluation-runner-and-quality-gates) |
 | [ ] | P10 — Docker, CI, and local developer experience | Docker, CI, env safety, and smoke test support repeatable demos. | [Task list](phases-and-tasks.md#p10-docker-ci-and-local-developer-experience) |
 | [ ] | P11 — Portfolio polish and interview readiness | Portfolio materials are polished for interview presentation. | [Task list](phases-and-tasks.md#p11-portfolio-polish-and-interview-readiness) |
 
@@ -106,11 +106,11 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 ### P9 — Evaluation runner and quality gates
 
-- [ ] JSONL dataset includes at least 30 examples.
-- [ ] `cmd/eval` runs against fake or local chat API.
-- [ ] Scoring covers intent, source, action, escalation, safety, and latency.
-- [ ] Markdown and JSON reports are generated.
-- [ ] Critical hallucination or missed escalation fails the build.
+- [x] JSONL dataset includes at least 30 examples.
+- [x] `cmd/eval` runs against fake or local chat API.
+- [x] Scoring covers intent, source, action, escalation, safety, and latency.
+- [x] Markdown and JSON reports are generated.
+- [x] Critical hallucination or missed escalation fails the build.
 
 ### P10 — Docker, CI, and local developer experience
 
@@ -146,12 +146,13 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 - [x] P6 fallback classifier plus optional LLM client.
 - [x] P7 redaction, audit store, and dashboard endpoint.
 - [x] P8 local workflow simulator and optional webhook client.
+- [x] P9 deterministic evaluation runner and `make eval`.
 - [ ] `go test ./...` and `make smoke` pass.
 
 ### 2-week version
 
-- [x] P1-P8 complete.
-- [ ] P9 evaluation runner and quality gates.
+- [x] P1-P9 complete.
+- [x] P9 evaluation runner and quality gates.
 - [ ] P10 Docker Compose and CI.
 - [ ] P11 polished portfolio docs and demo assets.
 - [x] Optional Power Automate webhook integration.
@@ -167,5 +168,5 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 7. P6-T01 to P6-T05: add LLM capability behind tests and guardrails.
 8. P7-T01 to P7-T06: add redaction, audit storage, dashboard metrics, and retention controls.
 9. P8-T01 to P8-T05: complete automation story and document webhook setup.
-10. P9 and P10: prove quality and repeatability.
+10. P10: prove repeatability with Docker and CI.
 11. P11: polish the portfolio.

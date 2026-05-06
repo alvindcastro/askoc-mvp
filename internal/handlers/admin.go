@@ -27,8 +27,16 @@ type auditResetStore interface {
 	Reset(context.Context)
 }
 
+type evalReviewQueueStore interface {
+	OpenReviewItems(context.Context) any
+}
+
 type auditExportResponse struct {
 	Events []audit.Event `json:"events"`
+}
+
+type reviewQueueResponse struct {
+	Items any `json:"items"`
 }
 
 type auditResetResponse struct {
@@ -104,6 +112,24 @@ func AdminAuditPurgeHandler(store audit.Pruner, adminToken string) http.Handler 
 		}
 		pruned := audit.DefaultRetentionPolicy().PurgeExpired(r.Context(), store, time.Now().UTC())
 		WriteJSON(w, r, http.StatusOK, auditPurgeResponse{Pruned: pruned})
+	})
+}
+
+func AdminReviewQueueHandler(queue evalReviewQueueStore, adminToken string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			WriteError(w, r, http.StatusMethodNotAllowed, "method_not_allowed", "method not allowed")
+			return
+		}
+		if !authorizedAdmin(r, adminToken) {
+			WriteError(w, r, http.StatusUnauthorized, "unauthorized", "missing or invalid admin bearer token")
+			return
+		}
+		var items any = []any{}
+		if queue != nil {
+			items = queue.OpenReviewItems(r.Context())
+		}
+		WriteJSON(w, r, http.StatusOK, reviewQueueResponse{Items: items})
 	})
 }
 

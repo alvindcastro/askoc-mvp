@@ -27,7 +27,7 @@ cmd/mock-crm
 cmd/mock-lms
 cmd/workflow-sim   # P8 local workflow simulator
 cmd/ingest         # P5 local RAG ingestion
-cmd/eval           # later P9
+cmd/eval           # P9 JSONL evaluation runner and quality gate
 ```
 
 Each command should have a small `main.go` that loads configuration, creates dependencies, registers routes, and starts an HTTP server.
@@ -49,6 +49,7 @@ Each command should have a small `main.go` that loads configuration, creates dep
 | `internal/workflow` | In-process idempotent workflow client, local simulator handler, idempotency hashing, and optional Power Automate-compatible webhook client |
 | `internal/privacy` | PII redaction, prompt-injection checks, safe summaries |
 | `internal/audit` | Audit event store, dashboard summaries, export, reset, purge, and workflow metrics |
+| `internal/eval` | JSONL dataset parsing, deterministic eval client, scoring, reports, gates, and review queue |
 | `internal/middleware` | Trace IDs, recovery, logging, auth, rate limits |
 
 ## Dependency rule
@@ -370,9 +371,11 @@ func TestTranscriptStatusWorkflow(t *testing.T) {
 go test ./...
 go test ./internal/classifier ./internal/workflow ./internal/orchestrator
 go test ./internal/rag ./internal/orchestrator
+go test ./internal/eval ./cmd/eval
 go test -race ./internal/session
 go run ./cmd/api
 go run ./cmd/ingest -sources data/seed-sources.json -out data/rag-chunks.json
+go run ./cmd/eval -input data/eval-questions.jsonl -output reports/eval-summary.json -markdown-output reports/eval-summary.md
 go run ./cmd/mock-banner
 go run ./cmd/mock-payment
 go run ./cmd/mock-crm
@@ -380,12 +383,12 @@ go run ./cmd/mock-lms
 go run ./cmd/workflow-sim
 ```
 
-`cmd/workflow-sim` is the P8 local workflow target. `cmd/eval` remains a later-phase command.
+`cmd/workflow-sim` is the P8 local workflow target. `cmd/eval` is the P9 deterministic evaluation command and can also target a running local chat API with `-base-url`.
 
 ## Makefile targets
 
 ```makefile
-.PHONY: dev test test-race
+.PHONY: dev test test-race eval
 
 dev:
 	go run ./cmd/api
@@ -395,6 +398,9 @@ test:
 
 test-race:
 	go test -race ./internal/session
+
+eval:
+	go run ./cmd/eval -input data/eval-questions.jsonl -output reports/eval-summary.json -markdown-output reports/eval-summary.md -fail-on-critical
 ```
 
 ## What to show in GitHub
