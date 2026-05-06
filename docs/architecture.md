@@ -49,11 +49,11 @@ flowchart TD
 
 | Service | Go package/command | Responsibility |
 |---|---|---|
-| Public API | `cmd/api` | Serves chat UI, REST API, P5 local retrieval wiring, and chat orchestration |
-| Orchestrator | `internal/orchestrator` | Coordinates deterministic intent, local RAG source packaging, tools, workflow, and escalation ports |
+| Public API | `cmd/api` | Serves chat UI, REST API, P6 provider wiring, local retrieval wiring, and chat orchestration |
+| Orchestrator | `internal/orchestrator` | Coordinates guarded classification, prompt templates, local RAG source packaging, tools, workflow, and escalation ports |
 | RAG ingestor | `cmd/ingest` + `internal/rag` | Fetches approved public pages, cleans HTML, chunks content, and writes local JSON chunks |
-| LLM gateway | `internal/llm` | Later phase: wraps Azure OpenAI/OpenAI-compatible REST calls |
-| Classifier | `internal/classifier` | P4 deterministic fallback intent/sentiment; later LLM/parser path plugs in behind the port |
+| LLM gateway | `internal/llm` | P6 provider-neutral types and tested Azure OpenAI/OpenAI-compatible REST calls |
+| Classifier | `internal/classifier` | P6 deterministic fallback, strict JSON parser, and fixture-backed intent/sentiment checks |
 | Tool clients | `internal/tools` | Typed clients for Banner, payment, CRM, LMS, notification |
 | Privacy | `internal/privacy` | Later phase: redaction, safe logging, prompt-injection checks |
 | Audit | `internal/audit` | P4 audit port types; later phase: durable interaction, source, tool-call, workflow, and feedback events |
@@ -131,7 +131,7 @@ type ChatResponse struct {
 }
 ```
 
-P5 implements these models in `internal/domain` with provider-neutral request/response structs, source citations, source confidence/risk/freshness metadata, learner-safe action traces, idempotency key metadata, and handoff metadata. Request validation lives in `internal/validation`; the deterministic orchestrator lives in `internal/orchestrator`.
+P6 uses these models in `internal/domain` with provider-neutral request/response structs, source citations, source confidence/risk/freshness metadata, learner-safe action traces, idempotency key metadata, and handoff metadata. Request validation lives in `internal/validation`; the guarded orchestrator lives in `internal/orchestrator`.
 
 ## Component responsibilities
 
@@ -168,7 +168,7 @@ Responsibilities:
 
 ### 3. Go AI orchestrator
 
-The P5 orchestrator coordinates source-grounded transcript answers and the deterministic transcript/payment interaction before live AI is introduced.
+The P6 orchestrator coordinates source-grounded transcript answers, optional guarded LLM classification/answering, and the deterministic transcript/payment interaction. Live provider use is opt-in through `ASKOC_PROVIDER=openai-compatible`; local deterministic behavior remains the default.
 
 Responsibilities:
 

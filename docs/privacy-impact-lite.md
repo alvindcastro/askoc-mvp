@@ -151,7 +151,7 @@ The assistant should not answer with certainty when:
 - source conflicts with another source,
 - question involves deadlines, fees, eligibility, holds, immigration, disability accommodation, legal matters, or financial decisions.
 
-P5 enforces this boundary in `internal/rag` and `internal/orchestrator`: ingestion rejects unallowlisted URLs, local retrieval returns approved chunk citations only, low-confidence retrieval falls back, and stale or high-risk sources require staff confirmation instead of an authoritative answer.
+P6 enforces this boundary in `internal/rag`, `internal/classifier`, `internal/llm`, and `internal/orchestrator`: ingestion rejects unallowlisted URLs, local retrieval returns approved chunk citations only, strict JSON classification is validated before use, low-confidence classification or retrieval falls back, ungrounded LLM answers are rejected, and stale or high-risk sources require staff confirmation instead of an authoritative answer.
 
 Safe fallback:
 

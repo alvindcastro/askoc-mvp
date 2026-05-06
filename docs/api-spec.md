@@ -10,7 +10,7 @@ This document defines a simple REST API surface for the AskOC AI Concierge MVP. 
 http://localhost:8080/api/v1
 ```
 
-The implemented P5 chat route is `POST http://localhost:8080/api/v1/chat`. The web chat UI is served at `GET http://localhost:8080/chat`.
+The implemented P6 chat route is `POST http://localhost:8080/api/v1/chat`. The web chat UI is served at `GET http://localhost:8080/chat`.
 
 ## Authentication
 
@@ -101,7 +101,7 @@ Sends a learner message to the Go AI orchestrator.
     {
       "type": "intent_classified",
       "status": "completed",
-      "message": "Message classified by deterministic fallback logic.",
+      "message": "Message classified by validated classifier logic.",
       "trace_id": "trace_01JABC456"
     },
     {
@@ -131,14 +131,16 @@ Sends a learner message to the Go AI orchestrator.
 }
 ```
 
-P5 validation and orchestration rules:
+P6 validation and orchestration rules:
 
 - `message` is required after trimming whitespace.
 - `message` must be 2000 characters or fewer.
 - `student_id` is optional, but when present it must use the synthetic demo shape `S` plus six digits, such as `S100002`.
 - transcript-status messages can also include a synthetic ID in the message body, such as `My student ID is S100002`.
 - invalid JSON, validation failures, and service failures return the common safe error shape and never echo raw request bodies.
-- P5 does not call live AI. It uses deterministic classifier logic, local retrieval over approved source chunks, typed mock Banner/payment/CRM clients, and an in-process idempotent workflow port.
+- Default `stub` mode does not call live AI. It uses deterministic classifier logic, local retrieval over approved source chunks, typed mock Banner/payment/CRM clients, and an in-process idempotent workflow port.
+- Optional `openai-compatible` mode uses a tested REST LLM gateway behind strict JSON classification parsing, versioned prompts, source-only answer validation, and deterministic fallback on model timeout or unsafe output.
+- Low-confidence classification cannot trigger Banner, payment, or workflow checks; it routes to staff handoff instead.
 - policy/procedure answers include approved source metadata or return a safe fallback when retrieval confidence is low.
 - stale sources or high-risk sources below the confidence threshold include caution metadata and ask for staff confirmation.
 - paid records skip workflow reminders, unpaid records trigger one reminder attempt, financial holds create mock Registrar/Student Accounts cases, unresolved synthetic records create normal handoff cases, and urgent/negative messages create priority staff handoffs.

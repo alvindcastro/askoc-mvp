@@ -86,6 +86,7 @@ func (o *Orchestrator) summary(req domain.ChatRequest, result classifier.Result,
 func needsEscalation(result classifier.Result) bool {
 	return result.Intent == domain.IntentHumanHandoff ||
 		result.Intent == domain.IntentEscalationRequest ||
+		result.NeedsHandoff ||
 		result.Sentiment == domain.SentimentNegative ||
 		result.Sentiment == domain.SentimentUrgentNegative ||
 		result.Confidence < classifier.SensitiveToolConfidence

@@ -136,8 +136,18 @@ func (o *Orchestrator) HandleChat(ctx context.Context, req domain.ChatRequest) (
 		},
 		Sentiment: result.Sentiment,
 		Actions: []domain.Action{
-			o.action(ctx, "intent_classified", domain.ActionStatusCompleted, "Message classified by deterministic fallback logic.", ""),
+			o.action(ctx, "intent_classified", domain.ActionStatusCompleted, "Message classified by validated classifier logic.", ""),
 		},
+	}
+
+	if !result.CanTriggerSensitiveTools() {
+		resp.Answer = "I could not validate that classification strongly enough for synthetic tool checks, so I created a normal staff handoff instead of checking transcript or payment records."
+		resp.Actions = append(resp.Actions, o.action(ctx, "classification_guardrail", domain.ActionStatusPending, "Low-confidence classification blocked sensitive synthetic tool calls.", ""))
+		return o.createHandoff(ctx, req, result, resp, handoffRequest{
+			queue:    "learner_support",
+			priority: "normal",
+			reason:   "classification below sensitive tool threshold",
+		})
 	}
 
 	switch {

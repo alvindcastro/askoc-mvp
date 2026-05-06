@@ -45,6 +45,12 @@ func TestLoadFromEnvUsesSafeDefaults(t *testing.T) {
 	if cfg.Provider.Model != "demo-placeholder" {
 		t.Fatalf("Provider.Model = %q, want demo-placeholder", cfg.Provider.Model)
 	}
+	if cfg.Provider.Endpoint != "" {
+		t.Fatalf("Provider.Endpoint = %q, want empty default", cfg.Provider.Endpoint)
+	}
+	if cfg.Provider.Timeout != 5*time.Second {
+		t.Fatalf("Provider.Timeout = %s, want 5s", cfg.Provider.Timeout)
+	}
 	if cfg.RAG.ChunksPath != "data/rag-chunks.json" {
 		t.Fatalf("RAG.ChunksPath = %q, want data/rag-chunks.json", cfg.RAG.ChunksPath)
 	}
@@ -64,7 +70,9 @@ func TestLoadFromEnvUsesOverrides(t *testing.T) {
 		"ASKOC_RAG_CHUNKS_PATH":          "tmp/test-rag-chunks.json",
 		"ASKOC_PROVIDER":                 "openai-compatible",
 		"ASKOC_PROVIDER_MODEL":           "gpt-demo",
+		"ASKOC_PROVIDER_ENDPOINT":        "http://llm.local/v1/chat/completions",
 		"ASKOC_PROVIDER_API_KEY":         "sk-demo-secret",
+		"ASKOC_PROVIDER_TIMEOUT_SECONDS": "9",
 	})
 	if err != nil {
 		t.Fatalf("LoadFromEnv returned error: %v", err)
@@ -91,8 +99,14 @@ func TestLoadFromEnvUsesOverrides(t *testing.T) {
 	if cfg.Provider.Mode != "openai-compatible" || cfg.Provider.Model != "gpt-demo" {
 		t.Fatalf("Provider = %+v", cfg.Provider)
 	}
+	if cfg.Provider.Endpoint != "http://llm.local/v1/chat/completions" {
+		t.Fatalf("Provider.Endpoint = %q", cfg.Provider.Endpoint)
+	}
 	if cfg.Provider.APIKey != "sk-demo-secret" {
 		t.Fatalf("Provider.APIKey was not loaded")
+	}
+	if cfg.Provider.Timeout != 9*time.Second {
+		t.Fatalf("Provider.Timeout = %s", cfg.Provider.Timeout)
 	}
 	if cfg.RAG.ChunksPath != "tmp/test-rag-chunks.json" {
 		t.Fatalf("RAG.ChunksPath = %q", cfg.RAG.ChunksPath)
@@ -124,6 +138,26 @@ func TestLoadFromEnvRejectsInvalidValues(t *testing.T) {
 			name:    "unsupported log level",
 			env:     map[string]string{"ASKOC_LOG_LEVEL": "verbose"},
 			wantErr: "ASKOC_LOG_LEVEL",
+		},
+		{
+			name:    "unsupported provider mode",
+			env:     map[string]string{"ASKOC_PROVIDER": "live"},
+			wantErr: "ASKOC_PROVIDER",
+		},
+		{
+			name:    "openai-compatible missing endpoint",
+			env:     map[string]string{"ASKOC_PROVIDER": "openai-compatible", "ASKOC_PROVIDER_API_KEY": "sk-demo-secret"},
+			wantErr: "ASKOC_PROVIDER_ENDPOINT",
+		},
+		{
+			name:    "openai-compatible missing api key",
+			env:     map[string]string{"ASKOC_PROVIDER": "openai-compatible", "ASKOC_PROVIDER_ENDPOINT": "http://llm.local/v1/chat/completions"},
+			wantErr: "ASKOC_PROVIDER_API_KEY",
+		},
+		{
+			name:    "invalid provider timeout",
+			env:     map[string]string{"ASKOC_PROVIDER_TIMEOUT_SECONDS": "soon"},
+			wantErr: "ASKOC_PROVIDER_TIMEOUT_SECONDS",
 		},
 		{
 			name:    "empty RAG chunks path",

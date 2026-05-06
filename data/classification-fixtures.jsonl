@@ -1,0 +1,31 @@
+{"id":"transcript_request_001","message":"How do I order my official transcript?","expected_intent":"transcript_request","expected_sentiment":"neutral","expected_can_trigger_tools":true}
+{"id":"transcript_request_002","message":"Where can I request a transcript to be sent to another college?","expected_intent":"transcript_request","expected_sentiment":"neutral","expected_can_trigger_tools":true}
+{"id":"transcript_request_003","message":"I need to send my transcript to an employer right away.","expected_intent":"transcript_request","expected_sentiment":"urgent","expected_can_trigger_tools":true}
+{"id":"transcript_request_004","message":"Where do I find official transcript instructions?","expected_intent":"transcript_request","expected_sentiment":"neutral","expected_can_trigger_tools":true}
+{"id":"transcript_request_005","message":"I need a transcript copy for my records.","expected_intent":"transcript_request","expected_sentiment":"neutral","expected_can_trigger_tools":true}
+{"id":"transcript_status_001","message":"I ordered my transcript but it has not been processed.","expected_intent":"transcript_status","expected_sentiment":"neutral","expected_can_trigger_tools":true}
+{"id":"transcript_status_002","message":"Can you check my transcript status for S100001?","expected_intent":"transcript_status","expected_sentiment":"neutral","expected_can_trigger_tools":true}
+{"id":"transcript_status_003","message":"My transcript has not arrived and I am frustrated.","expected_intent":"transcript_status","expected_sentiment":"negative","expected_can_trigger_tools":true}
+{"id":"transcript_status_004","message":"The transcript seems blocked and I have a deadline today.","expected_intent":"transcript_status","expected_sentiment":"urgent","expected_can_trigger_tools":true}
+{"id":"transcript_status_005","message":"Where is my transcript? The receiving school still does not have it.","expected_intent":"transcript_status","expected_sentiment":"neutral","expected_can_trigger_tools":true}
+{"id":"fee_payment_001","message":"I paid my transcript fee but my balance still shows owing.","expected_intent":"fee_payment","expected_sentiment":"neutral","expected_can_trigger_tools":true}
+{"id":"fee_payment_002","message":"Why is there a payment charge on my account?","expected_intent":"fee_payment","expected_sentiment":"neutral","expected_can_trigger_tools":true}
+{"id":"fee_payment_003","message":"I am upset that my fee payment still shows a balance.","expected_intent":"fee_payment","expected_sentiment":"negative","expected_can_trigger_tools":true}
+{"id":"fee_payment_004","message":"I need this payment cleared today.","expected_intent":"fee_payment","expected_sentiment":"urgent","expected_can_trigger_tools":true}
+{"id":"fee_payment_005","message":"My account says I am owing a charge after I paid.","expected_intent":"fee_payment","expected_sentiment":"neutral","expected_can_trigger_tools":true}
+{"id":"human_handoff_001","message":"Can I talk to a person on staff?","expected_intent":"human_handoff","expected_sentiment":"neutral","expected_can_trigger_tools":true}
+{"id":"human_handoff_002","message":"Please connect me with a human representative.","expected_intent":"human_handoff","expected_sentiment":"neutral","expected_can_trigger_tools":true}
+{"id":"human_handoff_003","message":"I need an advisor to help with my transcript question.","expected_intent":"human_handoff","expected_sentiment":"neutral","expected_can_trigger_tools":true}
+{"id":"human_handoff_004","message":"I am frustrated and want to talk to someone.","expected_intent":"human_handoff","expected_sentiment":"negative","expected_can_trigger_tools":true}
+{"id":"human_handoff_005","message":"I need learner services right away.","expected_intent":"human_handoff","expected_sentiment":"urgent","expected_can_trigger_tools":true}
+{"id":"escalation_request_001","message":"This is extremely frustrating. My transcript is needed today for a job application.","expected_intent":"escalation_request","expected_sentiment":"urgent_negative","expected_can_trigger_tools":true}
+{"id":"escalation_request_002","message":"I am angry about the transcript delay and need help immediately.","expected_intent":"escalation_request","expected_sentiment":"urgent_negative","expected_can_trigger_tools":true}
+{"id":"escalation_request_003","message":"The transcript delay is not acceptable and the deadline is today.","expected_intent":"escalation_request","expected_sentiment":"urgent_negative","expected_can_trigger_tools":true}
+{"id":"escalation_request_004","message":"I am upset about this transcript issue and need it right away.","expected_intent":"escalation_request","expected_sentiment":"urgent_negative","expected_can_trigger_tools":true}
+{"id":"escalation_request_005","message":"My transcript status is unacceptable and I need this today.","expected_intent":"escalation_request","expected_sentiment":"urgent_negative","expected_can_trigger_tools":true}
+{"id":"unknown_001","message":"What food is available near campus tonight?","expected_intent":"unknown","expected_sentiment":"neutral","expected_can_trigger_tools":false}
+{"id":"unknown_002","message":"Can you recommend a restaurant?","expected_intent":"unknown","expected_sentiment":"neutral","expected_can_trigger_tools":false}
+{"id":"unknown_003","message":"Who won the hockey game yesterday?","expected_intent":"unknown","expected_sentiment":"neutral","expected_can_trigger_tools":false}
+{"id":"unknown_004","message":"Tell me a joke about studying.","expected_intent":"unknown","expected_sentiment":"neutral","expected_can_trigger_tools":false}
+{"id":"unknown_005","message":"What is the weather in Kelowna?","expected_intent":"unknown","expected_sentiment":"neutral","expected_can_trigger_tools":false}
+{"id":"unknown_006","message":"Parking is frustrating and urgent; where do I get a permit?","expected_intent":"unknown","expected_sentiment":"urgent_negative","expected_can_trigger_tools":false}

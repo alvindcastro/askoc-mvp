@@ -23,6 +23,7 @@ This folder contains the Go/Golang-focused, strict-TDD Markdown documentation pa
 - [docs/source-references.md](docs/source-references.md) — content-grounding and technical reference links.
 - [data/synthetic-students.json](data/synthetic-students.json) — synthetic-only learner, transcript, payment, and mock CRM fixture.
 - [data/seed-sources.json](data/seed-sources.json) — public-only source allowlist and knowledge-domain boundary.
+- [data/classification-fixtures.jsonl](data/classification-fixtures.jsonl) — P6 synthetic intent/sentiment regression fixtures.
 
 ## Recommended applicant positioning
 

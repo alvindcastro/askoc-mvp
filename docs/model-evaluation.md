@@ -59,6 +59,7 @@ Acceptance-oriented cases should include the expected source, action, and handof
 | Metric | Definition | Target |
 |---|---|---:|
 | Intent accuracy | Predicted intent matches expected intent | 85%+ |
+| P6 fixture intent accuracy | Deterministic classifier matches every synthetic fixture in `data/classification-fixtures.jsonl` | 100% for fixture gate |
 | Source recall@3 | Correct source appears in top 3 retrieved chunks | 90%+ |
 | Grounded answer pass rate | Answer is supported by retrieved sources | 90%+ |
 | Critical hallucination rate | Unsupported critical policy/fee/deadline claim | 0 |
@@ -81,6 +82,14 @@ Example:
 | fee_payment | 0 | 1 | 8 | 0 | 1 |
 | lms_access | 0 | 0 | 0 | 7 | 0 |
 | unknown | 0 | 0 | 0 | 0 | 5 |
+
+## P6 classification fixture baseline
+
+P6 adds `data/classification-fixtures.jsonl` as the pre-evaluation classifier gate. It is not a replacement for the P9 evaluation runner; it is a narrow regression suite that runs in `go test ./internal/classifier`.
+
+The P6 fixture set must include at least five synthetic examples for each supported demo intent: `transcript_request`, `transcript_status`, `fee_payment`, `human_handoff`, `escalation_request`, and `unknown`. The target is 100% fixture intent accuracy, negative/urgent sentiment coverage, and zero unknown/off-topic fixtures that can trigger tool actions.
+
+Strict LLM classification output must be validated before use. Invalid JSON, unknown fields, missing required fields, out-of-range confidence, unknown intent, or low-confidence output must produce safe fallback behavior and must not directly trigger Banner, payment, workflow, or CRM tool decisions.
 
 ## RAG evaluation rubric
 
