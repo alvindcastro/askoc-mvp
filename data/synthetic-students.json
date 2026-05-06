@@ -1,6 +1,6 @@
 {
   "fixture_name": "askoc-demo-synthetic-students",
-  "fixture_version": "P0-T02",
+  "fixture_version": "P3-T01",
   "synthetic_only": true,
   "data_notice": "All records in this file are invented for a local AskOC AI Concierge demo. They are not real Okanagan College learner, payment, transcript, or CRM records.",
   "id_policy": {
@@ -34,6 +34,16 @@
         "case_id": null,
         "case_status": "none"
       },
+      "lms": {
+        "account_status": "active",
+        "courses": [
+          {
+            "course_id": "DEMO-LMS-101",
+            "course_name": "Online Learning Orientation",
+            "access_status": "available"
+          }
+        ]
+      },
       "demo_notes": "Baseline happy-path transcript scenario."
     },
     {
@@ -61,6 +71,16 @@
       "crm": {
         "case_id": null,
         "case_status": "none"
+      },
+      "lms": {
+        "account_status": "active",
+        "courses": [
+          {
+            "course_id": "DEMO-LMS-101",
+            "course_name": "Online Learning Orientation",
+            "access_status": "available"
+          }
+        ]
       },
       "demo_notes": "Core workflow scenario: trigger synthetic payment reminder."
     },
@@ -90,6 +110,16 @@
         "case_id": "MOCK-CRM-100003",
         "case_status": "open"
       },
+      "lms": {
+        "account_status": "active",
+        "courses": [
+          {
+            "course_id": "DEMO-LMS-101",
+            "course_name": "Online Learning Orientation",
+            "access_status": "available"
+          }
+        ]
+      },
       "demo_notes": "Escalation scenario for unresolved hold and staff follow-up."
     },
     {
@@ -115,6 +145,10 @@
       "crm": {
         "case_id": "MOCK-CRM-100004",
         "case_status": "queued"
+      },
+      "lms": {
+        "account_status": "inactive_demo",
+        "courses": []
       },
       "demo_notes": "Safe fallback scenario when a transcript request cannot be found in synthetic systems."
     }

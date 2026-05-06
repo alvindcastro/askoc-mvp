@@ -116,7 +116,7 @@ A task is not done until the relevant package test and `go test ./...` pass. AI,
 3. Assistant summarizes the case.
 4. Mock CRM case is created with transcript context, payment status, conversation summary, and priority flag.
 
-## Current P2 repository structure
+## Current P3 repository structure
 
 ```text
 askoc-ai-concierge/
@@ -125,12 +125,19 @@ askoc-ai-concierge/
   Makefile
   cmd/
     api/                  # API server with health/readiness, chat API, and chat UI routes
+    mock-banner/          # Synthetic student profile, transcript status, and hold API
+    mock-payment/         # Synthetic transcript payment status API
+    mock-crm/             # Synthetic CRM case creation API
+    mock-lms/             # Synthetic LMS access-status API
   internal/
     config/
     domain/
+    fixtures/
     handlers/
     middleware/
+    mock/
     session/
+    tools/
     validation/
     build/
   web/
@@ -143,9 +150,9 @@ askoc-ai-concierge/
     ...
 ```
 
-The current chat API uses deterministic placeholder behavior only. Later phases add real orchestration, mock Banner/payment/CRM/LMS services, workflow simulation, ingestion, evaluation, dashboard, and Docker.
+The current chat API still uses deterministic placeholder behavior only. P3 adds reusable synthetic fixtures, mock Banner/payment/CRM/LMS HTTP services, and typed enterprise clients; later phases wire them into orchestration, workflow simulation, ingestion, evaluation, dashboard, and Docker.
 
-## Current P2 commands
+## Current P3 commands
 
 ```bash
 make dev
@@ -153,6 +160,10 @@ make test
 make test-race
 go test ./...
 go vet ./...
+go run ./cmd/mock-banner
+go run ./cmd/mock-payment
+go run ./cmd/mock-crm
+go run ./cmd/mock-lms
 ```
 
 `make dev` runs the Go API and serves the chat UI. Auth is disabled by default for local demo use. Set `ASKOC_AUTH_ENABLED=true` and `ASKOC_AUTH_TOKEN=<demo-token>` to require a mock bearer token.
@@ -178,9 +189,15 @@ Chat UI:   http://localhost:8080/chat
 Chat API:  http://localhost:8080/api/v1/chat
 Health:    http://localhost:8080/healthz
 Readiness: http://localhost:8080/readyz
+
+Mock Banner:  http://localhost:8081/api/v1/students/S100002
+Mock Payment: http://localhost:8082/api/v1/students/S100002/payment-status
+Mock CRM:     http://localhost:8083/api/v1/crm/cases
+Mock LMS:     http://localhost:8085/api/v1/students/S100001/lms-access?course_id=DEMO-LMS-101
 ```
 
 The P2 chat API validates JSON requests, rejects empty or oversized messages, accepts synthetic student IDs in the `S` plus six digits format, includes trace IDs in responses, and stores only redacted demo conversation messages in an in-memory TTL session store.
+P3 tool clients forward `X-Trace-ID` headers and map not-found, retryable, parse, timeout, and external-service failures into typed errors for later orchestration.
 
 ## Demo data policy
 
@@ -189,9 +206,11 @@ Do not use real student data. Use synthetic records only.
 | Student ID | Name | Transcript payment | Hold | Expected result |
 |---|---|---:|---|---|
 | `S100001` | Demo Learner One | Paid | None | Ready for processing |
-| `S100002` | Demo Learner Two | Unpaid | None | Payment reminder workflow |
+| `S100002` | Demo Learner Two | Unpaid | Mock payment hold | Payment reminder workflow |
 | `S100003` | Demo Learner Three | Review required | Mock financial hold | CRM escalation |
 | `S100004` | Demo Learner Four | Not applicable | None | Human handoff |
+
+The same fixture now includes synthetic LMS account status and demo course-access records. It does not include LMS course content.
 
 ## Success metrics
 

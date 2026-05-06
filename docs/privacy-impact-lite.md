@@ -104,7 +104,7 @@ The MVP should not store:
 
 ## Demo fixture rules
 
-`data/synthetic-students.json` is the only approved learner fixture for the P0 demo boundary. It must contain invented records only.
+`data/synthetic-students.json` is the only approved learner fixture for the demo boundary. It must contain invented records only.
 
 Allowed fixture fields:
 
@@ -114,6 +114,7 @@ Allowed fixture fields:
 - transcript workflow status,
 - mock payment status and synthetic transaction ID,
 - mock CRM case status and synthetic case ID,
+- mock LMS account status and demo course-access status,
 - non-sensitive demo notes.
 
 Not allowed in fixtures:
@@ -123,6 +124,7 @@ Not allowed in fixtures:
 - real email addresses or phone numbers,
 - real payment card, bank, tax, or account data,
 - real Banner, CRM, LMS, or portal identifiers,
+- LMS course content, grades, submissions, or activity records,
 - private portal URLs or scraped content.
 
 If a future demo needs a new scenario, add a new clearly fake record rather than copying or anonymizing a real learner.

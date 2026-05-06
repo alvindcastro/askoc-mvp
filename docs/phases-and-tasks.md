@@ -200,7 +200,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ## P3 — Synthetic enterprise APIs and clients
 **Phase outcome:** Synthetic Banner/payment/CRM/LMS APIs and typed clients are working.
-- [ ] **P3-T01 — Create synthetic fixture loader**  
+- [x] **P3-T01 — Create synthetic fixture loader**
   **Type:** Code  
   **Goal:** Load deterministic demo records for students, transcripts, payments, LMS access, and CRM examples.  
   **Primary files:** `data/synthetic-students.json`, `internal/fixtures/loader.go`, `internal/fixtures/loader_test.go`  
@@ -208,7 +208,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Valid fixture loads all expected students.; Duplicate IDs fail.; Missing required fields fail.; Fixture contains only synthetic IDs.  
   **Done when:** S100001-S100004 exist with expected states.; Fixtures can be reused by mock services and tests.
-- [ ] **P3-T02 — Build mock Banner-style student API**  
+- [x] **P3-T02 — Build mock Banner-style student API**
   **Type:** Code  
   **Goal:** Simulate student profile, enrollment status, transcript request status, and holds.  
   **Primary files:** `cmd/mock-banner/main.go`, `internal/mock/banner`, `internal/tools/banner_client.go`  
@@ -216,7 +216,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Handler tests for known student, unknown student, transcript status, and financial hold.; Client tests against `httptest.Server`.; Contract tests validate response schema.  
   **Done when:** Known IDs return deterministic data.; Unknown IDs return 404.; No real Banner naming/secrets are used beyond mock labels.
-- [ ] **P3-T03 — Build mock payment API**  
+- [x] **P3-T03 — Build mock payment API**
   **Type:** Code  
   **Goal:** Simulate transcript payment status without processing real payments.  
   **Primary files:** `cmd/mock-payment/main.go`, `internal/mock/payment`, `internal/tools/payment_client.go`  
@@ -224,7 +224,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Paid student returns paid status.; Unpaid student returns unpaid status.; Unknown payment returns clear safe error.; Client timeout test.  
   **Done when:** Payment response includes status, amount, currency, and synthetic transaction ID only.; The UI never accepts real card/payment data.
-- [ ] **P3-T04 — Build mock CRM API for case creation and queue routing**  
+- [x] **P3-T04 — Build mock CRM API for case creation and queue routing**
   **Type:** Code  
   **Goal:** Show human handoff and staff-facing case summaries.  
   **Primary files:** `cmd/mock-crm/main.go`, `internal/mock/crm`, `internal/tools/crm_client.go`  
@@ -232,7 +232,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Create case success.; Priority case success.; Validation rejects empty summary.; Client retries or returns typed error on 5xx.  
   **Done when:** Case response includes case ID, queue, priority, and summary.; Conversation summary is redacted before storage.
-- [ ] **P3-T05 — Build mock LMS API**  
+- [x] **P3-T05 — Build mock LMS API**
   **Type:** Code  
   **Goal:** Support basic Moodle/Brightspace-style learner access questions without real LMS access.  
   **Primary files:** `cmd/mock-lms/main.go`, `internal/mock/lms`, `internal/tools/lms_client.go`  
@@ -240,7 +240,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Known synthetic student returns LMS access status.; Unknown course returns safe fallback.; Client handles timeout.  
   **Done when:** LMS API is clearly marked synthetic.; It supports only demo access status, not course content.
-- [ ] **P3-T06 — Add typed enterprise clients with shared error model**  
+- [x] **P3-T06 — Add typed enterprise clients with shared error model**
   **Type:** Code  
   **Goal:** Let the orchestrator call mock services through interfaces that resemble production integrations.  
   **Primary files:** `internal/tools/errors.go`, `internal/tools/*_client.go`, `internal/tools/*_test.go`  
@@ -251,10 +251,10 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ### P3 phase gate
 
-- [ ] All P3 tasks above are complete or explicitly deferred with a reason.
-- [ ] All code tasks in P3 have failing-test evidence before implementation.
-- [ ] `go test ./...` passes after P3 code tasks.
-- [ ] Relevant docs are updated with any changed behavior or assumptions.
+- [x] All P3 tasks above are complete or explicitly deferred with a reason.
+- [x] All code tasks in P3 have failing-test evidence before implementation.
+- [x] `go test ./...` passes after P3 code tasks.
+- [x] Relevant docs are updated with any changed behavior or assumptions.
 
 ---
 

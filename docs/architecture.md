@@ -360,6 +360,7 @@ sequenceDiagram
 | `cmd/mock-payment` | 8082 |
 | `cmd/mock-crm` | 8083 |
 | `cmd/workflow-sim` | 8084 |
+| `cmd/mock-lms` | 8085 |
 | PostgreSQL | 5432 |
 
 ## Deployment options

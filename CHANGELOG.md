@@ -2,6 +2,64 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-06 - P3 Synthetic Enterprise APIs And Clients
+
+### P3-T01 - Create synthetic fixture loader
+
+- What: added a validated synthetic fixture loader for learner, transcript, payment, CRM, and LMS demo records.
+- Where: `internal/fixtures/loader.go`, `internal/fixtures/loader_test.go`, `data/synthetic-students.json`, `docs/privacy-impact-lite.md`.
+- When: 2026-05-06.
+- Why: let mock services and tests reuse one deterministic synthetic data source without touching real learner, payment, CRM, or LMS records.
+- How: wrote failing loader tests for expected students, duplicate IDs, missing required fields, and synthetic-only validation, then implemented context-aware JSON loading and fixture validation.
+
+### P3-T02 - Build mock Banner-style student API
+
+- What: added the synthetic Banner-style HTTP service for student profile and transcript status/hold lookups.
+- Where: `cmd/mock-banner/main.go`, `internal/mock/banner`, `internal/tools/banner_client.go`, `internal/tools/banner_client_test.go`, `docs/api-spec.md`.
+- When: 2026-05-06.
+- Why: provide deterministic student and transcript state for later orchestration without any real Banner integration or credentials.
+- How: wrote handler, contract, client, trace-header, not-found, and malformed-response tests first, then implemented `net/http` handlers and the typed Banner client.
+
+### P3-T03 - Build mock payment API
+
+- What: added the synthetic transcript payment-status HTTP service and typed payment client.
+- Where: `cmd/mock-payment/main.go`, `internal/mock/payment`, `internal/tools/payment_client.go`, `internal/tools/payment_client_test.go`, `docs/api-spec.md`, `docs/golang-implementation.md`.
+- When: 2026-05-06.
+- Why: simulate paid and unpaid transcript scenarios without accepting or storing real payment details.
+- How: wrote tests for paid, unpaid, unknown-payment, response contract, and canceled-context timeout behavior, then implemented the handler and context-aware client.
+
+### P3-T04 - Build mock CRM API for case creation and queue routing
+
+- What: added the synthetic CRM case-creation service with queue, priority, case ID, and redacted summary output.
+- Where: `cmd/mock-crm/main.go`, `internal/mock/crm`, `internal/tools/crm_client.go`, `internal/tools/crm_client_test.go`, `docs/api-spec.md`.
+- When: 2026-05-06.
+- Why: show human handoff and staff-facing routing without creating real cases or storing raw conversation PII.
+- How: wrote tests for normal case creation, priority case creation, empty-summary rejection, redaction, and 5xx retryable client errors before implementing the in-memory mock CRM handler and typed client.
+
+### P3-T05 - Build mock LMS API
+
+- What: added the synthetic LMS access-status service and typed LMS client for demo account/course access checks only.
+- Where: `cmd/mock-lms/main.go`, `internal/mock/lms`, `internal/tools/lms_client.go`, `internal/tools/lms_client_test.go`, `data/synthetic-students.json`, `docs/api-spec.md`.
+- When: 2026-05-06.
+- Why: support basic LMS access questions in the enterprise integration surface while keeping LMS course content, grades, submissions, and activity records out of scope.
+- How: wrote tests for known synthetic access, unknown-course fallback, unknown student, and canceled-context timeout behavior, then implemented the mock LMS handler and client on local port 8085.
+
+### P3-T06 - Add typed enterprise clients with shared error model
+
+- What: added shared tool error kinds and HTTP client helpers for Banner, payment, CRM, and LMS integrations.
+- Where: `internal/tools/errors.go`, `internal/tools/http.go`, `internal/tools/*_client.go`, `internal/tools/*_test.go`, `README.md`, `docs/test-plan.md`.
+- When: 2026-05-06.
+- Why: keep later orchestrator code independent from raw HTTP details while preserving branchable not-found, retryable, external-service, parse, and timeout errors.
+- How: wrote `httptest.Server` client tests for trace ID forwarding, context cancellation, 404 mapping, 5xx mapping, and malformed JSON, then implemented context-aware clients that emit `X-Trace-ID`.
+
+### P3 review evidence
+
+- What: completed P3 status and documentation sync.
+- Where: `docs/phases-and-tasks.md`, `docs/implementation-roadmap.md`, `README.md`, `docs/api-spec.md`, `docs/architecture.md`, `docs/golang-implementation.md`, `docs/test-plan.md`, `docs/privacy-impact-lite.md`, `CHANGELOG.md`.
+- When: 2026-05-06.
+- Why: keep the task board, roadmap, API contracts, local commands, privacy assumptions, and verification expectations aligned with the implemented synthetic enterprise APIs and clients.
+- How: marked P3 tasks and gates complete after confirming the red test state, reconciled the README demo table with the `mock_payment_hold` fixture/API contract, then verified `go test ./internal/fixtures ./internal/mock/banner ./internal/mock/payment ./internal/mock/crm ./internal/mock/lms ./internal/tools`, `go test ./cmd/mock-banner ./cmd/mock-payment ./cmd/mock-crm ./cmd/mock-lms`, `go test ./...`, and `go vet ./...` pass.
+
 ## 2026-05-06 - P2 Chat API And UI Skeleton
 
 ### P2-T01 - Define chat domain models
