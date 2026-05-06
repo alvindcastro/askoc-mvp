@@ -2,6 +2,56 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-06 - P2 Chat API And UI Skeleton
+
+### P2-T01 - Define chat domain models
+
+- What: added provider-neutral chat request/response domain models for intents, sentiment, source citations, action traces, and escalation metadata.
+- Where: `internal/domain/chat.go`, `internal/domain/chat_test.go`, `docs/api-spec.md`, `docs/architecture.md`.
+- When: 2026-05-06.
+- Why: establish the stable API contract before real retrieval, AI orchestration, and enterprise integrations are added.
+- How: wrote JSON round-trip and validation-facing tests first, confirmed the missing package failure, then implemented typed Go structs and constants.
+
+### P2-T02 - Implement `POST /api/v1/chat` handler with deterministic placeholder response
+
+- What: added the chat HTTP handler, chat service interface, deterministic placeholder service, trace ID propagation, strict JSON decoding, and safe service-error handling.
+- Where: `internal/handlers/chat.go`, `internal/handlers/chat_test.go`, `cmd/api/main.go`, `docs/api-spec.md`, `docs/golang-implementation.md`.
+- When: 2026-05-06.
+- Why: expose the public chat contract without relying on live AI, RAG, workflow, or mock enterprise services.
+- How: wrote `httptest` coverage for success, invalid JSON, missing message, unsupported method, validation errors, and safe service failure before implementing the handler and placeholder.
+
+### P2-T03 - Serve minimal Go web chat UI
+
+- What: added a Go-rendered chat page, static JavaScript, static CSS, and routes for `/chat`, `/`, and `/static/`.
+- Where: `web/templates/chat.html`, `web/static/app.js`, `web/static/app.css`, `internal/handlers/ui.go`, `internal/handlers/ui_test.go`, `cmd/api/main.go`, `README.md`.
+- When: 2026-05-06.
+- Why: provide an interview-friendly usable chat surface while keeping frontend complexity low.
+- How: wrote rendering and static-content tests first, confirmed missing handler/static asset failures, then added the template, static assets, and route registration.
+
+### P2-T04 - Add request validation and safe client-facing errors
+
+- What: added chat request validation for missing, whitespace-only, oversized messages and synthetic-only student ID shape.
+- Where: `internal/validation/chat.go`, `internal/validation/chat_test.go`, `internal/handlers/chat.go`, `internal/handlers/chat_test.go`, `docs/api-spec.md`, `README.md`.
+- When: 2026-05-06.
+- Why: keep malformed requests and accidental non-demo identifiers from destabilizing the local demo or leaking raw input.
+- How: added table-driven validation tests and handler assertions that error responses do not echo request bodies, then implemented safe validation codes and messages.
+
+### P2-T05 - Add in-memory conversation session store
+
+- What: added a concurrency-safe in-memory session store with configurable TTL, create/append/read/expire behavior, and redaction before message persistence.
+- Where: `internal/session/store.go`, `internal/session/store_test.go`, `internal/handlers/chat.go`, `Makefile`, `docs/test-plan.md`, `README.md`.
+- When: 2026-05-06.
+- Why: track short synthetic demo conversations so follow-up behavior can be layered in later phases without storing raw PII.
+- How: wrote create/append/read, expiration, redaction, and concurrent access tests first, confirmed missing package failures, then implemented the mutex-protected store and `make test-race` target.
+
+### P2 review evidence
+
+- What: completed P2 status and documentation sync.
+- Where: `docs/phases-and-tasks.md`, `docs/implementation-roadmap.md`, `README.md`, `docs/api-spec.md`, `docs/architecture.md`, `docs/golang-implementation.md`, `docs/test-plan.md`, `CHANGELOG.md`.
+- When: 2026-05-06.
+- Why: keep the task board, roadmap, API surface, local commands, and verification expectations aligned with the implemented chat skeleton.
+- How: marked P2 tasks and gates complete after the red/green cycle and verified `go test ./internal/domain ./internal/validation ./internal/handlers ./internal/session`, `go test -race ./internal/session`, `go test ./...`, `go test -race ./...`, `make test`, `make test-race`, and `go vet ./...` pass.
+
 ## 2026-05-06 - P1 Go Project Foundation
 
 ### P1-T01 - Initialize Go module, repository layout, and developer commands

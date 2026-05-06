@@ -10,6 +10,8 @@ This document defines a simple REST API surface for the AskOC AI Concierge MVP. 
 http://localhost:8080/api/v1
 ```
 
+The implemented P2 chat route is `POST http://localhost:8080/api/v1/chat`. The web chat UI is served at `GET http://localhost:8080/chat`.
+
 ## Authentication
 
 For the MVP, use a mock bearer token.
@@ -24,7 +26,7 @@ A production version should use institutional SSO and role-based access control.
 
 ```http
 Content-Type: application/json
-X-Trace-Id: optional-client-generated-trace-id
+X-Trace-ID: optional-client-generated-trace-id
 ```
 
 ## Error response format
@@ -56,7 +58,7 @@ X-Trace-Id: optional-client-generated-trace-id
 
 ---
 
-## `POST /chat`
+## `POST /api/v1/chat`
 
 Sends a learner message to the Go AI orchestrator.
 
@@ -77,32 +79,37 @@ Sends a learner message to the Go AI orchestrator.
 {
   "conversation_id": "conv_01JABC123",
   "trace_id": "trace_01JABC456",
-  "answer": "Your transcript request appears to be waiting for payment. I can send you a payment reminder with the next steps.",
+  "answer": "This P2 demo placeholder received your transcript status question. Synthetic Banner and payment checks will be added in later phases.",
   "intent": {
     "name": "transcript_status",
-    "confidence": 0.92
+    "confidence": 0.6
   },
   "sentiment": "neutral",
   "sources": [
     {
       "title": "Transcript Request - 2005 Onwards",
       "url": "https://www.okanagancollege.ca/ask-oc/transcript-request-2005-onwards",
-      "chunk_id": "transcript-001"
+      "chunk_id": "placeholder-transcript-source"
     }
   ],
   "actions": [
     {
-      "type": "payment_status_checked",
-      "status": "success"
-    },
-    {
-      "type": "payment_reminder_triggered",
-      "status": "success"
+      "type": "placeholder_response",
+      "status": "completed",
+      "message": "No live AI, retrieval, or enterprise system was called in this P2 placeholder."
     }
   ],
   "escalation": null
 }
 ```
+
+P2 validation rules:
+
+- `message` is required after trimming whitespace.
+- `message` must be 2000 characters or fewer.
+- `student_id` is optional, but when present it must use the synthetic demo shape `S` plus six digits, such as `S100002`.
+- invalid JSON, validation failures, and service failures return the common safe error shape and never echo raw request bodies.
+- P2 does not call live AI, retrieval, Banner, payment, CRM, LMS, or workflow services.
 
 ### Go request model
 
@@ -123,7 +130,7 @@ type ChatResponse struct {
     TraceID        string        `json:"trace_id"`
     Answer         string        `json:"answer"`
     Intent         IntentResult  `json:"intent"`
-    Sentiment      string        `json:"sentiment"`
+    Sentiment      Sentiment     `json:"sentiment"`
     Sources        []Source      `json:"sources"`
     Actions        []Action      `json:"actions"`
     Escalation     *Escalation   `json:"escalation,omitempty"`
@@ -444,8 +451,10 @@ components:
           example: web
         message:
           type: string
+          maxLength: 2000
         student_id:
           type: string
+          pattern: '^S[0-9]{6}$'
     ChatResponse:
       type: object
       properties:
@@ -455,12 +464,41 @@ components:
           type: string
         answer:
           type: string
+        intent:
+          type: object
+          properties:
+            name:
+              type: string
+            confidence:
+              type: number
+              format: float
         sentiment:
           type: string
         sources:
           type: array
           items:
             type: object
+            properties:
+              title:
+                type: string
+              url:
+                type: string
+              chunk_id:
+                type: string
+        actions:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              status:
+                type: string
+              message:
+                type: string
+        escalation:
+          nullable: true
+          type: object
 ```
 
 ## Go implementation notes

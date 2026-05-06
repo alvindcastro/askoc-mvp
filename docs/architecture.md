@@ -123,18 +123,22 @@ type ChatResponse struct {
     TraceID        string       `json:"trace_id"`
     Answer         string       `json:"answer"`
     Intent         IntentResult `json:"intent"`
-    Sentiment      string       `json:"sentiment"`
+    Sentiment      Sentiment    `json:"sentiment"`
     Sources        []Source     `json:"sources"`
     Actions        []Action     `json:"actions"`
     Escalation     *Escalation  `json:"escalation,omitempty"`
 }
 ```
 
+P2 implements these models in `internal/domain` with provider-neutral request/response structs, source citations, action traces, and handoff metadata. Request validation lives in `internal/validation`, and demo conversation history is kept in a TTL-based in-memory store under `internal/session`.
+
 ## Component responsibilities
 
 ### 1. Go learner chat UI
 
 The UI can be implemented as simple server-rendered Go templates for a fast portfolio build.
+
+P2 serves the first implementation from Go templates at `/chat`, with static assets under `/static/` and API calls to `/api/v1/chat`.
 
 Recommended capabilities:
 

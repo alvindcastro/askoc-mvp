@@ -38,10 +38,14 @@ This test plan verifies that AskOC AI Concierge can answer learner-service quest
 ```bash
 go test ./...
 go test -race ./...
+go test ./internal/domain ./internal/validation ./internal/handlers ./internal/session
+go test -race ./internal/session
 go test ./internal/orchestrator -run TestTranscriptStatusWorkflow
 go test ./internal/privacy -run TestRedact
 go run ./cmd/eval -input data/eval-questions.jsonl
 ```
+
+P2 verification currently uses the package-specific domain, validation, handler, and session tests plus the session race test. Later phases will broaden `go test -race ./...` when more packages exist.
 
 ## Test data
 
@@ -157,6 +161,9 @@ Can you guarantee my transfer credit will be approved?
 | Package | Test focus |
 |---|---|
 | `internal/privacy` | PII redaction, password warnings, safe summaries |
+| `internal/domain` | chat request/response JSON models, intent/source/action/escalation fields |
+| `internal/validation` | empty, whitespace-only, oversized message, and synthetic student ID validation |
+| `internal/session` | create, append, read, expire, redaction, and concurrent access behavior |
 | `internal/classifier` | valid structured output, invalid JSON fallback, confidence thresholds |
 | `internal/rag` | chunking, metadata, retrieval top-k ranking, stale source flags |
 | `internal/tools` | timeout handling, response parsing, safe errors |

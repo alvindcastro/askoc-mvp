@@ -97,7 +97,7 @@ type WorkflowResult struct {
 The Go client should:
 
 - use a short timeout,
-- include `X-Trace-Id`,
+- include `X-Trace-ID`,
 - include an idempotency key,
 - retry at most once for transient failures,
 - never include sensitive raw conversation text,
