@@ -1,6 +1,6 @@
 # AskOC AI Concierge
 
-**Go/Golang portfolio MVP for an AI/Automation Solutions Developer role**
+**Go/Golang portfolio MVP for an AI/Automation Solution**
 
 AskOC AI Concierge is a privacy-aware learner-service automation MVP designed for a higher-education digital learner experience team. It demonstrates how conversational AI, retrieval-augmented generation, workflow automation, and mock enterprise integrations can reduce Tier 0 and Tier 1 learner-service volume while improving response quality and routing.
 
@@ -116,75 +116,59 @@ A task is not done until the relevant package test and `go test ./...` pass. AI,
 3. Assistant summarizes the case.
 4. Mock CRM case is created with transcript context, payment status, conversation summary, and priority flag.
 
-## Repository structure
+## Current P1 repository structure
 
 ```text
 askoc-ai-concierge/
   README.md
   go.mod
-  go.sum
-  docker-compose.yml
   Makefile
   cmd/
-    api/                  # public chat/API gateway
-    mock-banner/          # synthetic Banner-style student API
-    mock-crm/             # mock case management API
-    mock-payment/         # synthetic payment-status API
-    mock-lms/             # synthetic LMS-status API
-    workflow-sim/         # local Power Automate-style simulator
-    ingest/               # public content ingestion and chunking
-    eval/                 # model/RAG evaluation runner
+    api/                  # P1 API skeleton with health/readiness endpoints
   internal/
-    audit/
-    classifier/
     config/
     handlers/
-    llm/
     middleware/
-    orchestrator/
-    privacy/
-    rag/
-    tools/
-    workflow/
-  web/
-    templates/
-    static/
+    build/
   data/
     synthetic-students.json
-    eval-questions.jsonl
     seed-sources.json
   docs/
-    architecture.md
-    golang-implementation.md
-    privacy-impact-lite.md
-    api-spec.md
-    test-plan.md
-    model-evaluation.md
-    demo-script.md
-    implementation-roadmap.md
+    ...
 ```
 
-## Local demo commands
+Later phases add chat orchestration, mock Banner/payment/CRM/LMS services, workflow simulation, ingestion, evaluation, dashboard, Docker, and UI folders.
+
+## Current P1 commands
 
 ```bash
 make dev
-make seed
-make ingest
 make test
-make eval
-make smoke
+go test ./...
+go vet ./...
 ```
 
-Example service URLs:
+`make dev` runs the API skeleton with `/healthz` and `/readyz`. Auth is disabled by default for local demo use. Set `ASKOC_AUTH_ENABLED=true` and `ASKOC_AUTH_TOKEN=<demo-token>` to require a mock bearer token.
+
+P1 environment settings:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `ASKOC_HTTP_ADDR` | `:8080` | API listen address |
+| `ASKOC_AUTH_ENABLED` | `false` | Enables mock bearer-token auth |
+| `ASKOC_AUTH_TOKEN` | empty | Demo bearer token when auth is enabled |
+| `ASKOC_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, or `error` |
+| `ASKOC_WORKFLOW_URL` | empty | Future workflow webhook URL |
+| `ASKOC_WORKFLOW_TIMEOUT_SECONDS` | `5` | Future workflow timeout |
+| `ASKOC_PROVIDER` | `stub` | Future AI provider mode |
+| `ASKOC_PROVIDER_MODEL` | `demo-placeholder` | Future provider model name |
+| `ASKOC_PROVIDER_API_KEY` | empty | Future provider API key, never printed by config |
+
+Current service URLs:
 
 ```text
-Chat UI:      http://localhost:8080
-API:          http://localhost:8080/api/v1
-Mock Banner:  http://localhost:8081
-Mock Payment: http://localhost:8082
-Mock CRM:     http://localhost:8083
-Workflow sim: http://localhost:8084
-Dashboard:    http://localhost:8080/admin
+Health:    http://localhost:8080/healthz
+Readiness: http://localhost:8080/readyz
 ```
 
 ## Demo data policy

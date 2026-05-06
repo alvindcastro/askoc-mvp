@@ -16,7 +16,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 | Status | Phase | Primary outcome | Detailed tasks |
 |---|---|---|---|
 | [x] | P0 — Product framing and applicant strategy | Applicant story, scope, privacy boundary, source limits, and demo matrix are frozen. | [Task list](phases-and-tasks.md#p0-product-framing-and-applicant-strategy) |
-| [ ] | P1 — Go project foundation | Go project compiles, serves health endpoints, and has API hygiene. | [Task list](phases-and-tasks.md#p1-go-project-foundation) |
+| [x] | P1 — Go project foundation | Go project compiles, serves health endpoints, and has API hygiene. | [Task list](phases-and-tasks.md#p1-go-project-foundation) |
 | [ ] | P2 — Chat API and UI skeleton | Chat API and minimal UI exist with deterministic placeholder behavior. | [Task list](phases-and-tasks.md#p2-chat-api-and-ui-skeleton) |
 | [ ] | P3 — Synthetic enterprise APIs and clients | Synthetic Banner/payment/CRM/LMS APIs and typed clients are working. | [Task list](phases-and-tasks.md#p3-synthetic-enterprise-apis-and-clients) |
 | [ ] | P4 — Deterministic orchestration before AI | Transcript/payment orchestration works without relying on live AI. | [Task list](phases-and-tasks.md#p4-deterministic-orchestration-before-ai) |
@@ -41,11 +41,12 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 ### P1 — Go project foundation
 
-- [ ] `go test ./...` passes.
-- [ ] `make test` passes.
-- [ ] Health and readiness endpoints are tested.
-- [ ] Middleware has trace, recovery, logging, and mock auth tests.
-- [ ] Error response shape is stable.
+- [x] `go test ./...` passes.
+- [x] `make test` passes.
+- [x] `go vet ./...` passes.
+- [x] Health and readiness endpoints are tested.
+- [x] Middleware has trace, recovery, logging, and mock auth tests.
+- [x] Error response shape is stable.
 
 ### P2 — Chat API and UI skeleton
 

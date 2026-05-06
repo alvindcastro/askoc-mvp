@@ -2,6 +2,56 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-06 - P1 Go Project Foundation
+
+### P1-T01 - Initialize Go module, repository layout, and developer commands
+
+- What: created the initial Go module, API skeleton, build smoke test, and developer commands.
+- Where: `go.mod`, `Makefile`, `cmd/api/main.go`, `internal/build/smoke_test.go`.
+- When: 2026-05-06.
+- Why: establish a compilable Go workspace and predictable local commands before feature work.
+- How: added failing compile/Makefile smoke tests first, confirmed `go test ./...` failed for missing implementation, then added the minimal module, `make test`, and `make dev` targets.
+
+### P1-T02 - Build typed configuration loader
+
+- What: added typed environment configuration with defaults, overrides, validation, and redacted string output.
+- Where: `internal/config/config.go`, `internal/config/config_test.go`, `README.md`.
+- When: 2026-05-06.
+- Why: make HTTP, auth, logging, workflow, and provider settings explicit without leaking secrets.
+- How: added table-driven tests for defaults, overrides, invalid booleans/timeouts/log levels, and secret redaction, then implemented `Load`, `LoadFromEnv`, and safe formatting.
+
+### P1-T03 - Implement health and readiness endpoints
+
+- What: added `GET /healthz` and `GET /readyz` handlers with JSON responses, method checks, trace IDs, and safe dependency status reporting.
+- Where: `internal/handlers/health.go`, `internal/handlers/health_test.go`, `docs/api-spec.md`, `README.md`.
+- When: 2026-05-06.
+- Why: provide operational endpoints for local demo startup checks and later Docker/deployment health checks.
+- How: added `httptest` coverage for healthy responses, readiness dependency success/failure, 405 responses, trace propagation, and non-leaky dependency failures before implementing handlers.
+
+### P1-T04 - Add middleware for trace ID, panic recovery, request logging, and mock auth
+
+- What: added middleware chaining, trace ID propagation, panic recovery, mock bearer auth, request logging, and basic redaction.
+- Where: `internal/middleware/chain.go`, `internal/middleware/trace.go`, `internal/middleware/recover.go`, `internal/middleware/auth.go`, `internal/middleware/logging.go`, `internal/middleware/*_test.go`, `docs/task-prompts.md`, `docs/phases-and-tasks.md`.
+- When: 2026-05-06.
+- Why: establish API hygiene before chat, orchestration, and mock integration endpoints are added.
+- How: wrote failing tests for trace preservation/generation, safe panic conversion, auth enabled/disabled behavior, and logging redaction hooks, then implemented standard-library middleware.
+
+### P1-T05 - Create JSON response and error helpers
+
+- What: added response helpers for successful JSON payloads and stable safe API errors.
+- Where: `internal/handlers/respond.go`, `internal/handlers/respond_test.go`, `internal/handlers/health.go`.
+- When: 2026-05-06.
+- Why: standardize response shape for later handlers and avoid leaking raw Go errors to clients.
+- How: added tests for success headers/body, `{error:{code,message,trace_id}}` error shape, and unsupported-value fallback before implementing helper functions.
+
+### P1 review evidence
+
+- What: completed P1 status and documentation sync.
+- Where: `docs/phases-and-tasks.md`, `docs/implementation-roadmap.md`, `README.md`, `docs/api-spec.md`, `docs/task-prompts.md`, `CHANGELOG.md`.
+- When: 2026-05-06.
+- Why: keep the task board, roadmap, API surface, and local commands aligned with the implemented Go foundation.
+- How: marked P1 tasks and gates complete after the red/green cycle and verified `go test ./...`, `make test`, and `go vet ./...` pass.
+
 ## 2026-05-06 - P0 Product Framing And Applicant Strategy
 
 ### P0-T01 - Write the applicant story and MVP thesis
