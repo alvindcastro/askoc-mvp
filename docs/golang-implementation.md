@@ -271,9 +271,29 @@ Response:
 {
   "student_id": "S100002",
   "item": "official_transcript",
-  "amount_due": 10.00,
+  "amount_due": 15.00,
   "currency": "CAD",
   "status": "unpaid"
+}
+```
+
+## Mock LMS endpoint
+
+```http
+GET /api/v1/students/S100001/lms-access?course_id=DEMO-LMS-101
+```
+
+Response:
+
+```json
+{
+  "student_id": "S100001",
+  "account_status": "active",
+  "course_id": "DEMO-LMS-101",
+  "course_name": "Online Learning Orientation",
+  "access_status": "available",
+  "synthetic": true,
+  "content_included": false
 }
 ```
 
@@ -348,6 +368,7 @@ go run ./cmd/api
 go run ./cmd/mock-banner
 go run ./cmd/mock-payment
 go run ./cmd/mock-crm
+go run ./cmd/mock-lms
 go run ./cmd/workflow-sim
 go run ./cmd/ingest -sources data/seed-sources.json
 go run ./cmd/eval -input data/eval-questions.jsonl

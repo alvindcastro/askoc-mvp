@@ -50,6 +50,7 @@ X-Trace-ID: optional-client-generated-trace-id
 | `GET` | `/students/{student_id}/transcript-status` | Check synthetic transcript status | `cmd/mock-banner` |
 | `GET` | `/students/{student_id}/payment-status` | Check synthetic transcript payment status | `cmd/mock-payment` |
 | `POST` | `/crm/cases` | Create mock CRM case | `cmd/mock-crm` |
+| `GET` | `/students/{student_id}/lms-access` | Check synthetic LMS access status | `cmd/mock-lms` |
 | `POST` | `/automation/payment-reminder` | Trigger mock payment reminder workflow | `cmd/workflow-sim` or Power Automate |
 | `GET` | `/analytics/summary` | Get dashboard summary metrics | `cmd/api` |
 | `POST` | `/feedback` | Submit answer quality feedback | `cmd/api` |
@@ -157,8 +158,9 @@ Authorization: Bearer demo-token
   "student_id": "S100002",
   "preferred_name": "Demo Learner Two",
   "status": "active",
+  "enrollment_status": "active",
   "program": "Business Administration Demo Program",
-  "holds": [],
+  "holds": ["mock_payment_hold"],
   "synthetic": true
 }
 ```
@@ -186,10 +188,13 @@ Checks synthetic transcript request status.
 ```json
 {
   "student_id": "S100001",
-  "transcript_request_status": "requested",
+  "transcript_request_id": "SYNTH-TRN-100001",
+  "transcript_request_status": "ready_for_processing",
   "eligible_for_processing": true,
   "hold": "none",
-  "last_updated": "2026-05-06T12:00:00Z"
+  "holds": [],
+  "requested_at": "2026-05-01T16:10:00Z",
+  "synthetic": true
 }
 ```
 
@@ -198,10 +203,13 @@ Checks synthetic transcript request status.
 ```json
 {
   "student_id": "S100003",
-  "transcript_request_status": "requested",
+  "transcript_request_id": "SYNTH-TRN-100003",
+  "transcript_request_status": "needs_staff_review",
   "eligible_for_processing": false,
   "hold": "financial",
-  "last_updated": "2026-05-06T12:00:00Z"
+  "holds": ["mock_financial_hold"],
+  "requested_at": "2026-05-03T14:40:00Z",
+  "synthetic": true
 }
 ```
 
@@ -217,10 +225,11 @@ Checks synthetic transcript payment status.
 {
   "student_id": "S100002",
   "item": "official_transcript",
-  "amount_due": 10.00,
+  "amount_due": 15.00,
   "currency": "CAD",
   "status": "unpaid",
-  "last_updated": "2026-05-06T12:00:00Z"
+  "transaction_id": "SYNTH-PAY-100002",
+  "synthetic": true
 }
 ```
 
@@ -233,7 +242,8 @@ Checks synthetic transcript payment status.
   "amount_due": 0.00,
   "currency": "CAD",
   "status": "paid",
-  "last_updated": "2026-05-06T12:00:00Z"
+  "transaction_id": "SYNTH-PAY-100001",
+  "synthetic": true
 }
 ```
 
@@ -261,11 +271,54 @@ Creates a mock CRM case.
 
 ```json
 {
-  "case_id": "CASE-2026-000123",
+  "case_id": "MOCK-CRM-000001",
   "status": "created",
   "queue": "registrar_finance",
   "priority": "high",
-  "created_at": "2026-05-06T12:05:00Z"
+  "summary": "Learner requested transcript status. Payment is marked paid, but a financial hold exists. Learner needs staff follow-up.",
+  "conversation_id": "conv_01JABC123",
+  "source_trace_id": "trace_01JABC456",
+  "synthetic": true
+}
+```
+
+---
+
+## `GET /students/{student_id}/lms-access`
+
+Checks synthetic LMS account and demo course access status. This endpoint never returns course content, grades, submissions, or activity data.
+
+### Query parameters
+
+| Name | Required | Purpose |
+|---|---:|---|
+| `course_id` | no | Synthetic demo course ID such as `DEMO-LMS-101` |
+
+### Response: access available
+
+```json
+{
+  "student_id": "S100001",
+  "account_status": "active",
+  "course_id": "DEMO-LMS-101",
+  "course_name": "Online Learning Orientation",
+  "access_status": "available",
+  "synthetic": true,
+  "content_included": false
+}
+```
+
+### Response: unknown demo course
+
+```json
+{
+  "student_id": "S100001",
+  "account_status": "active",
+  "course_id": "DEMO-LMS-999",
+  "access_status": "unknown_demo_course",
+  "message": "No synthetic LMS access record exists for that demo course.",
+  "synthetic": true,
+  "content_included": false
 }
 ```
 

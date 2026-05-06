@@ -18,7 +18,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 | [x] | P0 — Product framing and applicant strategy | Applicant story, scope, privacy boundary, source limits, and demo matrix are frozen. | [Task list](phases-and-tasks.md#p0-product-framing-and-applicant-strategy) |
 | [x] | P1 — Go project foundation | Go project compiles, serves health endpoints, and has API hygiene. | [Task list](phases-and-tasks.md#p1-go-project-foundation) |
 | [x] | P2 — Chat API and UI skeleton | Chat API and minimal UI exist with deterministic placeholder behavior. | [Task list](phases-and-tasks.md#p2-chat-api-and-ui-skeleton) |
-| [ ] | P3 — Synthetic enterprise APIs and clients | Synthetic Banner/payment/CRM/LMS APIs and typed clients are working. | [Task list](phases-and-tasks.md#p3-synthetic-enterprise-apis-and-clients) |
+| [x] | P3 — Synthetic enterprise APIs and clients | Synthetic Banner/payment/CRM/LMS APIs and typed clients are working. | [Task list](phases-and-tasks.md#p3-synthetic-enterprise-apis-and-clients) |
 | [ ] | P4 — Deterministic orchestration before AI | Transcript/payment orchestration works without relying on live AI. | [Task list](phases-and-tasks.md#p4-deterministic-orchestration-before-ai) |
 | [ ] | P5 — RAG ingestion and source-grounded answers | Approved-source ingestion and retrieval produce grounded responses. | [Task list](phases-and-tasks.md#p5-rag-ingestion-and-source-grounded-answers) |
 | [ ] | P6 — LLM gateway and structured classification | LLM gateway, strict JSON classification, prompts, and guardrails are testable. | [Task list](phases-and-tasks.md#p6-llm-gateway-and-structured-classification) |
@@ -58,11 +58,11 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 ### P3 — Synthetic enterprise APIs and clients
 
-- [ ] Synthetic fixture loader is tested.
-- [ ] Mock Banner, payment, CRM, and LMS APIs respond deterministically.
-- [ ] Typed clients have timeout, error, and malformed-response tests.
-- [ ] Contract tests verify request/response shapes.
-- [ ] No real system credentials or records are used.
+- [x] Synthetic fixture loader is tested.
+- [x] Mock Banner, payment, CRM, and LMS APIs respond deterministically.
+- [x] Typed clients have timeout, error, and malformed-response tests.
+- [x] Contract tests verify request/response shapes.
+- [x] No real system credentials or records are used.
 
 ### P4 — Deterministic orchestration before AI
 
@@ -135,7 +135,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 - [x] P0 story and demo matrix.
 - [x] P1 API foundation.
 - [x] P2 chat endpoint with deterministic response.
-- [ ] P3 in-process synthetic student/payment fixture.
+- [x] P3 synthetic student/payment/LMS fixture and mock enterprise APIs.
 - [ ] P4 deterministic transcript flow for S100001-S100003.
 - [x] Basic README and demo script.
 
@@ -161,7 +161,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 1. P0-T01 to P0-T05: freeze story and boundaries.
 2. P1-T01 to P1-T05: create tested Go foundation.
 3. P2-T01 to P2-T05: expose the chat contract, UI skeleton, validation, and session store.
-4. P3-T01 to P3-T04: build synthetic systems.
+4. P3-T01 to P3-T06: build synthetic systems and typed clients.
 5. P4-T01 to P4-T06: make the core transcript workflow work deterministically.
 6. P7-T01 and P7-T02: add redaction/audit before adding AI calls.
 7. P5-T01 to P5-T05: add grounded retrieval.

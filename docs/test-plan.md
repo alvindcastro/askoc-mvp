@@ -163,10 +163,15 @@ Can you guarantee my transfer credit will be approved?
 | `internal/privacy` | PII redaction, password warnings, safe summaries |
 | `internal/domain` | chat request/response JSON models, intent/source/action/escalation fields |
 | `internal/validation` | empty, whitespace-only, oversized message, and synthetic student ID validation |
+| `internal/fixtures` | synthetic fixture loading, duplicate rejection, required fields, synthetic ID enforcement |
+| `internal/mock/banner` | known/unknown synthetic student profile and transcript/hold status handlers |
+| `internal/mock/payment` | paid/unpaid transcript payment status handlers and safe unknown-payment errors |
+| `internal/mock/crm` | case creation, priority routing, required summaries, and summary redaction |
+| `internal/mock/lms` | synthetic LMS access-status lookup and unknown-course fallback |
 | `internal/session` | create, append, read, expire, redaction, and concurrent access behavior |
 | `internal/classifier` | valid structured output, invalid JSON fallback, confidence thresholds |
 | `internal/rag` | chunking, metadata, retrieval top-k ranking, stale source flags |
-| `internal/tools` | timeout handling, response parsing, safe errors |
+| `internal/tools` | trace header forwarding, timeout handling, not-found/retryable/parse error mapping, response parsing, safe errors |
 | `internal/workflow` | idempotency, retry behavior, duplicate prevention |
 | `internal/orchestrator` | decision table for transcript/payment/escalation |
 | `internal/handlers` | request validation, status codes, trace IDs |
