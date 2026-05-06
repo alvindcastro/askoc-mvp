@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AskOC AI Concierge</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <main class="shell" data-chat-endpoint="{{.ChatEndpoint}}">
+    <section class="workspace" aria-labelledby="chat-title">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Synthetic demo mode</p>
+          <h1 id="chat-title">AskOC AI Concierge</h1>
+        </div>
+        <div class="status" aria-live="polite">P2 placeholder</div>
+      </header>
+
+      <section class="conversation" id="conversation" aria-live="polite">
+        <article class="message assistant">
+          <p>This demo chat returns deterministic placeholder responses. Use synthetic IDs such as S100002 for transcript-status examples.</p>
+        </article>
+      </section>
+
+      <form class="composer" id="chat-form">
+        <label class="field">
+          <span>Message</span>
+          <textarea id="message" name="message" rows="3" maxlength="2000" required>How do I order an official transcript?</textarea>
+        </label>
+        <div class="form-row">
+          <label class="field compact">
+            <span>Synthetic student ID</span>
+            <input id="student-id" name="student_id" inputmode="text" pattern="S[0-9]{6}" placeholder="S100002">
+          </label>
+          <button type="submit">Send</button>
+        </div>
+        <input type="hidden" id="conversation-id" name="conversation_id">
+      </form>
+    </section>
+
+    <aside class="details" aria-label="Response details">
+      <div>
+        <h2>Intent</h2>
+        <p id="intent">Waiting for first message</p>
+      </div>
+      <div>
+        <h2>Sources</h2>
+        <ul id="sources"></ul>
+      </div>
+      <div>
+        <h2>Actions</h2>
+        <ul id="actions"></ul>
+      </div>
+      <div>
+        <h2>Escalation</h2>
+        <p id="escalation">None</p>
+      </div>
+    </aside>
+  </main>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

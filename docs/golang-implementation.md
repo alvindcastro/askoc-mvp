@@ -39,6 +39,8 @@ Each command should have a small `main.go` that loads configuration, creates dep
 | `internal/config` | Environment variables and typed config |
 | `internal/domain` | Shared request, response, intent, source, action, case, and student models |
 | `internal/handlers` | HTTP handlers and JSON encoding/decoding |
+| `internal/session` | In-memory demo conversation sessions with TTL and redaction before persistence |
+| `internal/validation` | Chat request validation and safe validation error codes |
 | `internal/orchestrator` | Main chat decision workflow |
 | `internal/rag` | Ingestion, chunking, retrieval, source metadata |
 | `internal/llm` | LLM provider interface and Azure/OpenAI-compatible REST client |
@@ -128,33 +130,39 @@ func main() {
 ## Chat handler pattern
 
 ```go
-func (h *ChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-    if r.Method != http.MethodPost {
-        writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "Use POST.")
-        return
-    }
+func ChatHandler(service ChatService) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        if r.Method != http.MethodPost {
+            WriteError(w, r, http.StatusMethodNotAllowed, "method_not_allowed", "method not allowed")
+            return
+        }
 
-    var req domain.ChatRequest
-    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-        writeError(w, http.StatusBadRequest, "invalid_json", "Request body must be valid JSON.")
-        return
-    }
+        var req domain.ChatRequest
+        decoder := json.NewDecoder(r.Body)
+        decoder.DisallowUnknownFields()
+        if err := decoder.Decode(&req); err != nil {
+            WriteError(w, r, http.StatusBadRequest, "invalid_request", "request body must be valid JSON")
+            return
+        }
 
-    if strings.TrimSpace(req.Message) == "" {
-        writeError(w, http.StatusBadRequest, "missing_message", "Message is required.")
-        return
-    }
+        if err := validation.ValidateChatRequest(req); err != nil {
+            WriteError(w, r, http.StatusBadRequest, validation.Code(err), validation.SafeMessage(err))
+            return
+        }
 
-    resp, err := h.Orchestrator.HandleChat(r.Context(), req)
-    if err != nil {
-        h.Logger.Error("chat failed", "error", err)
-        writeError(w, http.StatusInternalServerError, "chat_failed", "The assistant could not process this message.")
-        return
-    }
+        resp, err := service.HandleChat(r.Context(), req)
+        if err != nil {
+            WriteError(w, r, http.StatusInternalServerError, "chat_unavailable", "unable to produce chat response")
+            return
+        }
 
-    writeJSON(w, http.StatusOK, resp)
+        resp.TraceID = middleware.TraceIDFromContext(r.Context())
+        WriteJSON(w, r, http.StatusOK, resp)
+    })
 }
 ```
+
+P2 wires this handler to a deterministic placeholder service at `POST /api/v1/chat`. The placeholder returns intent, source, action, and optional handoff metadata without calling live AI, retrieval, workflow, or enterprise APIs. The Go UI is served at `/chat`.
 
 ## Orchestrator decision flow
 
@@ -403,4 +411,3 @@ Implementation should follow [TDD Policy](tdd-policy.md) and the task-level prom
 - [ ] refactor only while green.
 
 Use `httptest.Server` for clients, fakes for orchestrator dependencies, table-driven tests for pure logic, and redaction tests for any log/audit/session behavior.
-

@@ -13,6 +13,7 @@ import (
 	"askoc-mvp/internal/config"
 	"askoc-mvp/internal/handlers"
 	"askoc-mvp/internal/middleware"
+	"askoc-mvp/internal/session"
 )
 
 func main() {
@@ -27,6 +28,12 @@ func main() {
 	}))
 
 	mux := http.NewServeMux()
+	chatStore := session.NewStore(30 * time.Minute)
+	chatService := handlers.NewPlaceholderChatService(chatStore)
+	mux.Handle("/", handlers.ChatPageHandler("web/templates/chat.html"))
+	mux.Handle("/chat", handlers.ChatPageHandler("web/templates/chat.html"))
+	mux.Handle("/static/", http.StripPrefix("/static/", handlers.StaticFileHandler("web/static")))
+	mux.Handle("/api/v1/chat", handlers.ChatHandler(chatService))
 	mux.Handle("/healthz", handlers.HealthHandler())
 	mux.Handle("/readyz", handlers.ReadyHandler())
 

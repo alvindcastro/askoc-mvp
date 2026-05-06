@@ -17,7 +17,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 |---|---|---|---|
 | [x] | P0 — Product framing and applicant strategy | Applicant story, scope, privacy boundary, source limits, and demo matrix are frozen. | [Task list](phases-and-tasks.md#p0-product-framing-and-applicant-strategy) |
 | [x] | P1 — Go project foundation | Go project compiles, serves health endpoints, and has API hygiene. | [Task list](phases-and-tasks.md#p1-go-project-foundation) |
-| [ ] | P2 — Chat API and UI skeleton | Chat API and minimal UI exist with deterministic placeholder behavior. | [Task list](phases-and-tasks.md#p2-chat-api-and-ui-skeleton) |
+| [x] | P2 — Chat API and UI skeleton | Chat API and minimal UI exist with deterministic placeholder behavior. | [Task list](phases-and-tasks.md#p2-chat-api-and-ui-skeleton) |
 | [ ] | P3 — Synthetic enterprise APIs and clients | Synthetic Banner/payment/CRM/LMS APIs and typed clients are working. | [Task list](phases-and-tasks.md#p3-synthetic-enterprise-apis-and-clients) |
 | [ ] | P4 — Deterministic orchestration before AI | Transcript/payment orchestration works without relying on live AI. | [Task list](phases-and-tasks.md#p4-deterministic-orchestration-before-ai) |
 | [ ] | P5 — RAG ingestion and source-grounded answers | Approved-source ingestion and retrieval produce grounded responses. | [Task list](phases-and-tasks.md#p5-rag-ingestion-and-source-grounded-answers) |
@@ -50,11 +50,11 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 ### P2 — Chat API and UI skeleton
 
-- [ ] `POST /api/v1/chat` is tested with success and error cases.
-- [ ] Minimal chat UI renders from Go.
-- [ ] Validation rejects empty, oversized, and unsafe inputs.
-- [ ] Session store is concurrency-safe if implemented.
-- [ ] No live AI dependency is needed for demo placeholder behavior.
+- [x] `POST /api/v1/chat` is tested with success and error cases.
+- [x] Minimal chat UI renders from Go.
+- [x] Validation rejects empty, oversized, and unsafe inputs.
+- [x] Session store is concurrency-safe if implemented.
+- [x] No live AI dependency is needed for demo placeholder behavior.
 
 ### P3 — Synthetic enterprise APIs and clients
 
@@ -132,12 +132,12 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 ### 2-day version
 
-- [ ] P0 story and demo matrix.
-- [ ] P1 API foundation.
-- [ ] P2 chat endpoint with deterministic response.
+- [x] P0 story and demo matrix.
+- [x] P1 API foundation.
+- [x] P2 chat endpoint with deterministic response.
 - [ ] P3 in-process synthetic student/payment fixture.
 - [ ] P4 deterministic transcript flow for S100001-S100003.
-- [ ] Basic README and demo script.
+- [x] Basic README and demo script.
 
 ### 1-week version
 
@@ -160,7 +160,7 @@ This roadmap is the high-level path for the Go-based AskOC AI Concierge MVP. The
 
 1. P0-T01 to P0-T05: freeze story and boundaries.
 2. P1-T01 to P1-T05: create tested Go foundation.
-3. P2-T01 to P2-T04: expose the chat contract.
+3. P2-T01 to P2-T05: expose the chat contract, UI skeleton, validation, and session store.
 4. P3-T01 to P3-T04: build synthetic systems.
 5. P4-T01 to P4-T06: make the core transcript workflow work deterministically.
 6. P7-T01 and P7-T02: add redaction/audit before adding AI calls.

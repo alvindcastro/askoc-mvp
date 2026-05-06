@@ -148,7 +148,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ## P2 — Chat API and UI skeleton
 **Phase outcome:** Chat API and minimal UI exist with deterministic placeholder behavior.
-- [ ] **P2-T01 — Define chat domain models**  
+- [x] **P2-T01 — Define chat domain models**  
   **Type:** Code  
   **Goal:** Create typed request/response structs for messages, intents, sources, actions, and handoff status.  
   **Primary files:** `internal/domain/chat.go`, `internal/domain/chat_test.go`  
@@ -156,7 +156,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** JSON marshal/unmarshal tests for `ChatRequest` and `ChatResponse`.; Validation tests for missing message and invalid student ID shape.  
   **Done when:** Domain structs are provider-neutral.; Response can include source citations, tool actions, and escalation metadata.
-- [ ] **P2-T02 — Implement `POST /api/v1/chat` handler with deterministic placeholder response**  
+- [x] **P2-T02 — Implement `POST /api/v1/chat` handler with deterministic placeholder response**  
   **Type:** Code  
   **Goal:** Create the public chat API contract before real AI orchestration exists.  
   **Primary files:** `internal/handlers/chat.go`, `internal/handlers/chat_test.go`  
@@ -164,7 +164,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** `httptest` verifies valid request returns 200.; Invalid JSON returns 400.; Missing message returns 400.; Unsupported method returns 405.  
   **Done when:** Handler depends on an interface, not concrete orchestrator.; Trace ID appears in response.; Tests do not call network or model APIs.
-- [ ] **P2-T03 — Serve minimal Go web chat UI**  
+- [x] **P2-T03 — Serve minimal Go web chat UI**  
   **Type:** Code  
   **Goal:** Provide an interview-friendly UI without making frontend complexity the focus.  
   **Primary files:** `web/templates/chat.html`, `web/static/app.js`, `web/static/app.css`, `internal/handlers/ui.go`, `internal/handlers/ui_test.go`  
@@ -172,7 +172,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** `httptest` verifies chat page renders.; Template test verifies API endpoint path is present.; Static file route returns expected content type.  
   **Done when:** User can type a message and see a response.; UI clearly marks demo/synthetic mode.; UI can be replaced later without changing orchestrator.
-- [ ] **P2-T04 — Add request validation and safe client-facing errors**  
+- [x] **P2-T04 — Add request validation and safe client-facing errors**  
   **Type:** Code  
   **Goal:** Keep malformed requests and accidental PII from destabilizing the demo.  
   **Primary files:** `internal/validation`, `internal/handlers/chat_test.go`  
@@ -180,7 +180,7 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
   **Quality gate:** Strict TDD required. Use the prompt and tests before production code.  
   **Tests/review:** Table-driven tests for empty, oversized, and whitespace-only messages.; Student ID validation accepts synthetic IDs only.; Error body never includes raw request body.  
   **Done when:** Oversized messages are rejected.; Synthetic ID rule is explicit.; Error responses are consistent.
-- [ ] **P2-T05 — Add in-memory conversation session store**  
+- [x] **P2-T05 — Add in-memory conversation session store**  
   **Type:** Code  
   **Goal:** Track a short demo conversation so follow-up questions can reference prior transcript/payment context.  
   **Primary files:** `internal/session/store.go`, `internal/session/store_test.go`  
@@ -191,10 +191,10 @@ See [TDD Policy](tdd-policy.md) and [Task Prompts](task-prompts.md) for detailed
 
 ### P2 phase gate
 
-- [ ] All P2 tasks above are complete or explicitly deferred with a reason.
-- [ ] All code tasks in P2 have failing-test evidence before implementation.
-- [ ] `go test ./...` passes after P2 code tasks.
-- [ ] Relevant docs are updated with any changed behavior or assumptions.
+- [x] All P2 tasks above are complete or explicitly deferred with a reason.
+- [x] All code tasks in P2 have failing-test evidence before implementation.
+- [x] `go test ./...` passes after P2 code tasks.
+- [x] Relevant docs are updated with any changed behavior or assumptions.
 
 ---
 

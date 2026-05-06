@@ -76,7 +76,7 @@ A task is not done until the relevant package test and `go test ./...` pass. AI,
 
 | Layer | Suggested implementation |
 |---|---|
-| Web UI | Go server-rendered chat UI with `html/template` + HTMX, or optional React/Next.js |
+| Web UI | Go server-rendered chat UI with `html/template` + small JavaScript, or optional React/Next.js |
 | API gateway | Go `net/http` or `chi` router |
 | AI orchestration | Go service using typed interfaces for LLM, retriever, classifier, and tools |
 | LLM gateway | Azure OpenAI / OpenAI-compatible REST client written in Go |
@@ -116,7 +116,7 @@ A task is not done until the relevant package test and `go test ./...` pass. AI,
 3. Assistant summarizes the case.
 4. Mock CRM case is created with transcript context, payment status, conversation summary, and priority flag.
 
-## Current P1 repository structure
+## Current P2 repository structure
 
 ```text
 askoc-ai-concierge/
@@ -124,12 +124,18 @@ askoc-ai-concierge/
   go.mod
   Makefile
   cmd/
-    api/                  # P1 API skeleton with health/readiness endpoints
+    api/                  # API server with health/readiness, chat API, and chat UI routes
   internal/
     config/
+    domain/
     handlers/
     middleware/
+    session/
+    validation/
     build/
+  web/
+    templates/
+    static/
   data/
     synthetic-students.json
     seed-sources.json
@@ -137,20 +143,21 @@ askoc-ai-concierge/
     ...
 ```
 
-Later phases add chat orchestration, mock Banner/payment/CRM/LMS services, workflow simulation, ingestion, evaluation, dashboard, Docker, and UI folders.
+The current chat API uses deterministic placeholder behavior only. Later phases add real orchestration, mock Banner/payment/CRM/LMS services, workflow simulation, ingestion, evaluation, dashboard, and Docker.
 
-## Current P1 commands
+## Current P2 commands
 
 ```bash
 make dev
 make test
+make test-race
 go test ./...
 go vet ./...
 ```
 
-`make dev` runs the API skeleton with `/healthz` and `/readyz`. Auth is disabled by default for local demo use. Set `ASKOC_AUTH_ENABLED=true` and `ASKOC_AUTH_TOKEN=<demo-token>` to require a mock bearer token.
+`make dev` runs the Go API and serves the chat UI. Auth is disabled by default for local demo use. Set `ASKOC_AUTH_ENABLED=true` and `ASKOC_AUTH_TOKEN=<demo-token>` to require a mock bearer token.
 
-P1 environment settings:
+Current environment settings:
 
 | Variable | Default | Purpose |
 |---|---|---|
@@ -167,9 +174,13 @@ P1 environment settings:
 Current service URLs:
 
 ```text
+Chat UI:   http://localhost:8080/chat
+Chat API:  http://localhost:8080/api/v1/chat
 Health:    http://localhost:8080/healthz
 Readiness: http://localhost:8080/readyz
 ```
+
+The P2 chat API validates JSON requests, rejects empty or oversized messages, accepts synthetic student IDs in the `S` plus six digits format, includes trace IDs in responses, and stores only redacted demo conversation messages in an in-memory TTL session store.
 
 ## Demo data policy
 
