@@ -26,7 +26,20 @@ make compose-up
 ```
 
 4. Open `http://localhost:8080/chat` for the learner chat and `http://localhost:8080/admin` for the protected dashboard. The local admin token is `demo-admin-token`.
-5. Skim [docs/demo-script.md](docs/demo-script.md), [docs/architecture.md](docs/architecture.md), and [reports/eval-summary.md](reports/eval-summary.md) for the 5-7 minute walkthrough, integration diagrams, and quality evidence.
+5. Skim [docs/demo-hiring-manager-loom-script.md](docs/demo-hiring-manager-loom-script.md), [docs/demo-script.md](docs/demo-script.md), [docs/architecture.md](docs/architecture.md), and [reports/eval-summary.md](reports/eval-summary.md) for the hiring-manager Loom script, detailed walkthrough, integration diagrams, and quality evidence.
+
+## Practical docs
+
+Use these when setting up, developing, testing, or debugging the local demo:
+
+- [Setup Guide](docs/setup.md): prerequisites, Docker quickstart, manual services, env vars, admin access, and provider modes.
+- [End-To-End Demo Runbook](docs/demo-runbook.md): full-stack startup, health checks, demo scenarios, quality evidence, port overrides, and shutdown.
+- [Hiring Manager Loom Script](docs/demo-hiring-manager-loom-script.md): concise 5-7 minute spoken walkthrough for reviewers.
+- [Developer Guide](docs/developer-guide.md): repo map, common change paths, quality gates, and documentation sync checklist.
+- [How-To Playbook](docs/how-to.md): copy/paste recipes for chat requests, admin APIs, eval, RAG ingestion, workflow sim, and port overrides.
+- [Testing Guide](docs/testing.md): default gates, focused package tests, smoke checks, evaluation workflow, and handoff checklist.
+- [Troubleshooting](docs/troubleshooting.md): fixes for port conflicts, Compose health failures, auth errors, RAG fallback, eval changes, and smoke failures.
+- [Nice To Knows](docs/nice-to-knows.md): operational details about deterministic mode, synthetic data, admin auth, workflow modes, RAG, audit, and generated reports.
 
 ## Portfolio evidence at a glance
 

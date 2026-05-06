@@ -14,6 +14,14 @@ This folder contains the Go/Golang-focused, strict-TDD Markdown documentation pa
 - [docs/phases-and-tasks.md](docs/phases-and-tasks.md) — phase-by-phase tickable task board with acceptance criteria and quality gates.
 - [docs/task-prompts.md](docs/task-prompts.md) — detailed copy/paste prompts for each task, including strict TDD prompts for code work.
 - [docs/tdd-policy.md](docs/tdd-policy.md) — strict Go TDD policy, required evidence, test categories, and anti-patterns.
+- [docs/setup.md](docs/setup.md): practical local setup, Docker demo, manual service startup, env vars, admin access, and provider mode notes.
+- [docs/demo-runbook.md](docs/demo-runbook.md): end-to-end full-stack demo startup, verification, scenario flow, quality evidence, port overrides, and shutdown.
+- [docs/demo-hiring-manager-loom-script.md](docs/demo-hiring-manager-loom-script.md): concise 5-7 minute Loom script for hiring-manager review.
+- [docs/developer-guide.md](docs/developer-guide.md): day-to-day development map, change paths, quality gates, and documentation sync checklist.
+- [docs/how-to.md](docs/how-to.md): common local recipes for smoke tests, chat requests, admin APIs, eval, RAG ingestion, workflow sim, and port overrides.
+- [docs/testing.md](docs/testing.md): practical test command guide, focused package targets, smoke checks, eval workflow, and handoff checklist.
+- [docs/troubleshooting.md](docs/troubleshooting.md): common local setup, Compose, admin, RAG, eval, and smoke-test failure fixes.
+- [docs/nice-to-knows.md](docs/nice-to-knows.md): useful repo details about deterministic mode, synthetic data, auth, workflow modes, RAG, audit, and generated reports.
 - [docs/architecture.md](docs/architecture.md) — Go-based solution architecture, service boundaries, data flow, and deployment notes.
 - [docs/golang-implementation.md](docs/golang-implementation.md) — Go project layout, packages, handler patterns, interfaces, testing strategy, and local commands.
 - [docs/api-spec.md](docs/api-spec.md) — REST API endpoints, example payloads, OpenAPI starter spec, and Go implementation notes.
