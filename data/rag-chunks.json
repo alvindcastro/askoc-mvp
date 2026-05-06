@@ -1,0 +1,62 @@
+[
+  {
+    "id": "oc-transcript-request-2005-onwards-seed-001",
+    "source_id": "oc-transcript-request-2005-onwards",
+    "source_title": "Transcript Request Guidance",
+    "source_url": "https://www.okanagancollege.ca/ask-oc/transcript-request-2005-onwards",
+    "department": "Registrar",
+    "risk_level": "high",
+    "freshness_status": "fresh",
+    "content_hash": "manual-seed-2026-05-06-transcript",
+    "index": 0,
+    "text": "Official transcript request guidance for the AskOC demo. Use the approved public transcript request source for order steps, transcript request questions, processing guidance, payment-related transcript blocks, Registrar staff confirmation, and source-grounded transcript answers. Do not guess fees, deadlines, eligibility, account status, or private learner details."
+  },
+  {
+    "id": "oc-registrar-office-seed-001",
+    "source_id": "oc-registrar-office",
+    "source_title": "Office of the Registrar",
+    "source_url": "https://www.okanagancollege.ca/office-of-the-registrar",
+    "department": "Registrar",
+    "risk_level": "medium",
+    "freshness_status": "fresh",
+    "content_hash": "manual-seed-2026-05-06-registrar",
+    "index": 0,
+    "text": "Registrar learner-service context for the AskOC demo. Use this approved public source when a question is about Registrar service routing, official records, student service follow-up, staff review, or general transcript support context."
+  },
+  {
+    "id": "oc-online-resources-seed-001",
+    "source_id": "oc-online-resources",
+    "source_title": "Online Resources / myOkanagan / LMS Guidance",
+    "source_url": "https://www.okanagancollege.ca/student-handbook/online-resources",
+    "department": "Student Services",
+    "risk_level": "medium",
+    "freshness_status": "fresh",
+    "content_hash": "manual-seed-2026-05-06-online-resources",
+    "index": 0,
+    "text": "Online resources guidance for the AskOC demo. Use this approved public source for myOkanagan, online learner tools, course access navigation, LMS access context, and safe routing when the learner asks where to find online course resources."
+  },
+  {
+    "id": "oc-lms-information-seed-001",
+    "source_id": "oc-lms-information",
+    "source_title": "LMS Information",
+    "source_url": "https://www.okanagancollege.ca/teaching-and-learning-innovations/lms",
+    "department": "Teaching and Learning Innovations",
+    "risk_level": "medium",
+    "freshness_status": "fresh",
+    "content_hash": "manual-seed-2026-05-06-lms",
+    "index": 0,
+    "text": "LMS information source for the AskOC demo. Use this approved public source for learning management system access questions, online course platform routing, LMS transition context, and staff handoff when course-specific private details are needed."
+  },
+  {
+    "id": "oc-information-security-guide-seed-001",
+    "source_id": "oc-information-security-guide",
+    "source_title": "Information Security Guide",
+    "source_url": "https://www.okanagancollege.ca/it-services/it-security/information-security-guide",
+    "department": "IT Services",
+    "risk_level": "medium",
+    "freshness_status": "fresh",
+    "content_hash": "manual-seed-2026-05-06-security",
+    "index": 0,
+    "text": "Information security guidance for the AskOC demo. Use this approved public source for safe password, account security, phishing, and privacy-oriented learner guidance. Do not ingest passwords, private account pages, or authenticated portal content."
+  }
+]

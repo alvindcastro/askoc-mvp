@@ -26,7 +26,7 @@ cmd/mock-payment
 cmd/mock-crm
 cmd/mock-lms
 cmd/workflow-sim   # later P8
-cmd/ingest         # later P5
+cmd/ingest         # P5 local RAG ingestion
 cmd/eval           # later P9
 ```
 
@@ -41,8 +41,8 @@ Each command should have a small `main.go` that loads configuration, creates dep
 | `internal/handlers` | HTTP handlers and JSON encoding/decoding |
 | `internal/session` | In-memory demo conversation sessions with TTL and redaction before persistence |
 | `internal/validation` | Chat request validation and safe validation error codes |
-| `internal/orchestrator` | P4 deterministic chat decision workflow and dependency ports |
-| `internal/rag` | Later P5 ingestion, chunking, retrieval, source metadata |
+| `internal/orchestrator` | P5 deterministic chat decision workflow, source packaging, and dependency ports |
+| `internal/rag` | P5 allowlist parsing, ingestion, chunking, local retrieval, and source freshness metadata |
 | `internal/llm` | Later P6 provider interface and Azure/OpenAI-compatible REST client |
 | `internal/classifier` | P4 deterministic intent and sentiment fallback classification |
 | `internal/tools` | Banner, payment, CRM, LMS, notification clients |
@@ -162,7 +162,7 @@ func ChatHandler(service ChatService) http.Handler {
 }
 ```
 
-P4 wires this handler to the deterministic orchestrator at `POST /api/v1/chat`. The orchestrator returns fallback intent/sentiment classification, transcript source packaging, mock Banner/payment/CRM actions, idempotent payment-reminder workflow results, and optional handoff metadata without calling live AI or retrieval. The Go UI is served at `/chat`.
+P5 wires this handler to the deterministic orchestrator at `POST /api/v1/chat`. The orchestrator returns fallback intent/sentiment classification, local RAG source packaging for transcript-request answers, mock Banner/payment/CRM actions, idempotent payment-reminder workflow results, and optional handoff metadata without calling live AI. The Go UI is served at `/chat`.
 
 ## Orchestrator decision flow
 
@@ -170,27 +170,27 @@ P4 wires this handler to the deterministic orchestrator at `POST /api/v1/chat`. 
 1. Create trace ID.
 2. Redact message for logging.
 3. Classify intent and sentiment.
-4. Attach the deterministic transcript source placeholder for transcript/payment intents.
+4. Retrieve approved source chunks for transcript-request answers and attach source confidence/risk/freshness metadata.
 5. If confidence is too low, create a normal CRM handoff without triggering sensitive tools.
 6. If transcript-status intent and student ID exists, call mock Banner and payment APIs.
 7. If unpaid, trigger payment reminder workflow.
 8. If hold, negative sentiment, urgent context, or low confidence, create CRM case.
-9. Generate deterministic P4 response text.
+9. Generate deterministic response text with source-grounded answer or safe fallback.
 10. Record workflow audit-port events.
 11. Return structured response.
 ```
 
 ## RAG ingestion command
 
-`cmd/ingest` should:
+P5 `cmd/ingest`:
 
 1. Load `data/seed-sources.json`.
 2. Fetch allowlisted public URLs.
 3. Strip navigation and boilerplate where possible.
-4. Chunk text into 500–900 token-equivalent chunks.
-5. Store metadata: URL, title, retrieved date, content hash, risk level.
-6. Generate embeddings if using vector search.
-7. Write chunks to PostgreSQL/pgvector, Azure AI Search, or local JSON for the MVP.
+4. Chunk text with configurable `-max-words` and `-overlap-words`.
+5. Store metadata: source ID, URL, title, retrieved date, content hash, risk level, and freshness status.
+6. Write chunks to local JSON at `data/rag-chunks.json` by default.
+7. Leave embeddings, PostgreSQL/pgvector, and Azure AI Search for later implementation.
 
 Example source config:
 
@@ -367,15 +367,17 @@ func TestTranscriptStatusWorkflow(t *testing.T) {
 ```bash
 go test ./...
 go test ./internal/classifier ./internal/workflow ./internal/orchestrator
+go test ./internal/rag ./internal/orchestrator
 go test -race ./internal/session
 go run ./cmd/api
+go run ./cmd/ingest -sources data/seed-sources.json -out data/rag-chunks.json
 go run ./cmd/mock-banner
 go run ./cmd/mock-payment
 go run ./cmd/mock-crm
 go run ./cmd/mock-lms
 ```
 
-`cmd/workflow-sim`, `cmd/ingest`, and `cmd/eval` are later-phase commands.
+`cmd/workflow-sim` and `cmd/eval` are later-phase commands.
 
 ## Makefile targets
 

@@ -45,6 +45,8 @@
       "risk_level": "medium",
       "requires_freshness_check": true,
       "stale_after_days": 30,
+      "retrieved_at": "2026-05-06",
+      "freshness_status": "fresh",
       "knowledge_domains": [
         "registrar_service_context"
       ],
@@ -61,6 +63,8 @@
       "risk_level": "high",
       "requires_freshness_check": true,
       "stale_after_days": 14,
+      "retrieved_at": "2026-05-06",
+      "freshness_status": "fresh",
       "knowledge_domains": [
         "transcript_request_guidance"
       ],
@@ -77,6 +81,8 @@
       "risk_level": "medium",
       "requires_freshness_check": true,
       "stale_after_days": 30,
+      "retrieved_at": "2026-05-06",
+      "freshness_status": "fresh",
       "knowledge_domains": [
         "myokanagan_and_online_resources_guidance"
       ],
@@ -93,6 +99,8 @@
       "risk_level": "medium",
       "requires_freshness_check": true,
       "stale_after_days": 14,
+      "retrieved_at": "2026-05-06",
+      "freshness_status": "fresh",
       "knowledge_domains": [
         "lms_access_guidance"
       ],
@@ -109,6 +117,8 @@
       "risk_level": "medium",
       "requires_freshness_check": true,
       "stale_after_days": 90,
+      "retrieved_at": "2026-05-06",
+      "freshness_status": "fresh",
       "knowledge_domains": [
         "information_security_guidance"
       ],
