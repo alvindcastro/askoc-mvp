@@ -2,6 +2,22 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-06 - End-To-End Demo Runbook
+
+- What: added a full-stack demo runbook and linked it from the README, docs index, and interview demo script.
+- Where: `docs/demo-runbook.md`, `README.md`, `INDEX.md`, `docs/demo-script.md`, `CHANGELOG.md`.
+- When: 2026-05-06.
+- Why: give the presenter one operational checklist for turning on the local stack, verifying health, running demo scenarios, showing quality evidence, handling port overrides, and shutting the stack down.
+- How: reviewed the existing Compose stack, Makefile targets, smoke script, setup guide, how-to playbook, and demo script, then documented the smallest end-to-end path without changing runtime behavior.
+
+## 2026-05-06 - Practical Documentation Guides
+
+- What: added practical setup, developer, how-to, testing, troubleshooting, and nice-to-know Markdown guides, then linked them from the README and docs index.
+- Where: `docs/setup.md`, `docs/developer-guide.md`, `docs/how-to.md`, `docs/testing.md`, `docs/troubleshooting.md`, `docs/nice-to-knows.md`, `README.md`, `INDEX.md`, `CHANGELOG.md`.
+- When: 2026-05-06.
+- Why: make local setup, day-to-day development, verification, and debugging easier to follow without diluting the deeper architecture, API, TDD, and test-plan references.
+- How: reviewed the implemented Makefile, Compose stack, env defaults, API/admin routes, smoke script, eval command, and existing docs, then added focused operational guides without changing runtime behavior.
+
 ## 2026-05-06 - P11 Portfolio Polish And Interview Readiness
 
 ### P11-T01 - Polish README for applicant storytelling

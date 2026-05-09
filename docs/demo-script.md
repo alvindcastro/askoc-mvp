@@ -21,6 +21,8 @@ Show a 5–7 minute Go-based MVP that maps directly to the AI/Automation Solutio
 
 ## Demo setup
 
+Use [docs/demo-runbook.md](demo-runbook.md) for the full operational checklist covering stack startup, health checks, port overrides, manual-service fallback, and shutdown.
+
 Run locally:
 
 ```bash
@@ -37,7 +39,7 @@ If port `8080` is already in use during prep, run `ASKOC_API_PORT=18080 make smo
 Open:
 
 ```text
-http://localhost:8080
+http://localhost:8080/chat
 ```
 
 Services:
@@ -53,7 +55,30 @@ Mock LMS:     http://localhost:8085
 Dashboard:    protected admin metrics and redacted review queue
 ```
 
+## Click and show checklist
+
+Use this as the screen operator path during the recording.
+
+| Step | What to click or type | What to show |
+|---:|---|---|
+| 0 | Open `http://localhost:8080/chat`. | The header says `Synthetic demo mode`; the chat has `Message`, `Synthetic student ID`, `Send`, and the right-side `Intent`, `Sources`, `Actions`, and `Escalation` panels. |
+| 1 | Click the `Message` box, replace the default text with `How do I order my official transcript?`, leave `Synthetic student ID` blank, then click `Send`. | In the details panel, show `Intent` as `transcript_request`; show `Sources` with a transcript source, confidence, risk, and freshness metadata; show `Actions` with `intent_classified`; show `Escalation` as `None`. |
+| 2 | Replace the `Message` text with `I ordered my transcript but it has not been processed. My student ID is S100002.`, type `S100002` in `Synthetic student ID`, then click `Send`. | Show the assistant answer about an unpaid demo balance; show `Actions` containing `banner_status_checked`, `payment_status_checked`, and `payment_reminder_triggered`; show a workflow reference ID; show no CRM escalation. |
+| 3 | Replace the `Message` text with `My transcript request has a financial hold and is not moving. My student ID is S100003.`, replace the student ID with `S100003`, then click `Send`. | Show the assistant answer about staff review; show `Actions` containing `financial_hold_detected` and `crm_case_created`; show `Escalation` as `pending - registrar_student_accounts` or equivalent queue text; show the synthetic CRM case ID if visible. |
+| 4 | Replace the `Message` text with `This is really frustrating. I need this transcript for a job application.`, keep the same chat open, then click `Send`. | Show urgent or negative sentiment behavior in the response and action trace; show that the assistant creates or keeps a staff handoff and does not promise a deadline or approval. |
+| 5 | Open `http://localhost:8080/admin`, click the `Admin token` field, type `demo-admin-token`, then click `Refresh`. | Show `Total conversations`, `Containment`, `Escalations`, `Workflows`, `Top intents`, `Low-confidence review`, and `Stale-source warnings`. Point out that the dashboard uses aggregate or redacted data. |
+| 6 | Click `Export audit`. Avoid `Reset demo data` during the live walkthrough unless you are preparing a clean slate. | Show the status message `Exported ... redacted events`. Mention that `Purge expired` and `Reset demo data` exist for demo retention controls. |
+| 7 | Switch to terminal or `reports/eval-summary.md`. Run or show `make eval`, `make smoke`, and `go test ./...` evidence. | Show the responsible-AI gate, smoke proof, and Go test proof. Keep the focus on pass/fail evidence, not raw logs. |
+
 ## Minute 1: Grounded Tier 0 answer
+
+Click:
+
+- open `/chat`,
+- click the `Message` text area,
+- replace the default prompt with the transcript-order question,
+- leave `Synthetic student ID` empty,
+- click `Send`.
 
 Ask:
 
@@ -65,15 +90,26 @@ Show:
 
 - intent is `transcript_request`,
 - response includes source link, source confidence, risk level, and freshness status,
+- `Actions` includes `intent_classified`,
+- `Escalation` is `None`,
 - response is concise,
 - answer avoids unsupported claims,
 - deterministic action trace is visible.
 
 Talking point:
 
-> “This answer is grounded by the P5 local retriever. The API only cites chunks from `data/rag-chunks.json`, which is generated from the approved source allowlist, and it falls back or asks for staff confirmation when confidence is low or the source is stale/high-risk.”
+> “This answer is grounded by the local approved-source retrieval layer. The API only cites chunks from `data/rag-chunks.json`, which is generated from the approved source allowlist, and it falls back or asks for staff confirmation when confidence is low or the source is stale/high-risk.”
 
 ## Minute 2: Tier 1 transaction support
+
+Click:
+
+- stay on `/chat`,
+- click the `Message` text area,
+- replace the prompt with the status question,
+- click `Synthetic student ID`,
+- type `S100002`,
+- click `Send`.
 
 Ask:
 
@@ -88,6 +124,7 @@ Show:
 - mock Banner API is called,
 - mock payment API is called,
 - payment status is `unpaid`,
+- `Actions` shows `banner_status_checked` and `payment_status_checked`,
 - assistant explains the next step.
 
 Talking point:
@@ -95,6 +132,12 @@ Talking point:
 > “This mirrors an enterprise integration pattern without touching real systems. Banner, payment, and CRM are represented by typed Go clients and synthetic APIs.”
 
 ## Minute 3: Workflow automation
+
+Click:
+
+- keep the `S100002` response visible,
+- point to the `Actions` panel,
+- point to the `payment_reminder_triggered` row and workflow reference ID.
 
 Show workflow event:
 
@@ -107,13 +150,21 @@ Show:
 - idempotency key,
 - workflow ID,
 - tested audit-port event,
+- `Escalation` remains `None` for the unpaid self-service path,
 - safe reminder summary.
 
 Talking point:
 
-> “The workflow boundary is idempotent and testable without external services. P8 adds a standalone Go simulator plus an optional Power Automate-compatible webhook client behind the same interface, including retry handling and redacted audit metadata.”
+> “The workflow boundary is idempotent and testable without external services. The demo includes a standalone Go simulator plus an optional Power Automate-compatible webhook client behind the same interface, including retry handling and redacted audit metadata.”
 
 ## Minute 4: Sentiment and escalation
+
+Click:
+
+- click the `Message` text area,
+- replace the prompt with the urgent message,
+- leave the current conversation open,
+- click `Send`.
 
 Ask:
 
@@ -129,11 +180,13 @@ Show:
 - case summary is minimal and privacy-aware,
 - learner receives case ID.
 
+For a deterministic financial-hold handoff, type `S100003` in `Synthetic student ID`, ask `My transcript request has a financial hold and is not moving. My student ID is S100003.`, click `Send`, and show `financial_hold_detected`, `crm_case_created`, and the Registrar/Student Accounts queue.
+
 Talking point:
 
 > “Sentiment does not make final decisions alone. It increases routing priority when combined with unresolved context and safe business rules.”
 
-## Minute 5: P11 audit dashboard, redaction, and evaluation
+## Minute 5: Audit dashboard, redaction, and evaluation
 
 Talking point:
 
@@ -151,6 +204,13 @@ Use the default local admin token:
 demo-admin-token
 ```
 
+Click:
+
+- click the `Admin token` field,
+- type `demo-admin-token`,
+- click `Refresh`,
+- click `Export audit` after the metrics load.
+
 Show:
 
 - total conversations and containment rate,
@@ -158,9 +218,16 @@ Show:
 - workflow success/failure counts,
 - low-confidence review items with redacted question text,
 - stale-source warning count,
+- `Exported ... redacted events` status after clicking `Export audit`,
 - audit export/reset/purge controls.
 
 ## Minute 6: Go architecture walkthrough
+
+Click:
+
+- switch from the browser to the editor or terminal,
+- open the repository tree,
+- expand `cmd`, `internal`, `web`, `data`, and `reports` if using an editor sidebar.
 
 Show repository structure:
 
@@ -183,6 +250,12 @@ Talking point:
 
 ## Minute 7: Evaluation and tests
 
+Click or run:
+
+- switch to terminal,
+- run only the command you have time for live,
+- use `reports/eval-summary.md` as backup evidence if a full suite would take too long.
+
 Run:
 
 ```bash
@@ -191,7 +264,7 @@ go test ./internal/privacy ./internal/audit ./internal/handlers
 go test ./internal/llm ./internal/classifier ./internal/orchestrator
 go test ./internal/rag ./internal/orchestrator
 go test ./internal/classifier ./internal/workflow ./internal/orchestrator
-go test ./internal/build -run TestP10
+go test ./internal/build
 make eval
 make secret-check
 make smoke
@@ -208,7 +281,7 @@ Show:
 Talking point:
 
 > “I treat this as a maintained automation product. The test suite has deterministic unit coverage for RAG allowlisting, ingestion, chunking, retrieval, source fallback, classification, LLM gateway behavior, prompt guardrails, workflow idempotency, simulator contracts, webhook retries, transcript decisions, action traces, CRM escalation, shared redaction, audit storage, admin metrics, dashboard rendering, retention controls, repo-level Docker and CI contracts, and a broader JSONL evaluation runner that fails critical regressions.”
-> “P6 adds the guarded LLM layer: OpenAI-compatible calls are optional, strict JSON is validated before use, prompt templates are versioned, and low-confidence or ungrounded model output falls back instead of triggering tools.”
+> “The guarded LLM layer keeps OpenAI-compatible calls optional, validates strict JSON before use, versions prompt templates, and falls back when model output is low-confidence or ungrounded.”
 
 ## Expected demo path
 
@@ -220,15 +293,15 @@ All demo records are synthetic. Student IDs, payment states, holds, workflow IDs
 | 2 | Unpaid payment workflow | “I ordered my transcript but it has not been processed. My student ID is S100002.” | Payment status is unpaid and reminder workflow is accepted | Chat response shows `transcript_status`, `payment_status_checked`, `payment_reminder_triggered`, workflow ID, and no CRM handoff |
 | 3 | Financial-hold escalation | “My transcript still is not moving. My student ID is S100003.” | Financial hold is detected and staff handoff is created | Chat response shows `transcript_status`, `financial_hold_detected`, CRM case ID, and Registrar/Student Accounts handoff |
 | 4 | Urgent sentiment escalation | “This is really frustrating. I need this transcript for a job application.” | Urgent/negative sentiment creates a priority CRM case | Chat response shows urgent sentiment, `crm_case_created`, priority flag, case ID, and privacy-aware summary |
-| 5 | P11 TDD/eval/smoke evidence | Run package tests, eval gate, secret check, and smoke gate | Tests prove LLM gateway behavior, strict classification, prompt guardrails, source grounding, deterministic decisions, workflow simulator/webhook behavior, redaction, audit metrics, dashboard controls, Docker/CI contracts, env safety, eval quality gates, and release readiness | `go test ./internal/eval ./cmd/eval`, `go test ./internal/build -run TestP10`, `go test ./...`, `make eval`, `make secret-check`, and `make smoke` pass |
+| 5 | TDD, evaluation, and smoke evidence | Run package tests, eval gate, secret check, and smoke gate | Tests prove LLM gateway behavior, strict classification, prompt guardrails, source grounding, deterministic decisions, workflow simulator/webhook behavior, redaction, audit metrics, dashboard controls, Docker/CI contracts, env safety, eval quality gates, and release readiness | `go test ./internal/eval ./cmd/eval`, `go test ./internal/build`, `go test ./...`, `make eval`, `make secret-check`, and `make smoke` pass |
 
 ## Demo acceptance matrix
 
-Each P11 row must be verifiable from the Go API response, local RAG chunks, local mock service logs, the workflow simulator or in-process workflow response, CRM simulator output, protected admin metrics, redacted audit-store tests, Docker/CI artifact tests, smoke-script output, or `reports/eval-summary.md`. Source references are approved public/curated learner-service content; synthetic records are the only data used for student/payment/hold state.
+Each acceptance row must be verifiable from the Go API response, local RAG chunks, local mock service logs, the workflow simulator or in-process workflow response, CRM simulator output, protected admin metrics, redacted audit-store tests, Docker/CI artifact tests, smoke-script output, or `reports/eval-summary.md`. Source references are approved public/curated learner-service content; synthetic records are the only data used for student/payment/hold state.
 
 | ID | Scenario | Synthetic input | Expected intent | Expected source | Expected action | Expected handoff behavior | Pass evidence |
 |---|---|---|---|---|---|---|---|
-| D01 | Transcript answer | “How do I order my official transcript?” | `transcript_request` | P5 local chunk `oc-transcript-request-2005-onwards-seed-001` or refreshed chunk from the same allowlisted source | Return concise grounded answer with source link | No handoff; keep learner in chat | Response includes source, retrieval confidence, risk/freshness metadata, and zero critical unsupported claims |
+| D01 | Transcript answer | “How do I order my official transcript?” | `transcript_request` | Local approved-source chunk `oc-transcript-request-2005-onwards-seed-001` or refreshed chunk from the same allowlisted source | Return concise grounded answer with source link | No handoff; keep learner in chat | Response includes source, retrieval confidence, risk/freshness metadata, and zero critical unsupported claims |
 | D02 | Unpaid payment workflow | `S100002` transcript status prompt | `transcript_status` | Transcript/payment guidance source chunk plus synthetic payment record `S100002` | Check mock Banner, check mock Payment, trigger `payment_reminder_triggered` | No CRM handoff unless workflow fails or confidence is low | Response includes unpaid status, workflow ID, idempotency key, and redacted workflow audit events |
 | D03 | Financial-hold escalation | `S100003` transcript status prompt | `transcript_status` | Transcript/hold guidance source chunk plus synthetic Banner record `S100003` | Check mock Banner, detect `financial_hold`, create CRM case | Handoff to Registrar/Student Accounts queue with minimal summary and case ID | Response includes hold-safe wording, CRM case ID, queue/priority, and no payment reminder |
 | D04 | Urgent sentiment escalation | Frustrated urgent transcript message | `escalation_request` or human handoff intent with urgent sentiment | Transcript source chunk when transcript context is present | Classify sentiment as urgent/negative and create priority CRM case | Priority handoff to staff; assistant does not promise a deadline or outcome | Response includes priority flag, CRM case ID, redacted summary, and safe expectation-setting |
