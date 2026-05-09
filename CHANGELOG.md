@@ -2,6 +2,16 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-09 - AskOC Header Title Red Treatment
+
+### Chat and admin title styling
+
+- What: changed the chat `AskOC AI Concierge` and admin `AskOC Admin Dashboard` header titles to use the red brand accent instead of black.
+- Where: `web/static/app.css`, `web/static/admin.css`, `internal/handlers/ui_test.go`, `internal/handlers/admin_ui_test.go`.
+- When: 2026-05-09.
+- Why: align the primary product titles with the visible red AskOC brand treatment while preserving the existing black/red operational UI hierarchy.
+- How: added failing static asset contracts for `.app-header h1` red styling, implemented the CSS rule in both chat and admin stylesheets, and verified the focused handler/static test suite.
+
 ## 2026-05-09 - Developer Testing Guide And Docker Stack Notes
 
 ### Local testing workflow documentation

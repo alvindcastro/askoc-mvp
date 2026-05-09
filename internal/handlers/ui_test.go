@@ -98,6 +98,8 @@ func TestChatStaticAssetsExposeThemeAndEvidenceContracts(t *testing.T) {
 		"--border-strong: 2px solid #0A0A0A",
 		"--focus-ring: 0 0 0 2px #FAFAFA, 0 0 0 4px #0A0A0A",
 		"font-family: var(--font-body)",
+		".app-header h1",
+		"color: var(--color-accent)",
 		"border-radius: var(--radius-none)",
 		"@media (max-width: 820px)",
 	} {
