@@ -80,6 +80,37 @@ Expected smoke assertions:
 - `S100003` financial-hold chat returns `financial_hold_detected` and `crm_case_created`,
 - failures print the endpoint or missing response marker that needs attention.
 
+## R0-R5 web app revamp verification
+
+The revamp keeps AskOC as the product and uses `DESIGN.md` only as visual theme guidance. The verified surface is still the existing Go-rendered route set: `/` and `/chat` for learner chat, `/admin` for protected dashboard review, `/static/*` for local assets, `/api/v1/chat` for chat, admin metrics/audit/review APIs, `/healthz`, and `/readyz`.
+
+Automated gates:
+
+```bash
+go test ./internal/handlers -run 'Test(Chat|Admin).*Revamp|Test(Chat|Admin)StaticAssets'
+go test ./internal/handlers
+go test ./...
+make eval
+make secret-check
+git diff --check
+```
+
+The revamp handler/static tests verify:
+
+- stale `P2 placeholder` chat copy is absent,
+- chat/admin navigation has landmarks, active route state, and synthetic-mode labeling,
+- `#0A0A0A`, `#FAFAFA`, `#EF4444`, square radius, 2px borders, and the `DESIGN.md` focus ring exist in static CSS,
+- gradients, shadows, and rounded dashboard panels are not introduced,
+- chat rendering contracts include source confidence, risk, freshness, low-confidence/no-source fallback labels, trace IDs, workflow IDs, CRM case IDs, priority, and idempotency key evidence,
+- admin rendering contracts include review trace IDs, queue, priority, status, redacted markers, safe empty state, and evaluation-gate copy.
+
+Responsive and accessibility checks:
+
+- CSS includes mobile breakpoints at `max-width: 820px` for chat, action trace, admin metrics, review rows, and controls.
+- Key controls keep explicit labels: chat message, synthetic student ID, submit, admin token, audit export, purge, reset, and review filter.
+- Keyboard focus uses `0 0 0 2px #FAFAFA, 0 0 0 4px #0A0A0A`.
+- Manual screenshot review should inspect `/chat` and `/admin` at mobile and desktop widths for text overlap, clipped buttons, hidden source/action rows, dominant red usage, and accidental raw learner data.
+
 ## Test data
 
 | Student ID | Transcript status | Payment status | Holds | Expected result |

@@ -7,19 +7,31 @@
   <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Synthetic demo mode</p>
+      <h1 id="chat-title">AskOC AI Concierge</h1>
+      <p class="header-note">Transcript and payment support with source/action proof.</p>
+    </div>
+    <nav class="app-nav" aria-label="AskOC routes">
+      <a href="/chat" aria-current="page">Chat</a>
+      <a href="/admin">Admin</a>
+    </nav>
+  </header>
+
   <main class="shell" data-chat-endpoint="{{.ChatEndpoint}}">
     <section class="workspace" aria-labelledby="chat-title">
       <header class="topbar">
         <div>
-          <p class="eyebrow">Synthetic demo mode</p>
-          <h1 id="chat-title">AskOC AI Concierge</h1>
+          <p class="eyebrow">Learner workflow</p>
+          <h2>Source-grounded answer</h2>
         </div>
-        <div class="status" aria-live="polite">P2 placeholder</div>
+        <div class="status" aria-live="polite">Safe synthetic data only</div>
       </header>
 
-      <section class="conversation" id="conversation" aria-live="polite">
-        <article class="message assistant">
-          <p>This demo chat returns deterministic placeholder responses. Use synthetic IDs such as S100002 for transcript-status examples.</p>
+      <section class="conversation" id="conversation" aria-live="polite" aria-label="Conversation">
+        <article class="message assistant" data-role="assistant">
+          <p>Ask about transcript ordering or transcript/payment status. Use synthetic IDs such as S100002; source citations, confidence, risk, freshness, workflow, CRM, and trace evidence appear in the proof panel.</p>
         </article>
       </section>
 
@@ -31,30 +43,40 @@
         <div class="form-row">
           <label class="field compact">
             <span>Synthetic student ID</span>
-            <input id="student-id" name="student_id" inputmode="text" pattern="S[0-9]{6}" placeholder="S100002">
+            <input id="student-id" name="student_id" inputmode="text" pattern="S[0-9]{6}" placeholder="S100002" aria-describedby="student-id-help">
           </label>
           <button type="submit">Send</button>
         </div>
+        <p id="student-id-help" class="help-text">Use only demo records such as S100001, S100002, or S100003.</p>
         <input type="hidden" id="conversation-id" name="conversation_id">
       </form>
     </section>
 
     <aside class="details" aria-label="Response details">
-      <div>
+      <div class="detail-block">
         <h2>Intent</h2>
         <p id="intent">Waiting for first message</p>
       </div>
-      <div>
+      <div class="detail-block">
+        <h2>Trace ID</h2>
+        <p id="trace-id" class="mono">Not assigned</p>
+      </div>
+      <div class="detail-block">
         <h2>Sources</h2>
-        <ul id="sources"></ul>
+        <ul id="sources" class="evidence-list"></ul>
       </div>
-      <div>
-        <h2>Actions</h2>
-        <ul id="actions"></ul>
+      <div class="detail-block">
+        <h2>Action trace</h2>
+        <ul id="actions" class="evidence-list"></ul>
       </div>
-      <div>
+      <div class="detail-block">
         <h2>Escalation</h2>
         <p id="escalation">None</p>
+      </div>
+      <div class="detail-block evidence-legend" aria-label="Evidence states">
+        <span>High risk</span>
+        <span>Low-confidence fallback</span>
+        <span>No approved source</span>
       </div>
     </aside>
   </main>

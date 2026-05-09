@@ -25,7 +25,7 @@ make smoke
 make compose-up
 ```
 
-4. Open `http://localhost:8080/chat` for the learner chat and `http://localhost:8080/admin` for the protected dashboard. The local admin token is `demo-admin-token`.
+4. Open `http://localhost:8080/chat` for the themed learner chat and `http://localhost:8080/admin` for the themed protected dashboard. The local admin token is `demo-admin-token`.
 5. Skim [docs/demo-script.md](docs/demo-script.md), [docs/architecture.md](docs/architecture.md), and [reports/eval-summary.md](reports/eval-summary.md) for the 5-7 minute walkthrough, integration diagrams, and quality evidence.
 
 ## Portfolio evidence at a glance
@@ -36,6 +36,7 @@ make compose-up
 | Go service architecture | Chat UI, Go API, orchestrator, RAG, mock enterprise APIs, workflow, audit, dashboard, and eval are separated by typed boundaries | [docs/architecture.md](docs/architecture.md) |
 | Responsible-AI gate | Intent, source, action, handoff, safety, and critical hallucination checks are repeatable | `make eval`, [reports/eval-summary.md](reports/eval-summary.md) |
 | Privacy boundary | All learner, payment, LMS, workflow, and CRM data is visibly synthetic and redacted before audit/dashboard use | [docs/privacy-impact-lite.md](docs/privacy-impact-lite.md), `data/synthetic-students.json` |
+| Themed UI proof | `DESIGN.md` is applied as AskOC visual polish: square borders, high contrast, active red route underline, source chips, action trace rows, trace IDs, admin review rows, and visible focus states | `/chat`, `/admin`, `go test ./internal/handlers` |
 | TDD delivery | Code phases were implemented behind failing tests, package tests, full-suite tests, eval, smoke, and changelog evidence | [docs/phases-and-tasks.md](docs/phases-and-tasks.md), [CHANGELOG.md](CHANGELOG.md) |
 
 ## Screenshot and GIF placeholders
@@ -116,7 +117,7 @@ A task is not done until the relevant package test and `go test ./...` pass. AI,
 
 | Layer | Suggested implementation |
 |---|---|
-| Web UI | Go server-rendered chat UI with `html/template` + small JavaScript, or optional React/Next.js |
+| Web UI | Go server-rendered chat/admin UI with `html/template`, small JavaScript, and `DESIGN.md` theme tokens |
 | API gateway | Go `net/http` or `chi` router |
 | AI orchestration | Go service using typed interfaces for LLM, retriever, classifier, and tools |
 | LLM gateway | Azure OpenAI / OpenAI-compatible REST client written in Go |

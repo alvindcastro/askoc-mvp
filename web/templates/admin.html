@@ -7,16 +7,28 @@
   <link rel="stylesheet" href="/static/admin.css">
 </head>
 <body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Synthetic operations mode</p>
+      <h1>AskOC Admin Dashboard</h1>
+      <p class="header-note">Redacted aggregate metrics for the local transcript/payment demo.</p>
+    </div>
+    <nav class="app-nav" aria-label="AskOC routes">
+      <a href="/chat">Chat</a>
+      <a href="/admin" aria-current="page">Admin</a>
+    </nav>
+  </header>
+
   <main class="dashboard"
     data-metrics-endpoint="{{.MetricsEndpoint}}"
     data-export-endpoint="{{.ExportEndpoint}}"
     data-reset-endpoint="{{.ResetEndpoint}}"
     data-purge-endpoint="{{.PurgeEndpoint}}"
     data-review-endpoint="{{.ReviewEndpoint}}">
-    <header class="dashboard-header">
+    <section class="dashboard-header" aria-labelledby="dashboard-title">
       <div>
-        <p class="eyebrow">Synthetic operations</p>
-        <h1>AskOC Admin Dashboard</h1>
+        <p class="eyebrow">Protected review surface</p>
+        <h2 id="dashboard-title">Redacted aggregate metrics</h2>
       </div>
       <form class="token-form" id="token-form">
         <label>
@@ -25,7 +37,7 @@
         </label>
         <button type="submit">Refresh</button>
       </form>
-    </header>
+    </section>
 
     <section class="metric-strip" aria-label="Summary metrics">
       <div>
@@ -49,7 +61,7 @@
     <section class="dashboard-grid">
       <section class="panel" aria-labelledby="top-intents-title">
         <h2 id="top-intents-title">Top intents</h2>
-        <ul id="top-intents"></ul>
+        <ul id="top-intents" class="evidence-list"></ul>
       </section>
       <section class="panel" aria-labelledby="workflow-title">
         <h2 id="workflow-title">Workflows</h2>
@@ -59,13 +71,24 @@
         </dl>
       </section>
       <section class="panel" aria-labelledby="review-title">
-        <h2 id="review-title">Low-confidence review</h2>
+        <div class="panel-title-row">
+          <h2 id="review-title">Low-confidence review</h2>
+          <label class="filter-control">
+            <span>Review queue filter</span>
+            <select id="review-filter">
+              <option value="all">All</option>
+              <option value="high">High priority</option>
+              <option value="redacted">Redacted</option>
+            </select>
+          </label>
+        </div>
         <p><span id="low-confidence-count">0</span> items</p>
-        <ul id="review-items"></ul>
+        <ul id="review-items" class="evidence-list"></ul>
       </section>
       <section class="panel" aria-labelledby="stale-title">
         <h2 id="stale-title">Stale-source warnings</h2>
         <p><span id="stale-source-count">0</span> items</p>
+        <p class="panel-note">Evaluation gate: critical pass/fail remains visible in reports; warnings are not hidden.</p>
       </section>
     </section>
 

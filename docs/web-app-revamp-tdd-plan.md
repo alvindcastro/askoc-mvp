@@ -51,16 +51,16 @@ Design direction:
 
 ## Current Route And Screen Inventory
 
-- [ ] `GET /` and `GET /chat` render the learner chat shell.
-- [ ] `POST /api/v1/chat` accepts the learner chat JSON request from the web UI.
-- [ ] `GET /admin` renders the protected admin dashboard shell.
-- [ ] `GET /api/v1/admin/metrics` returns protected aggregate metrics.
-- [ ] `GET /api/v1/admin/audit/export` exports protected audit data.
-- [ ] `POST /api/v1/admin/audit/reset` resets demo audit data.
-- [ ] `POST /api/v1/admin/audit/purge` purges expired audit data.
-- [ ] `GET /api/v1/admin/review-items` returns protected review queue items.
-- [ ] `GET /static/*` serves `web/static`.
-- [ ] `GET /healthz` and `GET /readyz` expose service status.
+- [x] `GET /` and `GET /chat` render the learner chat shell.
+- [x] `POST /api/v1/chat` accepts the learner chat JSON request from the web UI.
+- [x] `GET /admin` renders the protected admin dashboard shell.
+- [x] `GET /api/v1/admin/metrics` returns protected aggregate metrics.
+- [x] `GET /api/v1/admin/audit/export` exports protected audit data.
+- [x] `POST /api/v1/admin/audit/reset` resets demo audit data.
+- [x] `POST /api/v1/admin/audit/purge` purges expired audit data.
+- [x] `GET /api/v1/admin/review-items` returns protected review queue items.
+- [x] `GET /static/*` serves `web/static`.
+- [x] `GET /healthz` and `GET /readyz` expose service status.
 
 Current screen surfaces:
 
@@ -69,19 +69,29 @@ Current screen surfaces:
 - [ ] Admin dashboard: token form, summary metrics, top intents, workflow counts, low-confidence review list, stale-source count, audit controls.
 - [ ] Static styling: split between `app.css` and `admin.css`; no shared theme-token layer exists yet.
 
-Known consistency risks to handle during the revamp:
+Known consistency risks handled during the revamp:
 
-- [ ] Chat UI copy still references a P2 placeholder even though the API is wired to the orchestrator.
-- [ ] Current chat rendering can drop source confidence, risk, freshness, workflow IDs, CRM case IDs, priority, and trace proof.
-- [ ] Admin docs describe eval review evidence; the runtime review queue can be empty and should not overwrite useful audit-derived review proof without clear empty-state copy.
-- [ ] `docs/api-spec.md` mentions routes such as feedback that are not wired in `cmd/api`; do not add UI controls for missing endpoints without a tested route task.
-- [ ] Decide whether `/` is an intentional chat alias or should become explicit redirect/404 behavior before changing it.
+- [x] Chat UI copy no longer references a P2 placeholder; the shell describes the current synthetic transcript/payment MVP.
+- [x] Chat rendering now covers source confidence, risk, freshness, workflow IDs, CRM case IDs, priority, idempotency keys, and trace proof.
+- [x] Admin review rendering keeps a safe empty state and preserves useful metrics-derived review proof when the eval queue is empty.
+- [x] `docs/api-spec.md` mentions routes such as feedback that are not wired in `cmd/api`; no UI control was added for missing endpoints.
+- [x] `/` remains an intentional chat alias because `cmd/api/main.go` already maps `/` and `/chat` to `ChatPageHandler`.
+
+## 2026-05-09 Implementation Evidence
+
+- Red test: `go test ./internal/handlers -run 'Test(Chat|Admin).*Revamp|Test(Chat|Admin)StaticAssets'` failed first on missing nav landmarks, stale P2 copy, missing theme tokens, and missing evidence rendering contracts.
+- Green tests: the same narrow command passes after template/static changes; `go test ./internal/handlers` also passes.
+- Changed runtime files: `web/templates/chat.html`, `web/templates/admin.html`, `web/static/app.css`, `web/static/app.js`, `web/static/admin.css`, `web/static/admin.js`.
+- Changed test files: `internal/handlers/ui_test.go`, `internal/handlers/admin_ui_test.go`.
+- Changed documentation files: `README.md`, `docs/demo-script.md`, `docs/test-plan.md`, `docs/askoc-ux-theme-brainstorm.md`, `docs/web-app-revamp-tdd-plan.md`, `CHANGELOG.md`.
+- Full verification: `go test ./...`, `make eval`, `make secret-check`, `git diff --check`, and `ASKOC_API_PORT=18080 make smoke` passed; default `make smoke` was blocked by occupied port `8080`.
+- Manual visual checklist: inspect `/chat` and `/admin` at mobile and desktop widths for text overlap, hidden source/action rows, clipped controls, dominant red usage, focus visibility, and accidental raw learner data.
 
 ## Phase R0 - Baseline, Scope, And Evidence
 
 **Outcome:** The revamp branch has a confirmed baseline, route inventory, and evidence contract before code changes.
 
-- [ ] **R0-T01 - Reconcile current web app status**
+- [x] **R0-T01 - Reconcile current web app status**
   - **Type:** Documentation
   - **Goal:** Confirm the existing route/screen inventory, stale UI copy, and proof gaps before implementation.
   - **Primary files:** `docs/web-app-revamp-tdd-plan.md`, `docs/askoc-ux-theme-brainstorm.md`
@@ -117,7 +127,7 @@ Expected response:
     - [ ] No new route is implied without a code task.
     - [ ] No real data or secrets are added.
 
-- [ ] **R0-T02 - Freeze revamp task taxonomy**
+- [x] **R0-T02 - Freeze revamp task taxonomy**
   - **Type:** Documentation
   - **Goal:** Keep one revamp prompt/task structure across docs, code, verification, and demo updates.
   - **Primary files:** `docs/web-app-revamp-tdd-plan.md`, `docs/askoc-ux-tdd-prompts.md`
@@ -151,7 +161,7 @@ Review checks:
 
 **Outcome:** `DESIGN.md` is mapped into reusable AskOC theme tokens and app-shell rules.
 
-- [ ] **R1-T01 - Map DESIGN.md tokens to AskOC surfaces**
+- [x] **R1-T01 - Map DESIGN.md tokens to AskOC surfaces**
   - **Type:** Documentation
   - **Goal:** Define token usage for chat, action trace, admin, review, and eval surfaces.
   - **Primary files:** `docs/askoc-ux-theme-brainstorm.md`, `docs/web-app-revamp-tdd-plan.md`
@@ -180,7 +190,7 @@ Review checks:
     - [ ] VoiceBox is framed as theme only.
     - [ ] AskOC scope is unchanged.
 
-- [ ] **R1-T02 - Add shared theme tokens to static CSS**
+- [x] **R1-T02 - Add shared theme tokens to static CSS**
   - **Type:** Code
   - **Goal:** Add reusable CSS variables/classes for the `DESIGN.md` system.
   - **Primary files:** `web/static/app.css`, `web/static/admin.css`, UI/template tests
@@ -216,7 +226,7 @@ Expected response:
     - [ ] No shadows, gradients, or rounded panels are introduced.
     - [ ] `go test ./...` passes.
 
-- [ ] **R1-T03 - Theme app shell and navigation**
+- [x] **R1-T03 - Theme app shell and navigation**
   - **Type:** Code
   - **Goal:** Make the app shell clear, compact, keyboard accessible, and consistent across chat/admin.
   - **Primary files:** `web/templates/chat.html`, `web/templates/admin.html`, static CSS/JS, handler/template tests
@@ -251,7 +261,7 @@ Requirements:
 
 **Outcome:** The learner chat proves source grounding, synthetic integrations, workflow action, escalation, and traceability at a glance.
 
-- [ ] **R2-T01 - Replace stale placeholder copy**
+- [x] **R2-T01 - Replace stale placeholder copy**
   - **Type:** Code
   - **Goal:** Remove P2 placeholder language and align empty states with the current orchestrated MVP.
   - **Primary files:** `web/templates/chat.html`, `internal/handlers/ui_test.go`, docs if copy changes demo expectations
@@ -281,7 +291,7 @@ Requirements:
     - [ ] No API behavior changes.
     - [ ] Broader tests pass.
 
-- [ ] **R2-T02 - Theme learner and assistant message layout**
+- [x] **R2-T02 - Theme learner and assistant message layout**
   - **Type:** Code
   - **Goal:** Make conversation turns compact, readable, responsive, and safe.
   - **Primary files:** `web/templates/chat.html`, `web/static/app.css`, `web/static/app.js`, UI tests
@@ -311,7 +321,7 @@ Requirements:
     - [ ] Synthetic marker is visible.
     - [ ] Chat API contract is unchanged.
 
-- [ ] **R2-T03 - Surface sources, confidence, risk, and freshness**
+- [x] **R2-T03 - Surface sources, confidence, risk, and freshness**
   - **Type:** Code
   - **Goal:** Show grounded-answer evidence and fallback states clearly.
   - **Primary files:** `web/static/app.js`, `web/static/app.css`, `web/templates/chat.html`, handler/JS tests where available
@@ -340,7 +350,7 @@ Requirements:
     - [ ] Private URLs are not introduced.
     - [ ] Broader tests pass.
 
-- [ ] **R2-T04 - Surface action trace, workflow, CRM, and trace IDs**
+- [x] **R2-T04 - Surface action trace, workflow, CRM, and trace IDs**
   - **Type:** Code
   - **Goal:** Render synthetic integration proof as scan-friendly action rows.
   - **Primary files:** `web/static/app.js`, `web/static/app.css`, `web/templates/chat.html`, UI tests
@@ -374,7 +384,7 @@ Requirements:
 
 **Outcome:** The admin surface exposes aggregate proof, review queues, and evaluation status without leaking raw learner content.
 
-- [ ] **R3-T01 - Theme admin metrics dashboard**
+- [x] **R3-T01 - Theme admin metrics dashboard**
   - **Type:** Code
   - **Goal:** Apply the `DESIGN.md` operational layout to metrics and audit controls.
   - **Primary files:** `web/templates/admin.html`, `web/static/admin.css`, `web/static/admin.js`, `internal/handlers/admin_ui_test.go`
@@ -404,7 +414,7 @@ Requirements:
     - [ ] Redaction is preserved.
     - [ ] Broader tests pass.
 
-- [ ] **R3-T02 - Theme audit and review queue rows**
+- [x] **R3-T02 - Theme audit and review queue rows**
   - **Type:** Code
   - **Goal:** Make trace-linked audit/review items easy to scan and filter.
   - **Primary files:** `web/static/admin.js`, `web/static/admin.css`, admin tests
@@ -435,7 +445,7 @@ Requirements:
     - [ ] Redaction markers are visible.
     - [ ] Review semantics are unchanged.
 
-- [ ] **R3-T03 - Surface evaluation pass/fail evidence**
+- [x] **R3-T03 - Surface evaluation pass/fail evidence**
   - **Type:** Code or Documentation
   - **Goal:** Make evaluation gate evidence visible and honest.
   - **Primary files:** `reports/eval-summary.md`, `docs/test-plan.md`, admin UI if surfaced there
@@ -470,7 +480,7 @@ Requirements:
 
 **Outcome:** The themed MVP is usable on desktop/mobile and has explicit visual-quality checks.
 
-- [ ] **R4-T01 - Add accessibility checks for themed controls**
+- [x] **R4-T01 - Add accessibility checks for themed controls**
   - **Type:** Code
   - **Goal:** Verify landmarks, labels, focus order, and keyboard behavior.
   - **Primary files:** UI tests, templates, static JS/CSS
@@ -502,7 +512,7 @@ Required coverage:
     - [ ] Keyboard behavior is covered.
     - [ ] Broader tests pass.
 
-- [ ] **R4-T02 - Add responsive layout checks**
+- [x] **R4-T02 - Add responsive layout checks**
   - **Type:** Code
   - **Goal:** Verify chat, action trace, dashboard, and review rows do not overlap.
   - **Primary files:** responsive CSS, visual/e2e tests if available, manual screenshot notes
@@ -535,7 +545,7 @@ If no automated browser tooling exists, document the manual screenshot checklist
     - [ ] No overlap or overflow is observed.
     - [ ] Broader tests pass.
 
-- [ ] **R4-T03 - Add contrast and theme drift gate**
+- [x] **R4-T03 - Add contrast and theme drift gate**
   - **Type:** Code or Documentation
   - **Goal:** Prevent low contrast, too much red, gradients, shadows, and rounded UI drift.
   - **Primary files:** CSS tests, `docs/test-plan.md`, manual review notes
@@ -570,7 +580,7 @@ Review requirements:
 
 **Outcome:** The README/demo/test docs explain the revamp as UX polish for AskOC and record exact evidence.
 
-- [ ] **R5-T01 - Update README reviewer path for revamp**
+- [x] **R5-T01 - Update README reviewer path for revamp**
   - **Type:** Documentation
   - **Goal:** Explain themed UI as polish for the existing AskOC MVP.
   - **Primary files:** `README.md`
@@ -600,7 +610,7 @@ Review checks:
     - [ ] No unsupported claims are added.
     - [ ] No real data or secrets are added.
 
-- [ ] **R5-T02 - Update demo script for themed screens**
+- [x] **R5-T02 - Update demo script for themed screens**
   - **Type:** Documentation
   - **Goal:** Add concise visual callouts for chat, source chips, action trace, dashboard, and eval evidence.
   - **Primary files:** `docs/demo-script.md`
@@ -629,7 +639,7 @@ Review checks:
     - [ ] Demo remains time-boxed.
     - [ ] No separate product story is introduced.
 
-- [ ] **R5-T03 - Record final UX quality evidence**
+- [x] **R5-T03 - Record final UX quality evidence**
   - **Type:** Documentation
   - **Goal:** Summarize tests, screenshots/manual checks, limitations, and out-of-scope UI work.
   - **Primary files:** `CHANGELOG.md`, `docs/test-plan.md`

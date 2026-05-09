@@ -13,10 +13,10 @@ Show a 5–7 minute Go-based MVP that maps directly to the AI/Automation Solutio
 | Minute | Focus | Screen or command | Proof point |
 |---:|---|---|---|
 | 0:00-0:45 | Problem, Go architecture, privacy boundary | README and chat UI | Hiring manager can understand the project quickly and see synthetic-data-only scope. |
-| 0:45-1:45 | Tier 0 grounded answer | `/chat` transcript-order question | RAG answer cites approved public transcript source chunks. |
-| 1:45-3:15 | Tier 1 transcript/payment workflow | `/chat` with `S100002` | Typed mock Banner/payment clients and idempotent workflow action run. |
-| 3:15-4:30 | Urgent or blocked escalation | `/chat` urgent message or `S100003` | Mock CRM case is created with redacted summary and priority routing. |
-| 4:30-5:30 | Dashboard evidence | `/admin` | Containment, escalation, workflow, stale-source, low-confidence, and review metrics are visible without raw PII. |
+| 0:45-1:45 | Tier 0 grounded answer | `/chat` transcript-order question | Point at source chips, confidence, risk, freshness, and trace ID proof. |
+| 1:45-3:15 | Tier 1 transcript/payment workflow | `/chat` with `S100002` | Point at synthetic action rows, workflow ID, idempotency key, and mock Banner/payment proof. |
+| 3:15-4:30 | Urgent or blocked escalation | `/chat` urgent message or `S100003` | Point at CRM case ID, priority chip, queue, and safe synthetic handoff copy. |
+| 4:30-5:30 | Dashboard evidence | `/admin` | Point at redacted aggregate metrics, review queue filter, status chips, stale-source count, and audit controls. |
 | 5:30-7:00 | TDD/evaluation/release proof | terminal and reports | `make test`, `make eval`, `make smoke`, and reports show repeatable quality gates. |
 
 ## Demo setup
@@ -67,7 +67,8 @@ Show:
 - response includes source link, source confidence, risk level, and freshness status,
 - response is concise,
 - answer avoids unsupported claims,
-- deterministic action trace is visible.
+- deterministic action trace is visible,
+- the themed proof panel shows the active route underline, `Trace ID`, `Sources`, and `Action trace` sections without exposing raw learner data.
 
 Talking point:
 
@@ -107,7 +108,8 @@ Show:
 - idempotency key,
 - workflow ID,
 - tested audit-port event,
-- safe reminder summary.
+- safe reminder summary,
+- the chat action trace row uses synthetic labels and mono IDs instead of raw payloads.
 
 Talking point:
 
@@ -158,7 +160,8 @@ Show:
 - workflow success/failure counts,
 - low-confidence review items with redacted question text,
 - stale-source warning count,
-- audit export/reset/purge controls.
+- audit export/reset/purge controls,
+- the review queue filter, trace IDs, priority/status chips, and `redacted` marker.
 
 ## Minute 6: Go architecture walkthrough
 

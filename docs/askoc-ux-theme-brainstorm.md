@@ -4,7 +4,15 @@ This document applies `DESIGN.md` as the UX theme for the existing **AskOC AI Co
 
 `DESIGN.md` names the visual system "VoiceBox"; in this repository, treat that as the **visual language only**: bold editorial typography, high contrast, square borders, no shadows, and a restrained red accent.
 
-For the active revamp branch, use [web-app-revamp-tdd-plan.md](web-app-revamp-tdd-plan.md) as the execution handoff. It adds the current route inventory, known UI consistency risks, and R0-R5 copy/paste prompts with strict red-first TDD requirements.
+For the active revamp branch, [web-app-revamp-tdd-plan.md](web-app-revamp-tdd-plan.md) is the source-of-truth execution handoff. This file is retained as the theme brief and historical UX0-UX5 planning note; use the R0-R5 taxonomy for implementation status, test evidence, and changelog entries.
+
+## 2026-05-09 Revamp Implementation Notes
+
+- `/` remains an intentional chat alias because `cmd/api/main.go` routes both `/` and `/chat` to `ChatPageHandler`; no redirect or new route was added.
+- Chat and admin now share the same visual language: high-contrast shell, active red route underline, square panels, 2px borders, visible synthetic-mode labels, and focus rings.
+- Chat proof points are source chips, confidence/risk/freshness metadata, trace ID, action rows, workflow ID, CRM case ID, priority, and idempotency key labels when present.
+- Admin proof points are redacted aggregate metrics, review queue filter, trace/queue/priority/status chips, stale-source count, evaluation-gate copy, and audit export/reset/purge controls.
+- Verification is tracked through `go test ./internal/handlers -run 'Test(Chat|Admin).*Revamp|Test(Chat|Admin)StaticAssets'`, `go test ./internal/handlers`, `go test ./...`, `make eval`, `make secret-check`, and `git diff --check`.
 
 ## MVP UX Thesis
 

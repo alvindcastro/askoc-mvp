@@ -2,6 +2,80 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-09 - R0-R5 Web App Revamp Implementation
+
+### R0-T01 - Reconcile current web app status
+
+- What: confirmed `/`, `/chat`, `/admin`, static assets, chat API, admin metrics/audit/review APIs, health, and readiness routes; recorded stale P2 copy and evidence gaps.
+- Where: `docs/web-app-revamp-tdd-plan.md`, `docs/askoc-ux-theme-brainstorm.md`.
+- When: 2026-05-09.
+- Why: establish the actual server-rendered AskOC surface before changing UI code.
+- How: inspected `cmd/api/main.go`, `internal/handlers`, `web/templates`, `web/static`, README, and demo docs; kept `/` as an intentional chat alias and added no unsupported routes.
+
+### R0-T02 - Freeze revamp task taxonomy
+
+- What: kept the active revamp status in R0-R5 terms and retained UX0-UX5 as historical theme planning only.
+- Where: `docs/web-app-revamp-tdd-plan.md`, `docs/askoc-ux-theme-brainstorm.md`.
+- When: 2026-05-09.
+- Why: avoid two competing task taxonomies for the same AskOC UI work.
+- How: marked R0-R5 task headings complete after implementation evidence existed and documented the R0-R5 source-of-truth rule.
+
+### R1-T01 - Map DESIGN.md tokens to AskOC surfaces
+
+- What: mapped VoiceBox visual language to AskOC chat, source citations, action trace, escalation, admin metrics, review rows, eval evidence, inputs, buttons, chips, focus rings, and route navigation.
+- Where: `docs/askoc-ux-theme-brainstorm.md`, `docs/test-plan.md`.
+- When: 2026-05-09.
+- Why: apply `DESIGN.md` as visual polish without changing the product into an editorial app.
+- How: documented black/white/red tokens, square borders, no gradients/shadows/rounded panels, mono metadata, and restrained red usage.
+
+### R1-T02 and R1-T03 - Theme tokens, shell, and navigation
+
+- What: added shared theme contracts and high-contrast route shells with active route state, synthetic-mode labels, keyboard focus, and AskOC-first product naming.
+- Where: `web/static/app.css`, `web/static/admin.css`, `web/templates/chat.html`, `web/templates/admin.html`, `internal/handlers/ui_test.go`, `internal/handlers/admin_ui_test.go`.
+- When: 2026-05-09.
+- Why: make the existing Go-rendered app feel like a compact operational console while preserving current routes and APIs.
+- How: wrote failing handler/static tests for nav landmarks, active routes, token names, square radius, 2px borders, focus ring, and forbidden visual drift; then implemented the smallest template/CSS changes.
+
+### R2-T01 through R2-T04 - Chat evidence surface
+
+- What: replaced stale P2 placeholder copy; added compact learner/assistant messaging, source evidence, confidence/risk/freshness chips, low-confidence/no-source fallback labels, trace ID display, workflow/CRM/action rows, priority, and idempotency-key rendering.
+- Where: `web/templates/chat.html`, `web/static/app.css`, `web/static/app.js`, `internal/handlers/ui_test.go`.
+- When: 2026-05-09.
+- Why: let a reviewer scan what the learner asked, what answer was grounded, which synthetic systems/actions ran, and what trace ties the chat to audit/eval proof.
+- How: extended red handler/static asset tests for stale copy and rendering contracts, verified failure, then updated the template and JavaScript without changing the chat API contract.
+
+### R3-T01 through R3-T03 - Admin, audit, and eval evidence
+
+- What: themed the admin dashboard, metric strip, audit controls, review filter, review rows, trace/queue/priority/status/redacted chips, safe empty state, and evaluation-gate copy.
+- Where: `web/templates/admin.html`, `web/static/admin.css`, `web/static/admin.js`, `internal/handlers/admin_ui_test.go`, `docs/test-plan.md`.
+- When: 2026-05-09.
+- Why: expose aggregate workflow/escalation/review evidence without raw learner messages or unsupported production claims.
+- How: added failing admin shell/static tests first, preserved existing protected API IDs/data attributes, kept review semantics unchanged, and documented eval evidence in the test plan.
+
+### R4-T01 through R4-T03 - Accessibility, responsive, and theme drift gates
+
+- What: added automated contracts for labels, landmarks, focus ring, mobile breakpoints, forbidden gradients/rounded panels, restrained red usage, and source/action/admin control coverage.
+- Where: `internal/handlers/ui_test.go`, `internal/handlers/admin_ui_test.go`, `web/static/app.css`, `web/static/admin.css`, `docs/test-plan.md`.
+- When: 2026-05-09.
+- Why: prevent the themed UI from drifting into low-contrast, overlapping, marketing-style, or inaccessible patterns.
+- How: verified red/green static tests, added `max-width: 820px` responsive rules, kept visible labels for chat/admin controls, and recorded a manual desktop/mobile screenshot checklist.
+
+### R5-T01 through R5-T03 - Reviewer path and final evidence
+
+- What: updated reviewer/demo/test documentation and recorded exact revamp evidence, commands, limitations, and changed files.
+- Where: `README.md`, `docs/demo-script.md`, `docs/test-plan.md`, `docs/web-app-revamp-tdd-plan.md`, `docs/askoc-ux-theme-brainstorm.md`, `CHANGELOG.md`.
+- When: 2026-05-09.
+- Why: make the revamp understandable as AskOC UX polish, not a separate product, and keep the final evidence auditable.
+- How: added README themed-UI proof, demo “point at” callouts, R0-R5 test evidence, manual visual checklist, and this changelog entry after implementation.
+
+### R0-R5 verification evidence
+
+- What: verified the revamp with red/green handler/static contracts and broader handler tests.
+- Where: `internal/handlers`, `web/templates`, `web/static`, docs listed above.
+- When: 2026-05-09.
+- Why: ensure UI changes are test-backed and do not alter API behavior.
+- How: red command failed first: `go test ./internal/handlers -run 'Test(Chat|Admin).*Revamp|Test(Chat|Admin)StaticAssets'`; green commands passed: same narrow command, `go test ./internal/handlers`, `go test ./...`, `make eval`, `make secret-check`, `git diff --check`, and `ASKOC_API_PORT=18080 make smoke`. The default `make smoke` image build succeeded but could not bind occupied port `8080`, so the documented alternate port was used.
+
 ## 2026-05-09 - AskOC DESIGN.md UX Theme Prompt Plan
 
 ### AskOC UX theme TDD prompt pack
