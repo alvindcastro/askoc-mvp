@@ -4,6 +4,8 @@ This document applies `DESIGN.md` as the UX theme for the existing **AskOC AI Co
 
 `DESIGN.md` names the visual system "VoiceBox"; in this repository, treat that as the **visual language only**: bold editorial typography, high contrast, square borders, no shadows, and a restrained red accent.
 
+For the active revamp branch, use [web-app-revamp-tdd-plan.md](web-app-revamp-tdd-plan.md) as the execution handoff. It adds the current route inventory, known UI consistency risks, and R0-R5 copy/paste prompts with strict red-first TDD requirements.
+
 ## MVP UX Thesis
 
 AskOC should feel like a crisp operational console for a learner-service automation demo, not a generic chatbot and not a separate editorial site. The UX should help an interviewer quickly see:

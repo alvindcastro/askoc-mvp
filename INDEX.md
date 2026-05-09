@@ -12,6 +12,7 @@ This folder contains the Go/Golang-focused, strict-TDD Markdown documentation pa
 - [docs/mvp-scope.md](docs/mvp-scope.md) — product scope, user journeys, boundaries, success metrics, and demo deliverables.
 - [docs/brainstorm.md](docs/brainstorm.md) — MVP brainstorming notes, architecture decisions, phase strategy, and TDD priorities.
 - [docs/askoc-ux-theme-brainstorm.md](docs/askoc-ux-theme-brainstorm.md) — AskOC-specific UX theme mapping from `DESIGN.md`, with a tickable TDD task board for MVP UI polish.
+- [docs/web-app-revamp-tdd-plan.md](docs/web-app-revamp-tdd-plan.md) — revamp-branch web app brainstorm, current route inventory, consistency risks, and per-phase strict-TDD prompts.
 - [docs/phases-and-tasks.md](docs/phases-and-tasks.md) — phase-by-phase tickable task board with acceptance criteria and quality gates.
 - [docs/task-prompts.md](docs/task-prompts.md) — detailed copy/paste prompts for each task, including strict TDD prompts for code work.
 - [docs/askoc-ux-tdd-prompts.md](docs/askoc-ux-tdd-prompts.md) — copy/paste strict-TDD prompts for applying the `DESIGN.md` theme to the existing AskOC MVP.
