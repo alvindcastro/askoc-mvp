@@ -2,6 +2,16 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-09 - VoiceBox Web App Prompt Plan
+
+### VoiceBox phased TDD prompt pack
+
+- What: added a VoiceBox editorial web app brainstorm, tickable phase/task board, and copy/paste strict-TDD prompts grounded in `DESIGN.md`.
+- Where: `docs/voicebox-web-app-brainstorm.md`, `docs/voicebox-tdd-prompts.md`, `INDEX.md`, `CHANGELOG.md`.
+- When: 2026-05-09.
+- Why: plan a new web app direction with parallel-agent research, UX constraints, phase prompts, and strict TDD without rewriting the completed AskOC P0-P11 implementation history.
+- How: reviewed the VoiceBox design system, kept the AskOC phase board stable, separated VoiceBox planning into dedicated Markdown files, and made all implementation tasks tickable with red/green/refactor evidence.
+
 ## 2026-05-06 - P11 Portfolio Polish And Interview Readiness
 
 ### P11-T01 - Polish README for applicant storytelling

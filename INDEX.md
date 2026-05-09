@@ -11,8 +11,10 @@ This folder contains the Go/Golang-focused, strict-TDD Markdown documentation pa
 - [.env.example](.env.example) — placeholder-only local environment sample for deterministic demo mode.
 - [docs/mvp-scope.md](docs/mvp-scope.md) — product scope, user journeys, boundaries, success metrics, and demo deliverables.
 - [docs/brainstorm.md](docs/brainstorm.md) — MVP brainstorming notes, architecture decisions, phase strategy, and TDD priorities.
+- [docs/voicebox-web-app-brainstorm.md](docs/voicebox-web-app-brainstorm.md) — VoiceBox editorial web app concept, UX constraints from `DESIGN.md`, and tickable TDD task board.
 - [docs/phases-and-tasks.md](docs/phases-and-tasks.md) — phase-by-phase tickable task board with acceptance criteria and quality gates.
 - [docs/task-prompts.md](docs/task-prompts.md) — detailed copy/paste prompts for each task, including strict TDD prompts for code work.
+- [docs/voicebox-tdd-prompts.md](docs/voicebox-tdd-prompts.md) — copy/paste strict-TDD prompts for each VoiceBox editorial web app phase and task.
 - [docs/tdd-policy.md](docs/tdd-policy.md) — strict Go TDD policy, required evidence, test categories, and anti-patterns.
 - [docs/architecture.md](docs/architecture.md) — Go-based solution architecture, service boundaries, data flow, and deployment notes.
 - [docs/golang-implementation.md](docs/golang-implementation.md) — Go project layout, packages, handler patterns, interfaces, testing strategy, and local commands.
