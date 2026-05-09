@@ -37,7 +37,7 @@ For a fully local P8 demo, `cmd/workflow-sim` simulates the Power Automate flow.
 
 ```text
 cmd/api
-→ POST http://workflow-sim:8084/api/v1/automation/payment-reminder
+→ POST http://workflow-sim:9084/api/v1/automation/payment-reminder
 → workflow-sim writes event to audit store
 → workflow-sim returns workflow ID
 ```
@@ -129,7 +129,7 @@ Implemented runtime settings:
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `ASKOC_WORKFLOW_URL` | empty | Empty uses the in-process client; set to `http://localhost:8084/api/v1/automation/payment-reminder` for `cmd/workflow-sim` or to a Power Automate trigger URL for webhook mode; redacted from config output |
+| `ASKOC_WORKFLOW_URL` | empty | Empty uses the in-process client; set to `http://localhost:9084/api/v1/automation/payment-reminder` for `cmd/workflow-sim` or to a Power Automate trigger URL for webhook mode; redacted from config output |
 | `ASKOC_WORKFLOW_TIMEOUT_SECONDS` | `5` | HTTP client timeout |
 | `ASKOC_WORKFLOW_SIGNATURE` | empty | Optional shared signature/header value; redacted from config output and never logged |
 | `ASKOC_WORKFLOW_SIGNATURE_HEADER` | `X-AskOC-Workflow-Signature` | Header name used with the signature value |

@@ -59,24 +59,24 @@ make secret-check
 make eval
 make docker-build
 make smoke
-ASKOC_API_PORT=18080 make smoke
+ASKOC_API_PORT=9180 make smoke
 ```
 
 P11 release verification uses package-specific privacy, audit, handler, LLM, classifier, RAG, workflow, config, API, simulator, orchestrator, eval, and build-artifact tests plus `go test ./...`. The deterministic evaluation gate is `make eval`; it must report zero critical failures before demo release. The local repeatability gate is `make smoke`; it builds and starts the Compose stack, checks `/healthz`, and verifies transcript workflow plus CRM action traces using synthetic IDs.
 
 ## Smoke checks
 
-`scripts/smoke.sh` can either start Docker Compose itself or test an already running local stack. Compose host ports default to `8080`-`8085`; set `ASKOC_API_PORT`, `ASKOC_BANNER_PORT`, `ASKOC_PAYMENT_PORT`, `ASKOC_CRM_PORT`, `ASKOC_WORKFLOW_PORT`, or `ASKOC_LMS_PORT` when a default port is already in use.
+`scripts/smoke.sh` can either start Docker Compose itself or test an already running local stack. Compose host ports default to `9080`-`9085`; set `ASKOC_API_PORT`, `ASKOC_BANNER_PORT`, `ASKOC_PAYMENT_PORT`, `ASKOC_CRM_PORT`, `ASKOC_WORKFLOW_PORT`, or `ASKOC_LMS_PORT` to another `9xxx` range when a default port is already in use.
 
 ```bash
 make smoke
 make compose-up
 make compose-test
 scripts/smoke.sh --compose --keep-stack
-scripts/smoke.sh --base-url http://localhost:18080
+scripts/smoke.sh --base-url http://localhost:9080
 ```
 
-`make smoke` is the release-style proof and tears the Compose stack down after the assertions. Use `scripts/smoke.sh --compose --keep-stack` for exploratory testing. `make compose-test` targets `http://localhost:8080`; when the stack is running on alternate ports, use `scripts/smoke.sh --base-url http://localhost:18080`.
+`make smoke` is the release-style proof and tears the Compose stack down after the assertions. Use `scripts/smoke.sh --compose --keep-stack` for exploratory testing. `make compose-test` targets `http://localhost:9080`; when the stack is running on alternate ports, use `scripts/smoke.sh --base-url http://localhost:<api-port>`.
 
 Expected smoke assertions:
 
@@ -386,4 +386,4 @@ Latest local verification on 2026-05-06:
 | `make eval` | Pass: 34/34 cases passed with zero critical failures and refreshed `reports/eval-summary.md`. |
 | `make secret-check` | Pass: no known live-token patterns detected. |
 | `git diff --check` | Pass: no whitespace errors. |
-| `make smoke` | Default port `8080` was occupied locally after images built; rerun with the documented `ASKOC_API_PORT=18080 make smoke` override passed health, transcript workflow, and CRM smoke checks. |
+| `make smoke` | Default port `9080` was occupied locally after images built; rerun with a documented alternate `9xxx` API port override passed health, transcript workflow, and CRM smoke checks. |

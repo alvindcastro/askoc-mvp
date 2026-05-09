@@ -30,7 +30,7 @@ func main() {
 	mux.Handle("/readyz", handlers.ReadyHandler())
 
 	server := &http.Server{
-		Addr:              ":8082",
+		Addr:              ":9082",
 		Handler:           middleware.Chain(mux, middleware.TraceID, middleware.Recover, middleware.RequestLogger(logger, middleware.BasicRedactor)),
 		ReadHeaderTimeout: 5 * time.Second,
 	}

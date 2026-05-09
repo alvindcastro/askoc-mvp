@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-BASE_URL="${ASKOC_BASE_URL:-http://localhost:${ASKOC_API_PORT:-8080}}"
+BASE_URL="${ASKOC_BASE_URL:-http://localhost:${ASKOC_API_PORT:-9080}}"
 COMPOSE=0
 KEEP_STACK=0
 TIMEOUT_SECONDS="${ASKOC_SMOKE_TIMEOUT_SECONDS:-90}"

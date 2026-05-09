@@ -16,7 +16,7 @@ Allowed visible values:
 
 - synthetic student IDs such as `S100002`,
 - mock workflow or CRM identifiers with `SYNTH-` or `MOCK-` prefixes,
-- local URLs such as `localhost:8080`,
+- local URLs such as `localhost:9080`,
 - placeholder admin token text such as `demo-admin-token`.
 
 Disallowed visible values:

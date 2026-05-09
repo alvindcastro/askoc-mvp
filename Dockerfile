@@ -20,6 +20,6 @@ COPY --from=build /src/web /app/web
 
 USER askoc
 
-EXPOSE 8080
+EXPOSE 9080
 
 ENTRYPOINT ["/app/askoc"]

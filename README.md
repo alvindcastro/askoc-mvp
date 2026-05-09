@@ -25,7 +25,7 @@ make smoke
 make compose-up
 ```
 
-4. Open `http://localhost:8080/chat` for the themed learner chat and `http://localhost:8080/admin` for the themed protected dashboard. The local admin token is `demo-admin-token`.
+4. Open `http://localhost:9080/chat` for the themed learner chat and `http://localhost:9080/admin` for the themed protected dashboard. The local admin token is `demo-admin-token`.
 5. Skim [docs/developer-guide.md](docs/developer-guide.md), [docs/demo-script.md](docs/demo-script.md), [docs/architecture.md](docs/architecture.md), and [reports/eval-summary.md](reports/eval-summary.md) for local testing, the 5-7 minute walkthrough, integration diagrams, and quality evidence.
 
 ## Portfolio evidence at a glance
@@ -242,9 +242,9 @@ go run ./cmd/mock-crm
 go run ./cmd/mock-lms
 ```
 
-For the repeatable Docker demo, run `make smoke`. It builds the API and mock-service images with Docker Compose, waits for `/healthz`, posts the unpaid `S100002` transcript-status scenario, and posts the `S100003` financial-hold scenario that creates a mock CRM case. Use `make compose-up` when you want to keep the stack running, then `make compose-test` to smoke-test an already running default-port stack. The Compose stack uses `ASKOC_PROVIDER=stub`, synthetic fixtures, service-DNS URLs such as `http://mock-banner:8081`, and the local workflow simulator URL by default. If a default host port is already in use, use the alternate-port commands in [docs/developer-guide.md](docs/developer-guide.md); the common API override is `ASKOC_API_PORT=18080`.
+For the repeatable Docker demo, run `make smoke`. It builds the API and mock-service images with Docker Compose, waits for `/healthz`, posts the unpaid `S100002` transcript-status scenario, and posts the `S100003` financial-hold scenario that creates a mock CRM case. Use `make compose-up` when you want to keep the stack running, then `make compose-test` to smoke-test an already running default-port stack. The Compose stack uses `ASKOC_PROVIDER=stub`, synthetic fixtures, service-DNS URLs such as `http://mock-banner:9081`, and the local workflow simulator URL by default. Host ports default to `9080`-`9085`; if that range is already in use, choose another `9xxx` range with the override commands in [docs/developer-guide.md](docs/developer-guide.md).
 
-For manual local development without containers, start the mock Banner, payment, CRM, and optionally workflow simulator services in separate terminals before `make dev`. The API loads local RAG chunks from `data/rag-chunks.json` at startup and talks to typed mock services through configurable local URLs. If `ASKOC_WORKFLOW_URL` is empty, the API uses the in-process idempotent workflow client; set `ASKOC_WORKFLOW_URL=http://localhost:8084/api/v1/automation/payment-reminder` to route reminders through `cmd/workflow-sim`, or point it at a Power Automate HTTP trigger for the optional webhook path. Auth is disabled by default for learner chat. Admin metrics, unresolved eval review items, audit export, purge, and reset routes require a bearer token; by default use `demo-admin-token`, or set `ASKOC_AUTH_TOKEN=<demo-token>` to reuse the configured mock token.
+For manual local development without containers, start the mock Banner, payment, CRM, and optionally workflow simulator services in separate terminals before `make dev`. The API loads local RAG chunks from `data/rag-chunks.json` at startup and talks to typed mock services through configurable local URLs. If `ASKOC_WORKFLOW_URL` is empty, the API uses the in-process idempotent workflow client; set `ASKOC_WORKFLOW_URL=http://localhost:9084/api/v1/automation/payment-reminder` to route reminders through `cmd/workflow-sim`, or point it at a Power Automate HTTP trigger for the optional webhook path. Auth is disabled by default for learner chat. Admin metrics, unresolved eval review items, audit export, purge, and reset routes require a bearer token; by default use `demo-admin-token`, or set `ASKOC_AUTH_TOKEN=<demo-token>` to reuse the configured mock token.
 
 `make eval` is the responsible-AI quality gate. It runs `cmd/eval` against `data/eval-questions.jsonl` using the deterministic in-process evaluator by default, writes `reports/eval-summary.json` and `reports/eval-summary.md`, and exits non-zero for critical safety regressions such as unsupported critical claims or missing required escalation.
 
@@ -254,7 +254,7 @@ Current environment settings:
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `ASKOC_HTTP_ADDR` | `:8080` | API listen address |
+| `ASKOC_HTTP_ADDR` | `:9080` | API listen address |
 | `ASKOC_AUTH_ENABLED` | `false` | Enables mock bearer-token auth |
 | `ASKOC_AUTH_TOKEN` | empty | Demo bearer token when auth is enabled |
 | `ASKOC_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, or `error` |
@@ -263,38 +263,38 @@ Current environment settings:
 | `ASKOC_WORKFLOW_SIGNATURE` | empty | Optional workflow webhook signature/header value; redacted from config output |
 | `ASKOC_WORKFLOW_SIGNATURE_HEADER` | `X-AskOC-Workflow-Signature` | Header name used when `ASKOC_WORKFLOW_SIGNATURE` is set |
 | `ASKOC_WORKFLOW_MAX_RETRIES` | `1` | Retry count for transient workflow webhook `5xx` responses |
-| `ASKOC_BANNER_URL` | `http://localhost:8081` | Mock Banner base URL used by P4 orchestration |
-| `ASKOC_PAYMENT_URL` | `http://localhost:8082` | Mock payment base URL used by P4 orchestration |
-| `ASKOC_CRM_URL` | `http://localhost:8083` | Mock CRM base URL used by P4 orchestration |
+| `ASKOC_BANNER_URL` | `http://localhost:9081` | Mock Banner base URL used by P4 orchestration |
+| `ASKOC_PAYMENT_URL` | `http://localhost:9082` | Mock payment base URL used by P4 orchestration |
+| `ASKOC_CRM_URL` | `http://localhost:9083` | Mock CRM base URL used by P4 orchestration |
 | `ASKOC_RAG_CHUNKS_PATH` | `data/rag-chunks.json` | Local approved-source chunks used by P5 retrieval |
 | `ASKOC_PROVIDER` | `stub` | `stub` keeps deterministic mode; `openai-compatible` enables the tested REST LLM gateway |
 | `ASKOC_PROVIDER_MODEL` | `demo-placeholder` | Provider model/deployment name when LLM mode is enabled |
 | `ASKOC_PROVIDER_ENDPOINT` | empty | OpenAI-compatible or Azure chat completions endpoint; required only for `openai-compatible` |
 | `ASKOC_PROVIDER_TIMEOUT_SECONDS` | `5` | LLM request timeout |
 | `ASKOC_PROVIDER_API_KEY` | empty | Provider API key; required only for `openai-compatible` and redacted from config output |
-| `ASKOC_API_PORT` | `8080` | Optional Docker Compose host port override for the API |
-| `ASKOC_BANNER_PORT` | `8081` | Optional Docker Compose host port override for mock Banner |
-| `ASKOC_PAYMENT_PORT` | `8082` | Optional Docker Compose host port override for mock payment |
-| `ASKOC_CRM_PORT` | `8083` | Optional Docker Compose host port override for mock CRM |
-| `ASKOC_WORKFLOW_PORT` | `8084` | Optional Docker Compose host port override for workflow simulator |
-| `ASKOC_LMS_PORT` | `8085` | Optional Docker Compose host port override for mock LMS |
+| `ASKOC_API_PORT` | `9080` | Optional Docker Compose host port override for the API |
+| `ASKOC_BANNER_PORT` | `9081` | Optional Docker Compose host port override for mock Banner |
+| `ASKOC_PAYMENT_PORT` | `9082` | Optional Docker Compose host port override for mock payment |
+| `ASKOC_CRM_PORT` | `9083` | Optional Docker Compose host port override for mock CRM |
+| `ASKOC_WORKFLOW_PORT` | `9084` | Optional Docker Compose host port override for workflow simulator |
+| `ASKOC_LMS_PORT` | `9085` | Optional Docker Compose host port override for mock LMS |
 
 Current service URLs:
 
 ```text
-Chat UI:   http://localhost:8080/chat
-Chat API:  http://localhost:8080/api/v1/chat
-Admin UI:  http://localhost:8080/admin
-Admin API: http://localhost:8080/api/v1/admin/metrics
-Review API: http://localhost:8080/api/v1/admin/review-items
-Health:    http://localhost:8080/healthz
-Readiness: http://localhost:8080/readyz
+Chat UI:   http://localhost:9080/chat
+Chat API:  http://localhost:9080/api/v1/chat
+Admin UI:  http://localhost:9080/admin
+Admin API: http://localhost:9080/api/v1/admin/metrics
+Review API: http://localhost:9080/api/v1/admin/review-items
+Health:    http://localhost:9080/healthz
+Readiness: http://localhost:9080/readyz
 
-Mock Banner:  http://localhost:8081/api/v1/students/S100002
-Mock Payment: http://localhost:8082/api/v1/students/S100002/payment-status
-Mock CRM:     http://localhost:8083/api/v1/crm/cases
-Workflow Sim: http://localhost:8084/api/v1/automation/payment-reminder
-Mock LMS:     http://localhost:8085/api/v1/students/S100001/lms-access?course_id=DEMO-LMS-101
+Mock Banner:  http://localhost:9081/api/v1/students/S100002
+Mock Payment: http://localhost:9082/api/v1/students/S100002/payment-status
+Mock CRM:     http://localhost:9083/api/v1/crm/cases
+Workflow Sim: http://localhost:9084/api/v1/automation/payment-reminder
+Mock LMS:     http://localhost:9085/api/v1/students/S100001/lms-access?course_id=DEMO-LMS-101
 ```
 
 The chat API validates JSON requests, rejects empty or oversized messages, accepts synthetic student IDs in the `S` plus six digits format, includes trace IDs in responses and action results, routes transcript/payment decisions through the orchestrator, and uses P5 retrieval plus P6 source guardrails for transcript-request answers.

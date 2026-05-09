@@ -2,6 +2,16 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-09 - Local Port Defaults Move To 9xxx
+
+### Docker and developer port alignment
+
+- What: changed local API, mock service, Compose, smoke, and documentation defaults from the old `808x` range to `9080`-`9085`, with `9180`-`9185` shown as the fallback override range.
+- Where: `docker-compose.yml`, `.env.example`, `scripts/smoke.sh`, `Makefile`, service entrypoints under `cmd/`, `internal/config`, `internal/build`, `README.md`, and developer/testing docs.
+- When: 2026-05-09.
+- Why: keep this side project out of the port range used by other local projects.
+- How: updated runtime defaults, Compose health checks and port mappings, config/build tests, and local testing/troubleshooting docs, then verified with Go tests and Docker smoke checks.
+
 ## 2026-05-09 - AskOC Header Title Red Treatment
 
 ### Chat and admin title styling

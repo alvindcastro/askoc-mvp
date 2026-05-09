@@ -32,24 +32,24 @@ go run ./cmd/ingest -sources data/seed-sources.json -out data/rag-chunks.json
 
 For manual non-container development, start `cmd/mock-banner`, `cmd/mock-payment`, `cmd/mock-crm`, and `cmd/workflow-sim` in separate terminals before `make dev`.
 
-If port `8080` is already in use during prep, run `ASKOC_API_PORT=18080 make smoke` and open `http://localhost:18080`.
+If port `9080` is already in use during prep, run `ASKOC_API_PORT=9180 make smoke` and open `http://localhost:9180`.
 
 Open:
 
 ```text
-http://localhost:8080
+http://localhost:9080
 ```
 
 Services:
 
 ```text
-API/UI:       http://localhost:8080
-Admin UI:     http://localhost:8080/admin
-Mock Banner:  http://localhost:8081
-Mock Payment: http://localhost:8082
-Mock CRM:     http://localhost:8083
-Workflow:     http://localhost:8084/api/v1/automation/payment-reminder or in-process fallback
-Mock LMS:     http://localhost:8085
+API/UI:       http://localhost:9080
+Admin UI:     http://localhost:9080/admin
+Mock Banner:  http://localhost:9081
+Mock Payment: http://localhost:9082
+Mock CRM:     http://localhost:9083
+Workflow:     http://localhost:9084/api/v1/automation/payment-reminder or in-process fallback
+Mock LMS:     http://localhost:9085
 Dashboard:    protected admin metrics and redacted review queue
 ```
 
@@ -144,7 +144,7 @@ Talking point:
 Open:
 
 ```text
-http://localhost:8080/admin
+http://localhost:9080/admin
 ```
 
 Use the default local admin token:

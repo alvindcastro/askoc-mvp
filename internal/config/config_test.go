@@ -12,8 +12,8 @@ func TestLoadFromEnvUsesSafeDefaults(t *testing.T) {
 		t.Fatalf("LoadFromEnv returned error: %v", err)
 	}
 
-	if cfg.HTTPAddr != ":8080" {
-		t.Fatalf("HTTPAddr = %q, want :8080", cfg.HTTPAddr)
+	if cfg.HTTPAddr != ":9080" {
+		t.Fatalf("HTTPAddr = %q, want :9080", cfg.HTTPAddr)
 	}
 	if cfg.Auth.Enabled {
 		t.Fatalf("Auth.Enabled = true, want false for local demo default")
@@ -39,13 +39,13 @@ func TestLoadFromEnvUsesSafeDefaults(t *testing.T) {
 	if cfg.Workflow.MaxRetries != 1 {
 		t.Fatalf("Workflow.MaxRetries = %d, want one retry by default", cfg.Workflow.MaxRetries)
 	}
-	if cfg.Integrations.BannerURL != "http://localhost:8081" {
+	if cfg.Integrations.BannerURL != "http://localhost:9081" {
 		t.Fatalf("Integrations.BannerURL = %q, want mock Banner default", cfg.Integrations.BannerURL)
 	}
-	if cfg.Integrations.PaymentURL != "http://localhost:8082" {
+	if cfg.Integrations.PaymentURL != "http://localhost:9082" {
 		t.Fatalf("Integrations.PaymentURL = %q, want mock Payment default", cfg.Integrations.PaymentURL)
 	}
-	if cfg.Integrations.CRMURL != "http://localhost:8083" {
+	if cfg.Integrations.CRMURL != "http://localhost:9083" {
 		t.Fatalf("Integrations.CRMURL = %q, want mock CRM default", cfg.Integrations.CRMURL)
 	}
 	if cfg.Provider.Mode != "stub" {

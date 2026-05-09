@@ -421,12 +421,12 @@ The interview sequence traces the 5-7 minute walkthrough: Tier 0 grounded answer
 
 | Service | Port |
 |---|---:|
-| `cmd/api` | 8080 |
-| `cmd/mock-banner` | 8081 |
-| `cmd/mock-payment` | 8082 |
-| `cmd/mock-crm` | 8083 |
-| `cmd/workflow-sim` | 8084 |
-| `cmd/mock-lms` | 8085 |
+| `cmd/api` | 9080 |
+| `cmd/mock-banner` | 9081 |
+| `cmd/mock-payment` | 9082 |
+| `cmd/mock-crm` | 9083 |
+| `cmd/workflow-sim` | 9084 |
+| `cmd/mock-lms` | 9085 |
 | PostgreSQL | 5432 |
 
 ## Deployment options
@@ -443,7 +443,7 @@ Docker Compose
 - workflow-sim
 ```
 
-The local Compose stack uses `ASKOC_PROVIDER=stub`, synthetic fixtures, service-DNS URLs for mock integrations, and `workflow-sim` for payment reminder automation. Host ports default to `8080`-`8085` and can be overridden with `ASKOC_API_PORT`, `ASKOC_BANNER_PORT`, `ASKOC_PAYMENT_PORT`, `ASKOC_CRM_PORT`, `ASKOC_WORKFLOW_PORT`, and `ASKOC_LMS_PORT`. PostgreSQL remains a later deployment option; the P11 portfolio demo stack is fully deterministic without a database.
+The local Compose stack uses `ASKOC_PROVIDER=stub`, synthetic fixtures, service-DNS URLs for mock integrations, and `workflow-sim` for payment reminder automation. Host ports default to `9080`-`9085` and can be overridden with `ASKOC_API_PORT`, `ASKOC_BANNER_PORT`, `ASKOC_PAYMENT_PORT`, `ASKOC_CRM_PORT`, `ASKOC_WORKFLOW_PORT`, and `ASKOC_LMS_PORT`. PostgreSQL remains a later deployment option; the P11 portfolio demo stack is fully deterministic without a database.
 
 ```bash
 make smoke

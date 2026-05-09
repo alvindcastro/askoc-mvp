@@ -37,16 +37,16 @@ func TestP10ComposeStackUsesSyntheticDeterministicDefaults(t *testing.T) {
 		"mock-lms:",
 		"workflow-sim:",
 		"ASKOC_PROVIDER: stub",
-		"ASKOC_BANNER_URL: http://mock-banner:8081",
-		"ASKOC_PAYMENT_URL: http://mock-payment:8082",
-		"ASKOC_CRM_URL: http://mock-crm:8083",
-		"ASKOC_WORKFLOW_URL: http://workflow-sim:8084/api/v1/automation/payment-reminder",
-		"${ASKOC_API_PORT:-8080}:8080",
-		"${ASKOC_BANNER_PORT:-8081}:8081",
-		"${ASKOC_PAYMENT_PORT:-8082}:8082",
-		"${ASKOC_CRM_PORT:-8083}:8083",
-		"${ASKOC_WORKFLOW_PORT:-8084}:8084",
-		"${ASKOC_LMS_PORT:-8085}:8085",
+		"ASKOC_BANNER_URL: http://mock-banner:9081",
+		"ASKOC_PAYMENT_URL: http://mock-payment:9082",
+		"ASKOC_CRM_URL: http://mock-crm:9083",
+		"ASKOC_WORKFLOW_URL: http://workflow-sim:9084/api/v1/automation/payment-reminder",
+		"${ASKOC_API_PORT:-9080}:9080",
+		"${ASKOC_BANNER_PORT:-9081}:9081",
+		"${ASKOC_PAYMENT_PORT:-9082}:9082",
+		"${ASKOC_CRM_PORT:-9083}:9083",
+		"${ASKOC_WORKFLOW_PORT:-9084}:9084",
+		"${ASKOC_LMS_PORT:-9085}:9085",
 		"/healthz",
 	)
 	if strings.Contains(text, "ASKOC_PROVIDER_API_KEY:") {
@@ -73,13 +73,13 @@ func TestP10CIWorkflowRunsOfflineQualityGates(t *testing.T) {
 func TestP10EnvironmentSampleAndGitignoreAreSecretSafe(t *testing.T) {
 	env := readRepoFile(t, ".env.example")
 	mustContainAll(t, env,
-		"ASKOC_HTTP_ADDR=:8080",
+		"ASKOC_HTTP_ADDR=:9080",
 		"ASKOC_PROVIDER=stub",
 		"ASKOC_PROVIDER_API_KEY=",
 		"ASKOC_WORKFLOW_URL=",
-		"ASKOC_BANNER_URL=http://localhost:8081",
-		"ASKOC_PAYMENT_URL=http://localhost:8082",
-		"ASKOC_CRM_URL=http://localhost:8083",
+		"ASKOC_BANNER_URL=http://localhost:9081",
+		"ASKOC_PAYMENT_URL=http://localhost:9082",
+		"ASKOC_CRM_URL=http://localhost:9083",
 	)
 	for _, forbidden := range []string{"sk-", "xoxb-", "ghp_", "AIza"} {
 		if strings.Contains(env, forbidden) {

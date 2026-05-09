@@ -84,7 +84,7 @@ Known consistency risks handled during the revamp:
 - Changed runtime files: `web/templates/chat.html`, `web/templates/admin.html`, `web/static/app.css`, `web/static/app.js`, `web/static/admin.css`, `web/static/admin.js`.
 - Changed test files: `internal/handlers/ui_test.go`, `internal/handlers/admin_ui_test.go`.
 - Changed documentation files: `README.md`, `docs/demo-script.md`, `docs/test-plan.md`, `docs/askoc-ux-theme-brainstorm.md`, `docs/web-app-revamp-tdd-plan.md`, `CHANGELOG.md`.
-- Full verification: `go test ./...`, `make eval`, `make secret-check`, `git diff --check`, and `ASKOC_API_PORT=18080 make smoke` passed; default `make smoke` was blocked by occupied port `8080`.
+- Full verification: `go test ./...`, `make eval`, `make secret-check`, `git diff --check`, and an alternate `9xxx` `ASKOC_API_PORT` smoke run passed; default `make smoke` was blocked by an occupied API port.
 - Manual visual checklist: inspect `/chat` and `/admin` at mobile and desktop widths for text overlap, hidden source/action rows, clipped controls, dominant red usage, focus visibility, and accidental raw learner data.
 
 ## Phase R0 - Baseline, Scope, And Evidence

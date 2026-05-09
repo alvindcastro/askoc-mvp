@@ -23,7 +23,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	input := fs.String("input", "data/eval-questions.jsonl", "JSONL evaluation dataset path")
 	output := fs.String("output", "reports/eval-summary.json", "JSON evaluation report output path")
 	markdownOutput := fs.String("markdown-output", "reports/eval-summary.md", "Markdown evaluation report output path")
-	baseURL := fs.String("base-url", "", "optional live API base URL, for example http://localhost:8080/api/v1")
+	baseURL := fs.String("base-url", "", "optional live API base URL, for example http://localhost:9080/api/v1")
 	chunksPath := fs.String("chunks", "data/rag-chunks.json", "local RAG chunks path for deterministic mode")
 	studentsPath := fs.String("students", "data/synthetic-students.json", "synthetic student fixture path for deterministic mode")
 	timeout := fs.Duration("timeout", 5*time.Second, "per-case timeout")

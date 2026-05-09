@@ -25,7 +25,7 @@ compose-down:
 	docker compose down --remove-orphans
 
 compose-test:
-	scripts/smoke.sh --base-url http://localhost:8080
+	scripts/smoke.sh --base-url http://localhost:9080
 
 smoke:
 	scripts/smoke.sh --compose

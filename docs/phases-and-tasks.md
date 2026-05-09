@@ -721,7 +721,7 @@ Before calling the MVP interview-ready:
 
 - [x] `make test` passes.
 - [x] `make eval` passes with zero critical policy errors.
-- [x] Smoke gate passes against the local stack; default `make smoke` built images but local port `8080` was occupied, and `ASKOC_API_PORT=18080 make smoke` passed.
+- [x] Smoke gate passes against the local stack; default `make smoke` built images but the local API port was occupied, and an alternate `9xxx` `ASKOC_API_PORT` smoke run passed.
 - [x] Demo uses only synthetic learner records.
 - [x] Transcript request, unpaid payment reminder, financial-hold escalation, and urgent-sentiment escalation all work.
 - [x] Dashboard shows containment, escalation, workflow, low-confidence, and stale-source metrics.

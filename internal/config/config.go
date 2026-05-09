@@ -55,7 +55,7 @@ func Load() (Config, error) {
 
 func LoadFromEnv(env map[string]string) (Config, error) {
 	cfg := Config{
-		HTTPAddr: value(env, "ASKOC_HTTP_ADDR", ":8080"),
+		HTTPAddr: value(env, "ASKOC_HTTP_ADDR", ":9080"),
 		LogLevel: value(env, "ASKOC_LOG_LEVEL", "info"),
 		Auth: AuthConfig{
 			Enabled: false,
@@ -76,9 +76,9 @@ func LoadFromEnv(env map[string]string) (Config, error) {
 			Timeout:  5 * time.Second,
 		},
 		Integrations: IntegrationConfig{
-			BannerURL:  value(env, "ASKOC_BANNER_URL", "http://localhost:8081"),
-			PaymentURL: value(env, "ASKOC_PAYMENT_URL", "http://localhost:8082"),
-			CRMURL:     value(env, "ASKOC_CRM_URL", "http://localhost:8083"),
+			BannerURL:  value(env, "ASKOC_BANNER_URL", "http://localhost:9081"),
+			PaymentURL: value(env, "ASKOC_PAYMENT_URL", "http://localhost:9082"),
+			CRMURL:     value(env, "ASKOC_CRM_URL", "http://localhost:9083"),
 		},
 		RAG: RAGConfig{
 			ChunksPath: value(env, "ASKOC_RAG_CHUNKS_PATH", "data/rag-chunks.json"),

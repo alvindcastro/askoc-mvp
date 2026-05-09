@@ -146,7 +146,7 @@ P11 portfolio captures must be reviewed before they are added to the repository 
 
 Required checks:
 
-- Capture only local demo URLs such as `localhost:8080` or clearly fake placeholders.
+- Capture only local demo URLs such as `localhost:9080` or clearly fake placeholders.
 - Show only synthetic learner IDs in the `S10000X` pattern.
 - Show only `SYNTH-`, `MOCK-`, or local demo workflow/case identifiers.
 - Do not show `.env`, shell history, real webhook URLs, provider endpoints, API keys, or browser profile details.

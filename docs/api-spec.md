@@ -7,10 +7,10 @@ This document defines a simple REST API surface for the AskOC AI Concierge MVP. 
 ## Base URL
 
 ```text
-http://localhost:8080/api/v1
+http://localhost:9080/api/v1
 ```
 
-The implemented P9 chat route is `POST http://localhost:8080/api/v1/chat`. The web chat UI is served at `GET http://localhost:8080/chat`, the admin dashboard shell is served at `GET http://localhost:8080/admin`, the protected eval review queue is served at `GET http://localhost:8080/api/v1/admin/review-items`, and the local workflow simulator exposes `POST http://localhost:8084/api/v1/automation/payment-reminder`.
+The implemented P9 chat route is `POST http://localhost:9080/api/v1/chat`. The web chat UI is served at `GET http://localhost:9080/chat`, the admin dashboard shell is served at `GET http://localhost:9080/admin`, the protected eval review queue is served at `GET http://localhost:9080/api/v1/admin/review-items`, and the local workflow simulator exposes `POST http://localhost:9084/api/v1/automation/payment-reminder`.
 
 ## Authentication
 
@@ -55,7 +55,7 @@ X-Trace-ID: optional-client-generated-trace-id
 | `GET` | `/students/{student_id}/payment-status` | Check synthetic transcript payment status | `cmd/mock-payment` |
 | `POST` | `/crm/cases` | Create mock CRM case | `cmd/mock-crm` |
 | `GET` | `/students/{student_id}/lms-access` | Check synthetic LMS access status | `cmd/mock-lms` |
-| `POST` | `/api/v1/automation/payment-reminder` on port `8084` | Trigger mock payment reminder workflow | `cmd/workflow-sim` or Power Automate-compatible webhook target |
+| `POST` | `/api/v1/automation/payment-reminder` on port `9084` | Trigger mock payment reminder workflow | `cmd/workflow-sim` or Power Automate-compatible webhook target |
 | `GET` | `/admin/metrics` | Get protected dashboard summary metrics | `cmd/api` |
 | `GET` | `/admin/review-items` | Get protected unresolved eval review queue items | `cmd/api` |
 | `GET` | `/admin/audit/export` | Export redacted audit events with message content omitted | `cmd/api` |
@@ -640,7 +640,7 @@ info:
   title: AskOC AI Concierge API
   version: 0.1.0
 servers:
-  - url: http://localhost:8080/api/v1
+  - url: http://localhost:9080/api/v1
 paths:
   /chat:
     post:

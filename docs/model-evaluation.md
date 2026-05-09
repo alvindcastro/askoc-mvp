@@ -33,7 +33,7 @@ go run ./cmd/eval \
   -input data/eval-questions.jsonl \
   -output reports/eval-summary.json \
   -markdown-output reports/eval-summary.md \
-  -base-url http://localhost:8080/api/v1 \
+  -base-url http://localhost:9080/api/v1 \
   -fail-on-critical
 ```
 
