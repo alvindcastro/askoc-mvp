@@ -36,6 +36,7 @@ This test plan verifies that AskOC AI Concierge can answer learner-service quest
 | Dashboard | Go admin dashboard at `/admin` reading the in-memory audit event store through protected admin APIs |
 | Evaluation | P9 `cmd/eval` uses deterministic in-process fakes by default or a live local `/api/v1/chat` endpoint with `-base-url` |
 | Local stack | Docker Compose runs API, mock Banner, mock payment, mock CRM, mock LMS, and workflow simulator containers |
+| Developer testing guide | [Developer Testing Guide](developer-guide.md) documents local stack startup, alternate ports, manual checks, troubleshooting, and useful operating notes |
 | CI | GitHub Actions runs offline `go test ./...`, `go vet ./...`, and `make eval` with `ASKOC_PROVIDER=stub` |
 
 ## Go test commands
@@ -71,7 +72,11 @@ P11 release verification uses package-specific privacy, audit, handler, LLM, cla
 make smoke
 make compose-up
 make compose-test
+scripts/smoke.sh --compose --keep-stack
+scripts/smoke.sh --base-url http://localhost:18080
 ```
+
+`make smoke` is the release-style proof and tears the Compose stack down after the assertions. Use `scripts/smoke.sh --compose --keep-stack` for exploratory testing. `make compose-test` targets `http://localhost:8080`; when the stack is running on alternate ports, use `scripts/smoke.sh --base-url http://localhost:18080`.
 
 Expected smoke assertions:
 

@@ -2,6 +2,16 @@
 
 All notable MVP task changes are recorded here with what changed, where it changed, when it changed, why it changed, and how it was completed.
 
+## 2026-05-09 - Developer Testing Guide And Docker Stack Notes
+
+### Local testing workflow documentation
+
+- What: added a developer testing guide with Docker stack startup, alternate port commands, test commands, manual API checks, troubleshooting, and useful local operating notes.
+- Where: `docs/developer-guide.md`, `README.md`, `docs/test-plan.md`, `docs/golang-implementation.md`, `INDEX.md`.
+- When: 2026-05-09.
+- Why: make local testing and handoff clearer for the running Compose stack, especially when default port `8080` is occupied.
+- How: built the local Docker images, attempted the default smoke path, confirmed the `8080` bind conflict, restarted the stack on `18080`-`18085` with `scripts/smoke.sh --compose --keep-stack`, and documented the verified workflow.
+
 ## 2026-05-09 - R0-R5 Web App Revamp Implementation
 
 ### R0-T01 - Reconcile current web app status

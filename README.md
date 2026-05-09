@@ -26,13 +26,14 @@ make compose-up
 ```
 
 4. Open `http://localhost:8080/chat` for the themed learner chat and `http://localhost:8080/admin` for the themed protected dashboard. The local admin token is `demo-admin-token`.
-5. Skim [docs/demo-script.md](docs/demo-script.md), [docs/architecture.md](docs/architecture.md), and [reports/eval-summary.md](reports/eval-summary.md) for the 5-7 minute walkthrough, integration diagrams, and quality evidence.
+5. Skim [docs/developer-guide.md](docs/developer-guide.md), [docs/demo-script.md](docs/demo-script.md), [docs/architecture.md](docs/architecture.md), and [reports/eval-summary.md](reports/eval-summary.md) for local testing, the 5-7 minute walkthrough, integration diagrams, and quality evidence.
 
 ## Portfolio evidence at a glance
 
 | Evidence | What it proves | Where to verify |
 |---|---|---|
 | One-command smoke test | Docker Compose can run the synthetic transcript/payment demo and CRM handoff | `make smoke`, `scripts/smoke.sh` |
+| Developer testing guide | Local stack startup, alternate ports, manual checks, troubleshooting, and useful operating notes are documented in one place | [docs/developer-guide.md](docs/developer-guide.md) |
 | Go service architecture | Chat UI, Go API, orchestrator, RAG, mock enterprise APIs, workflow, audit, dashboard, and eval are separated by typed boundaries | [docs/architecture.md](docs/architecture.md) |
 | Responsible-AI gate | Intent, source, action, handoff, safety, and critical hallucination checks are repeatable | `make eval`, [reports/eval-summary.md](reports/eval-summary.md) |
 | Privacy boundary | All learner, payment, LMS, workflow, and CRM data is visibly synthetic and redacted before audit/dashboard use | [docs/privacy-impact-lite.md](docs/privacy-impact-lite.md), `data/synthetic-students.json` |
@@ -241,7 +242,7 @@ go run ./cmd/mock-crm
 go run ./cmd/mock-lms
 ```
 
-For the repeatable Docker demo, run `make smoke`. It builds the API and mock-service images with Docker Compose, waits for `/healthz`, posts the unpaid `S100002` transcript-status scenario, and posts the `S100003` financial-hold scenario that creates a mock CRM case. Use `make compose-up` when you want to keep the stack running, then `make compose-test` to smoke-test an already running stack. The Compose stack uses `ASKOC_PROVIDER=stub`, synthetic fixtures, service-DNS URLs such as `http://mock-banner:8081`, and the local workflow simulator URL by default. If a default host port is already in use, override it for Compose, for example `ASKOC_API_PORT=18080 make smoke`.
+For the repeatable Docker demo, run `make smoke`. It builds the API and mock-service images with Docker Compose, waits for `/healthz`, posts the unpaid `S100002` transcript-status scenario, and posts the `S100003` financial-hold scenario that creates a mock CRM case. Use `make compose-up` when you want to keep the stack running, then `make compose-test` to smoke-test an already running default-port stack. The Compose stack uses `ASKOC_PROVIDER=stub`, synthetic fixtures, service-DNS URLs such as `http://mock-banner:8081`, and the local workflow simulator URL by default. If a default host port is already in use, use the alternate-port commands in [docs/developer-guide.md](docs/developer-guide.md); the common API override is `ASKOC_API_PORT=18080`.
 
 For manual local development without containers, start the mock Banner, payment, CRM, and optionally workflow simulator services in separate terminals before `make dev`. The API loads local RAG chunks from `data/rag-chunks.json` at startup and talks to typed mock services through configurable local URLs. If `ASKOC_WORKFLOW_URL` is empty, the API uses the in-process idempotent workflow client; set `ASKOC_WORKFLOW_URL=http://localhost:8084/api/v1/automation/payment-reminder` to route reminders through `cmd/workflow-sim`, or point it at a Power Automate HTTP trigger for the optional webhook path. Auth is disabled by default for learner chat. Admin metrics, unresolved eval review items, audit export, purge, and reset routes require a bearer token; by default use `demo-admin-token`, or set `ASKOC_AUTH_TOKEN=<demo-token>` to reuse the configured mock token.
 

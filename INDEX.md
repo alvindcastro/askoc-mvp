@@ -19,6 +19,7 @@ This folder contains the Go/Golang-focused, strict-TDD Markdown documentation pa
 - [docs/tdd-policy.md](docs/tdd-policy.md) — strict Go TDD policy, required evidence, test categories, and anti-patterns.
 - [docs/architecture.md](docs/architecture.md) — Go-based solution architecture, service boundaries, data flow, and deployment notes.
 - [docs/golang-implementation.md](docs/golang-implementation.md) — Go project layout, packages, handler patterns, interfaces, testing strategy, and local commands.
+- [docs/developer-guide.md](docs/developer-guide.md) — local Docker stack, testing commands, how-tos, troubleshooting, and useful developer notes.
 - [docs/api-spec.md](docs/api-spec.md) — REST API endpoints, example payloads, OpenAPI starter spec, and Go implementation notes.
 - [docs/power-automate-flow.md](docs/power-automate-flow.md) — webhook-compatible workflow design using Power Automate or a local Go workflow simulator.
 - [docs/privacy-impact-lite.md](docs/privacy-impact-lite.md) — privacy-by-design, responsible-AI controls, logging, redaction, and retention.

@@ -391,6 +391,8 @@ go run ./cmd/workflow-sim
 
 `cmd/workflow-sim` is the P8 local workflow target. `cmd/eval` is the P9 deterministic evaluation command and can also target a running local chat API with `-base-url`. P10 adds Docker Compose for the API, mock Banner, mock payment, mock CRM, mock LMS, and workflow simulator services; `make smoke` is the one-command local proof.
 
+For day-to-day testing, port-conflict handling, manual API checks, and troubleshooting, use [Developer Testing Guide](developer-guide.md). It records the `scripts/smoke.sh --compose --keep-stack` path for keeping containers running and the alternate `18080`-`18085` host-port convention when `8080` is already allocated.
+
 ## Makefile targets
 
 ```makefile
